@@ -5,7 +5,6 @@ import Header from '../../../modules/components/Header';
 
 
 function MainLayout({ children }){
-
   return (
       <div >
         <Header />

@@ -40,7 +40,8 @@ const theme = createTheme({
         fontSize : '1em',
       },
       small : {
-        fontSize : '0.75em'
+        fontSize : '0.75em',
+        opacity : '0,5'
       },
       large : {
         fontSize : '3em'
@@ -48,10 +49,13 @@ const theme = createTheme({
     },
     palette : {
       primary: {
-        main: '#00B7EB' //CYAN
+        main: '#00B7EB', //CYAN
+        dark: '',
+        light: '#A0CCDA',
+        contrastText: '#FFF'
       },
       secondary:{
-        main: '#FFFFFF'
+        main: '#9CFFD9' //ACUAMARINE
       }
     },
     background : {

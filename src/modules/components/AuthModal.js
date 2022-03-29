@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Grid, Modal, TextField } from '@mui/material';
+import { Box, Button, Grid, Modal, TextField, Typography } from '@mui/material';
 
 const style = {
     modal :{
@@ -19,7 +19,7 @@ const style = {
     
   };
 
-function AuthModal( { open, setOpen, signup, login, setSignup, setLogin } ) {
+function AuthModal( { open, isLogin, onClose } ) {
     
     //TODO implement errors
 
@@ -27,26 +27,29 @@ function AuthModal( { open, setOpen, signup, login, setSignup, setLogin } ) {
     const [username,setUsername] = useState('');
     const [password,setPassword] = useState('');
 
-    const [fetching,setFetching] = useState(false);
-
+    const [signup,setSignup] = useState(!isLogin);
     const [signupOrSignText,setSignupOrSignText] = useState('');
+    const [footText, setFootText] = useState('');
 
     useEffect(()=>{
-        if( signup ){
-            setSignupOrSignText('Sign Up');
-        }
-        if( login ) {
+        if( !signup ) {//fix 
             setSignupOrSignText('Log in');
+            setFootText("Don't have an account? Sign Up");
         }
-    },[login,signup]);
+        else{
+            setSignup(true)
+            setSignupOrSignText('Sign Up');
+            setFootText('Already have an Account? Log in');
+        }
+
+    },[signup,isLogin]);
 
     const handleSubmit = useCallback( async() => {
-        setFetching(true);
         
         let response;
 
         if( signup ) {
-            const url = process.env.REACT_APP_API_URL + 'users/';
+            const url = `${process.env.REACT_APP_API_URL}users/`;
             response = await fetch(url,{
                 method: 'POST',
                 headers: {
@@ -60,7 +63,7 @@ function AuthModal( { open, setOpen, signup, login, setSignup, setLogin } ) {
             })
         }
 
-        if( login ) {
+        else { //login
             const url = `${process.env.REACT_APP_API_URL}login/`;
             response = await fetch(url,{
                 method: 'POST',
@@ -74,23 +77,21 @@ function AuthModal( { open, setOpen, signup, login, setSignup, setLogin } ) {
             })
         }
         if( response.ok ){
-            localStorage.setItem( 'uuid', response.json()['uuid'] );
-            console.log(localStorage.getItem('uuid'));
+            const user = await response.json();
+            localStorage.setItem( 'uuid', user['uuid'] );
+            localStorage.setItem( 'id', user['id'] );
         }
-        
-        setFetching(false);
-        setOpen(false);
-      }, [email, login, password, signup, username, setOpen]);
+        onClose()
+      }, [email, password, signup, username, onClose]);
     
 
     return(
         <Modal
             open={open}
-            onClose={ () => {
-                setOpen(false);
-                setLogin(false);
-                setSignup(false);
-            } }
+            onClose={()=>{
+                setSignup(!isLogin)
+                onClose()
+            }}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
@@ -139,6 +140,17 @@ function AuthModal( { open, setOpen, signup, login, setSignup, setLogin } ) {
                         >
                             {signupOrSignText}
                         </Button>
+                    </Grid>
+                    <Grid item>
+                        <Typography variant='small'>
+                            <Button 
+                                variant="text"
+                                size="small"
+                                onClick={()=>{
+                                    setSignup(!signup)
+                                }}
+                            >{footText}</Button>
+                        </Typography>
                     </Grid>
                 </Grid>
             </Box>

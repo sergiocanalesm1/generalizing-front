@@ -1,45 +1,52 @@
+import React, { useEffect, useState, useCallback, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+
 import { AccountCircle } from '@mui/icons-material';
 import { AppBar, Button, ButtonGroup, Container, Grid, IconButton, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
-import React, { useEffect, useState, useCallback } from 'react';
 
+import { homePath } from '../../utils/paths';
 import AuthModal from './AuthModal';
 
 //const pages = ['Relations', 'Lessons'];
 //const settings = ['Profile', 'Logout'];
 
 function Header() {
-  
+
+  const navigate = useNavigate();
 
   const [isLogged, setIsLogged] = useState( false );
-  //for modal
+ 
   const [open, setOpen] = useState( false );
-  const [login, setLogin] = useState( false );
   const [signup, setSignup] = useState( false );
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const ref = useRef();
 
-  const handleMenu = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const handleMenu = useCallback(() => {
+    setAnchorEl(ref.current);
+  },[ref]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  },[]);
 
   const handleProfile = () => {
   };
 
   const handleLogout = useCallback(()=> {
-    localStorage.removeItem('uuid');
+    localStorage.clear();
     setIsLogged(false);
-  },[])
+    navigate( homePath );
+  },[navigate])
 
   useEffect(() => {
     setIsLogged( localStorage.getItem('uuid') );
-  }, []);
+    setAnchorEl(null);
+  }, [open,navigate]);
+
   return (
     <div>
-      <AppBar position="fixed">
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Container maxWidth="xl">
           <Toolbar>
             <Typography
@@ -53,6 +60,7 @@ function Header() {
             ? 
               <Grid container justifyContent="flex-end">
                 <IconButton
+                  ref={ref}
                   size="large"
                   aria-label="account of current user"
                   aria-controls="menu-appbar"
@@ -93,16 +101,16 @@ function Header() {
                 >
                   <Button
                     onClick={()=>{
+                      setSignup(true);
                       setOpen(true)
-                      setSignup(true)
                     }}
                   >
                     Sign Up
                   </Button>
                   <Button
                     onClick={()=>{
-                      setOpen(true)
-                      setLogin(true)
+                      setSignup(false);
+                      setOpen(true);
                     }}
                   >
                     Login
@@ -115,11 +123,11 @@ function Header() {
       </AppBar>
       <AuthModal
         open={open}
-        setOpen={setOpen}
-        login={login}
-        signup={signup}
-        setSignup={setSignup}
-        setLogin={setLogin}
+        isLogin={!signup}
+        onClose={()=>{
+          setOpen(false)
+          setSignup(false);
+        }}
       />
     </div>
   );
