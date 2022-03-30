@@ -149,7 +149,7 @@ function RelationGraph({ relations, setOpenList }) {
       svg.selectAll("path")
         .attr("opacity",d=>{
           if( d.value  > 0 ) {
-            return relations[d.value-1].user === parseInt(localStorage.getItem('id')) ? 1 :  0.3 //FIX
+            return relations[d.value-1].user === parseInt(localStorage.getItem('user')?.uuid ) ? 1 :  0.3 //FIX
           }
           return 0.3
         })

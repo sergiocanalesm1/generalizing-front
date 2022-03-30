@@ -83,7 +83,7 @@ function Relation() {
   },[chosenLessons]);
 
   const createRelation = useCallback(async()=>{
-    relation.user = parseInt(localStorage.getItem('id'));
+    relation.user = parseInt(localStorage.getItem('user')?.id );
     relation.lessons = chosenLessons.map((l)=>l.id);
 
     let url = `${process.env.REACT_APP_API_URL}relations/`;

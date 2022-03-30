@@ -2,8 +2,8 @@ import { useNavigate } from "react-router-dom";
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Box, CircularProgress, Divider, Drawer, List, ListItemButton, ListItemIcon, ListItemText, Toolbar } from "@mui/material";
-import { AddCircleOutline, VisibilityOutlined } from '@mui/icons-material';
+import { Box, Button, CircularProgress, Stack, Toolbar } from "@mui/material";
+import { AddCircleOutline } from '@mui/icons-material';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import AuthModal from "../components/AuthModal";
@@ -12,6 +12,7 @@ import { getAllLessons, getAllRelations } from "../../services/urls";
 import RelationGraph from "./components/RelationGraph";
 
 const drawerWidth = 240;
+/*
 const styles = {
     drawer : {
         width: drawerWidth,
@@ -22,6 +23,8 @@ const styles = {
         }
     }
 }
+*/
+
   
 function Home() {
     
@@ -34,7 +37,7 @@ function Home() {
 
 
     const handleCreateLesson = useCallback(()=>{
-        if( localStorage.getItem('uuid') ) {
+        if( localStorage.getItem('user')?.uuid  ) {
             navigate(lessonPath);
         }
         else  {
@@ -49,7 +52,7 @@ function Home() {
     },[]);
 
     const handleCreateRelation = useCallback(()=>{
-        if( localStorage.getItem('uuid') ) {
+        if( localStorage.getItem('user')?.uuid  ) {
             navigate(relationPath);
         }
         else  {
@@ -58,61 +61,48 @@ function Home() {
     },[navigate]);
 
     useEffect(()=>{
-        getAllRelations().then( r => setRelations(r) );
-        getAllLessons().then( l => setLessons(l) );
+        //getAllRelations().then( r => setRelations(r) );
+        //getAllLessons().then( l => setLessons(l) );
     },[]);
 
     return (
         <div>
             <Box>
-                <Drawer
-                    variant="permanent"
-                    anchor="left"
-                    sx={styles.drawer}
-                >
-                    <Toolbar />
-                    <List>
-                        <ListItemButton onClick={handleCreateRelation}>
-                            <ListItemIcon>
-                                <AddCircleOutline />
-                            </ListItemIcon>
-                            <ListItemText primary={"Create Relation"} />
-                        </ListItemButton>
-                        <ListItemButton onClick={handleCreateLesson}>
-                            <ListItemIcon>
-                                <AddCircleOutline />
-                            </ListItemIcon>
-                            <ListItemText primary={"Create Lesson"} />
-                        </ListItemButton>
-                        <Divider  />
-                        <ListItemButton >
-                            <ListItemIcon>
-                                <VisibilityOutlined />
-                            </ListItemIcon>
-                            <ListItemText primary={"View my Relations"} />
-                        </ListItemButton>
-                        <ListItemButton onClick={handleViewLesson}>
-                            <ListItemIcon>
-                                <VisibilityOutlined />
-                            </ListItemIcon>
-                            <ListItemText primary={"View my Lessons"} />
-                        </ListItemButton>
-                    </List>
-                </Drawer>
                 <Box>
+                    <Toolbar />
+                    <Stack
+                        direction="row"
+                        justifyContent="center"
+                        alignItems="center"
+                        spacing={2}
+                        sx={{m:2}}
+                    >
+                        <Button 
+                            variant="contained"
+                            startIcon={<AddCircleOutline />}
+                            onClick={handleCreateRelation}
+                        >
+                            Add Relation
+                        </Button>
+                        <Button 
+                            variant="contained"
+                            startIcon={<AddCircleOutline />}
+                            onClick={handleCreateLesson}
+                        >
+                            Add Lesson
+                        </Button>
+                    </Stack>
                     <Toolbar />
                     {   relations.length > 0 & lessons.length > 0
                         ? <RelationGraph relations={relations} lessons={lessons}/>
-                        : <CircularProgress />
+                        : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
                     }
                 </Box>
             </Box>
             <AuthModal
               open={openAuthModal}
-              isLogin
               onClose={()=>{
                   setOpenAuthModal(false);
-                  navigate(lessonPath);
                 }}
             />
             <LessonListDialog

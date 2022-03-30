@@ -59,7 +59,7 @@ function Lesson() {
 
   const createLesson = useCallback( async()=> {
     lesson.tags = tags.map((t)=>t.label);
-    lesson.user = parseInt(localStorage.getItem('id'));
+    lesson.user = parseInt(localStorage.getItem('user')['id']);
 
     let url = `${process.env.REACT_APP_API_URL}lessons/`;
     let response = await fetch(url,{
@@ -97,7 +97,7 @@ function Lesson() {
   },[ files, lesson, navigate, tags ])
 
   useEffect(()=>{
-    if( !localStorage.getItem('uuid') ) {
+    if( !localStorage.getItem('user')?.uuid ) {
       navigate( homePath );
     }
   },[navigate])

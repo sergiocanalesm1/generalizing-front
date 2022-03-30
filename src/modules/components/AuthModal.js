@@ -19,7 +19,7 @@ const style = {
     
   };
 
-function AuthModal( { open, isLogin, onClose } ) {
+function AuthModal( { open, onClose } ) {
     
     //TODO implement errors
 
@@ -27,28 +27,28 @@ function AuthModal( { open, isLogin, onClose } ) {
     const [username,setUsername] = useState('');
     const [password,setPassword] = useState('');
 
-    const [signup,setSignup] = useState(!isLogin);
+    const [isLogin,setIsLogin] = useState(true);
     const [signupOrSignText,setSignupOrSignText] = useState('');
     const [footText, setFootText] = useState('');
 
     useEffect(()=>{
-        if( !signup ) {//fix 
+        if( isLogin ) {
             setSignupOrSignText('Log in');
             setFootText("Don't have an account? Sign Up");
         }
         else{
-            setSignup(true)
+            setIsLogin(false)
             setSignupOrSignText('Sign Up');
             setFootText('Already have an Account? Log in');
         }
 
-    },[signup,isLogin]);
+    },[isLogin]);
 
     const handleSubmit = useCallback( async() => {
         
         let response;
 
-        if( signup ) {
+        if( !isLogin ) {
             const url = `${process.env.REACT_APP_API_URL}users/`;
             response = await fetch(url,{
                 method: 'POST',
@@ -78,20 +78,19 @@ function AuthModal( { open, isLogin, onClose } ) {
         }
         if( response.ok ){
             const user = await response.json();
-            localStorage.setItem( 'uuid', user['uuid'] );
-            localStorage.setItem( 'id', user['id'] );
+            localStorage.setItem( 'user', {
+                id: user['id'] ,
+                uuid: user['uuid']
+            } );
         }
         onClose()
-      }, [email, password, signup, username, onClose]);
+      }, [email, password, isLogin, username, onClose]);
     
 
     return(
         <Modal
             open={open}
-            onClose={()=>{
-                setSignup(!isLogin)
-                onClose()
-            }}
+            onClose={onClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
@@ -105,7 +104,7 @@ function AuthModal( { open, isLogin, onClose } ) {
                     <Grid item sx={style.modalItem}>
                         <h4 align='center'> {signupOrSignText} to start relating!</h4>
                     </Grid>
-                    { signup &&
+                    { !isLogin &&
                         <Grid item sx={style.modalItem}>
                             <TextField 
                                 variant="outlined"
@@ -147,7 +146,7 @@ function AuthModal( { open, isLogin, onClose } ) {
                                 variant="text"
                                 size="small"
                                 onClick={()=>{
-                                    setSignup(!signup)
+                                    setIsLogin(!isLogin)
                                 }}
                             >{footText}</Button>
                         </Typography>
