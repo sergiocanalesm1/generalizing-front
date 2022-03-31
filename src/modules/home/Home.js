@@ -10,20 +10,10 @@ import AuthModal from "../components/AuthModal";
 import LessonListDialog from "../lesson/LessonList";
 import { getAllLessons, getAllRelations } from "../../services/urls";
 import RelationGraph from "./components/RelationGraph";
-
-const drawerWidth = 240;
-/*
-const styles = {
-    drawer : {
-        width: drawerWidth,
-        flexShrink: 0,
-        '& .MuiDrawer-paper': {
-            width: drawerWidth,
-            boxSizing: 'border-box',
-        }
-    }
-}
-*/
+import RelationListDialog from "../relation/RelationList";
+import { tempRelations } from "../../utils/enums";
+import { getUser } from "../../utils/user";
+//const t_relations =  tempRelations()
 
   
 function Home() {
@@ -32,12 +22,19 @@ function Home() {
 
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
+    const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
+
     const [lessons, setLessons] = useState([]);
     const [relations, setRelations] = useState([]);
 
+    //this temp variable is used so that the d3 graph does not get rendered constantly
+    const [relationsToShow, setRelationsToShow] = useState([])
+
+    const [relationsFilters, setRelationsFilters] = useState({});
+
 
     const handleCreateLesson = useCallback(()=>{
-        if( localStorage.getItem('user')?.uuid  ) {
+        if( Boolean(getUser()) ) {
             navigate(lessonPath);
         }
         else  {
@@ -45,14 +42,8 @@ function Home() {
         }
     },[navigate])
 
-    const handleViewLesson = useCallback(async()=>{
-        const fetchedLessons = await getAllLessons();
-        setLessons(fetchedLessons);
-        setOpenLessonListDialog(true);
-    },[]);
-
     const handleCreateRelation = useCallback(()=>{
-        if( localStorage.getItem('user')?.uuid  ) {
+        if( Boolean(getUser()) ) {
             navigate(relationPath);
         }
         else  {
@@ -61,8 +52,12 @@ function Home() {
     },[navigate]);
 
     useEffect(()=>{
-        //getAllRelations().then( r => setRelations(r) );
-        //getAllLessons().then( l => setLessons(l) );
+        getAllRelations().then( r => {
+            setRelations(r)
+            setRelationsToShow(r)
+        } );
+        getAllLessons().then( l => setLessons(l) );
+        
     },[]);
 
     return (
@@ -92,9 +87,13 @@ function Home() {
                             Add Lesson
                         </Button>
                     </Stack>
-                    <Toolbar />
                     {   relations.length > 0 & lessons.length > 0
-                        ? <RelationGraph relations={relations} lessons={lessons}/>
+                        ? <RelationGraph 
+                            relations={relations} 
+                            setOpenList={setOpenRelationListDialog}
+                            setRelationsToShow={setRelationsToShow}
+                            setFilters={setRelationsFilters}
+                          />
                         : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
                     }
                 </Box>
@@ -110,6 +109,13 @@ function Home() {
                 setOpen={setOpenLessonListDialog}
                 onClose={()=>setOpenLessonListDialog(false)}
                 lessons={lessons}
+            />
+            <RelationListDialog
+                open={openRelationListDialog}
+                setOpen={setOpenRelationListDialog}
+                onClose={()=>setOpenRelationListDialog(false)}
+                relations={relationsToShow}
+                filters={relationsFilters}
             />
         </div>       
     );

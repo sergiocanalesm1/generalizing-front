@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { domains, origins } from "../../utils/enums";
 import { homePath } from "../../utils/paths";
 import { stringToColor } from "../../utils/randoms";
+import { getUser } from "../../utils/user";
 
 const styles = {
   lessonPaper: {
@@ -59,7 +60,7 @@ function Lesson() {
 
   const createLesson = useCallback( async()=> {
     lesson.tags = tags.map((t)=>t.label);
-    lesson.user = parseInt(localStorage.getItem('user')['id']);
+    lesson.user = parseInt( getUser().id );
 
     let url = `${process.env.REACT_APP_API_URL}lessons/`;
     let response = await fetch(url,{
@@ -97,7 +98,7 @@ function Lesson() {
   },[ files, lesson, navigate, tags ])
 
   useEffect(()=>{
-    if( !localStorage.getItem('user')?.uuid ) {
+    if( Boolean(getUser()) ) {
       navigate( homePath );
     }
   },[navigate])

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, Modal, TextField, Typography } from '@mui/material';
+import { setUser } from '../../utils/user';
 
 const style = {
     modal :{
@@ -78,10 +79,11 @@ function AuthModal( { open, onClose } ) {
         }
         if( response.ok ){
             const user = await response.json();
-            localStorage.setItem( 'user', {
+            const userToSet = {
                 id: user['id'] ,
                 uuid: user['uuid']
-            } );
+            }
+            setUser( userToSet );
         }
         onClose()
       }, [email, password, isLogin, username, onClose]);

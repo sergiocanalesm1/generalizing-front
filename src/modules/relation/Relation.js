@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { getAllLessons } from "../../services/urls";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/randoms";
+import { getUser } from "../../utils/user";
 import LessonDetailCard from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 
@@ -12,7 +13,9 @@ import LessonListDialog from "../lesson/LessonList";
 const  styles = {
   relationPaper: {
     m: 2,
-    p: 2
+    p: 2,
+    paddingLeft: 8,
+    paddingRight: 8
   },
   relationBox:{
     maxWidth: '100%',
@@ -83,7 +86,7 @@ function Relation() {
   },[chosenLessons]);
 
   const createRelation = useCallback(async()=>{
-    relation.user = parseInt(localStorage.getItem('user')?.id );
+    relation.user = parseInt(getUser().id );
     relation.lessons = chosenLessons.map((l)=>l.id);
 
     let url = `${process.env.REACT_APP_API_URL}relations/`;
@@ -100,7 +103,7 @@ function Relation() {
 
         if( files.length > 0 ) {
           let formData = new FormData();
-          formData.append( 'relation', parseInt(createdRelation['id']) )
+          formData.append( 'relation', parseInt(createdRelation.id) )
           formData.append( 'file', files );
 
           url = `${process.env.REACT_APP_API_URL}rfiles/`;
@@ -283,6 +286,7 @@ function Relation() {
       <Dialog
         open={openDetail}
         onClose={()=>setOpenDetail(false)}
+        fullWidth
       > 
         <LessonDetailCard
             lesson={selectedLessonDetail}

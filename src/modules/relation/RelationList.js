@@ -1,40 +1,39 @@
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { useCallback, useState } from "react";
+import { toDate } from "../../utils/dates";
+import { stringAvatar } from "../../utils/randoms";
+import RelationDetailCard from "./RelationDetail";
 
 const styles = {
-    lessonList:{ 
+    relationList:{ 
         width: '100%',
         maxWidth: 500,
         bgcolor: 'background.paper'
     },
-    lessonListItem:{
+    relationListItem:{
         '&:hover': {
             opacity:"0,5"
         }
     }
 };
 
-function RelationListDialog({open, setOpen, onClose, relations}) {
+function RelationListDialog({open, setOpen, onClose, relations, filters}) {
 
-    /*
     const [openDetail, setOpenDetail] = useState(false);
-    const [selectedLesson, setSelectedLesson] = useState();
+    const [selectedRelation, setSelectedRelation] = useState();
 
-    const handleOpenDetail = useCallback(( lesson )=>{
-        if( canChoose ) {
-            setChosenLesson(lesson);
-            setOpen(false);
-        }
-        else{
-            setOpen(false);
-            setOpenDetail(true);
-            setSelectedLesson(lesson);
-        }
-    },[setOpen, setChosenLesson, canChoose]);
+
+    const handleOpenDetail = useCallback(( relation )=>{
+        setOpen(false);
+        setSelectedRelation(relation);
+        setOpenDetail(true);
+    },[setOpen]);
 
     const handleDetailClose = useCallback(()=>{
         setOpenDetail(false);
         setOpen(true);
     },[setOpen])
-    */
+    
 
     return(
         <div>
@@ -42,25 +41,33 @@ function RelationListDialog({open, setOpen, onClose, relations}) {
                 scroll="paper"
                 open={open}
                 onClose={onClose}
+                fullWidth
             >
                 <DialogTitle>
                     <div>
                         <Typography variant="h3">
                             View Relations
                         </Typography>
+                        { filters &&
+                            <Typography variant="small" >
+                                Filtering by: {filters}
+                            </Typography>
+                        }
+                        
                     </div>
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
+                        {/**/}
                         { relations.map((r)=>(
                             <ListItemButton
                                 disableGutters
                                 key={r.id}
-                                onClick={()=>handleOpenDetail(r)}
                                 sx={styles.relationListItem}
+                                onClick={()=>handleOpenDetail(r)}
                             >
                                 <ListItemAvatar>
-                                <Avatar {...stringAvatar(r.name)} />
+                                    <Avatar {...stringAvatar(r.name)} />
                                 </ListItemAvatar>
                                 <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
                             </ListItemButton>
@@ -73,15 +80,17 @@ function RelationListDialog({open, setOpen, onClose, relations}) {
                 </DialogActions>
             </Dialog>
             <Dialog
+                fullWidth
                 open={openDetail}
                 onClose={handleDetailClose}
             >
-                <LessonDetailCard
-                    lesson={selectedLesson}
+                <RelationDetailCard
+                    relation={selectedRelation}
+                    setOpen={setOpenDetail}
+
                 />
             </Dialog>
         </div>
-        
     )
 }
 

@@ -46,6 +46,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 scroll="paper"
                 open={open}
                 onClose={onClose}
+                fullWidth
             >
                 <DialogTitle>
                     <div>
@@ -77,6 +78,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 </DialogActions>
             </Dialog>
             <Dialog
+                fullWidth
                 open={openDetail}
                 onClose={handleDetailClose}
             >

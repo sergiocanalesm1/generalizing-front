@@ -6,8 +6,11 @@ import { AppBar, Button, ButtonGroup, Container, Grid, IconButton, Menu, MenuIte
 
 import { homePath, lessonPath, relationPath } from '../../utils/paths';
 import AuthModal from './AuthModal';
-import { getAllLessons } from '../../services/urls';
+import { getAllLessons, getAllRelations } from '../../services/urls';
 import LessonListDialog from '../lesson/LessonList';
+import RelationListDialog from '../relation/RelationList';
+import { tempRelations } from '../../utils/enums';
+import { clearUser, getUser } from '../../utils/user';
 
 
 function Header() {
@@ -18,6 +21,7 @@ function Header() {
  
   const [openAuthModal, setOpenAuthModal] = useState( false );
   const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
+  const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
 
   const [anchorElUser, setAnchorElUser] = useState();
   const refUserSettings = useRef();
@@ -35,19 +39,19 @@ function Header() {
   };
 
   const handleLogout = useCallback(()=> {
-    localStorage.clear();
+    clearUser();
     setIsLogged(false);
     navigate( homePath );
   },[navigate])
 
-
   const handleCreateLesson = useCallback(()=>{
-      if( localStorage.getItem('user')?.uuid  ) {
-          navigate(lessonPath);
-      }
-      else  {
-          setOpenAuthModal(true);
-      }
+    if( Boolean(getUser()) ) {
+      navigate(lessonPath);
+    }
+    else  {
+        setOpenAuthModal(true);
+    }
+
   },[navigate])
 
   const handleViewLessons = useCallback(async()=>{
@@ -57,16 +61,22 @@ function Header() {
   },[]);
 
   const handleCreateRelation = useCallback(()=>{
-      if( localStorage.getItem('user')?.uuid  ) {
-          navigate(relationPath);
-      }
-      else  {
-          setOpenAuthModal(true);
-      }
+    if( Boolean(getUser()) ) {
+        navigate(relationPath);
+    }
+    else  {
+        setOpenAuthModal(true);
+    }
   },[navigate]);
 
+  const handleViewRelations = useCallback(async()=>{
+    const fetchedRelations = await getAllRelations();
+    setRelations(tempRelations());
+    setOpenRelationListDialog(true);
+  },[])
+
   useEffect(() => {
-    setIsLogged( localStorage.getItem('user')?.uuid  );
+    setIsLogged( Boolean(getUser()) );
     setAnchorElUser();
   }, [openAuthModal,navigate]);
 
@@ -102,7 +112,7 @@ function Header() {
                 onClose={()=>setAnchorElRelations()}
               >
                 <MenuItem onClick={handleCreateRelation}>Create Relation</MenuItem>
-                <MenuItem >View Relations</MenuItem>
+                <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
               </Menu>
               <Button 
                 ref={refLessons}
@@ -142,7 +152,7 @@ function Header() {
                 </IconButton>
                 <Menu
                   id="menu-appbar"
-                  anchorElUser={anchorElUser}
+                  anchorEl={anchorElUser}
                   anchorOrigin={{
                     vertical: 'top',
                     horizontal: 'right',
@@ -193,6 +203,13 @@ function Header() {
           setOpen={setOpenLessonListDialog}
           onClose={()=>setOpenLessonListDialog(false)}
           lessons={lessons}
+      />
+
+      <RelationListDialog
+          open={openRelationListDialog}
+          setOpen={setOpenRelationListDialog}
+          onClose={()=>setOpenRelationListDialog(false)}
+          relations={relations}
       />
     </div>
   );

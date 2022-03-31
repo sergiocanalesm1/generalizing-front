@@ -1,82 +1,35 @@
 import * as d3 from 'd3';
-import { useMemo } from 'react';
-import { useD3 } from '../../../common/hooks/useD3';
+import { useEffect, useMemo, useRef } from 'react';
 import  { domains } from '../../../utils/enums';
+import { filterByDomain } from '../../../utils/filters';
 
-/*
-function getData(fetchedRelations,fetchedLessons) {
-  //create a map that relates domain name with index on json.children.children
-  const domainsMap = new Map();
-  const data = {
-    name:"relations",
-    children:[]
-  };
-
-  domains.forEach( (domain, index) => {
-    domainsMap.set(domain,index);
-    data.children.push({
-      name:domain,
-    });
-  });
-
-  //create  a map that relates lesson to index
-  const lessonMap = new Map();
-  fetchedLessons.forEach( lesson => {
-    const jsonDomainIndex = domainsMap.get( lesson.domain );
-    if(!Array.isArray( data.children[ jsonDomainIndex ].children)) {
-      data.children[ jsonDomainIndex ].children = []
-    }
-    data.children[ jsonDomainIndex ]?.children?.push({
-      name: lesson.name,
-      relations: []
-    })
-    if(data.children[ jsonDomainIndex ].children){
-      lessonMap.set( lesson.name, data.children[ jsonDomainIndex ].children.length - 1 );
-    }
-  })
-  fetchedRelations.forEach( relation => {
-    let jsonDomainIndex = domainsMap.get( relation.lessons[0].domain );
-    let jsonLessonIndex = lessonMap.get( relation.lessons[0].name );
-    data.children[ jsonDomainIndex ].children[ jsonLessonIndex ].relations.push( relation.lessons[1].name );
-
-    //jsonDomainIndex = domainsMap( relation.lesson2.domain );
-    //jsonLessonIndex = lessonMap( relation.lesson2.name );
-    //json.children[ jsonDomainIndex ].children[ jsonLessonIndex ].relations.push( relation.lesson1.name );
-  })
-  return data;
-}
-*/
 
 function getData(fetchedRelations){
 
-  /*
-  for(let i=0; i<500;i++){
-    relations.push({
-      source: `domain ${random}`,
-      target: `domain ${(random + r(max)) % max}`,
-      //value: `relation ${i}`
-      value: i
-    })
-  }
-  */
-  return fetchedRelations.map( (r,i) => ({
-    source: r.lessons[0].domain,
-    target: r.lessons[1].domain,
-    value: i+1
-  }))
+  return fetchedRelations.map( (r,i) => {
+    //this gets sorted because it simplifies the filtering by domain
+    const d1 = r.lessons[0].domain;
+    const d2 = r.lessons[1].domain;
+    const sortedDomains =  [d1,d2].sort();
+    return {
+      source: sortedDomains[0],
+      target: sortedDomains[1],
+      value: 1
+    }
+  })
 }
 
 function getMatrix(dom,data){
   const index = new Map(dom.map((d, i) => [d, i]));
   const matrix  = Array.from(index, () => new Array(dom.length).fill(0));
-  for (const {source, target, value} of data) matrix[index.get(source)][index.get(target)] = value;
+  for (const {source, target, value} of data) matrix[index.get(source)][index.get(target)] += value;
   return matrix;
 
 }
 
-const width = 954;
-const height=width;
-const innerRadius = Math.min(width, height) * 0.5 - 90;
+const width = 945;
+const height=width*0.5;
+const innerRadius = Math.min(width, height) * 0.3;
 const outerRadius = innerRadius + 10;
 
 
@@ -92,22 +45,25 @@ const ribbon = d3.ribbonArrow()
   .padAngle(1 / innerRadius);
   
 
-function RelationGraph({ relations, setOpenList }) {
+function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters }) {
   const data = useMemo(()=>getData(relations),[relations])
   const names = domains;
   const matrix = useMemo(()=>getMatrix(names,data),[names,data])
 
-  const ref = useD3(
-    (svg) => {
+  const d3Ref = useRef()
+
+  useEffect(()=>{
       const color = d3.scaleOrdinal(names, d3.quantize(d3.interpolateRainbow, names.length));
 
-      svg.attr("viewBox", [-width / 2, -height / 2, width, height]);
+      const svgEl = d3.select(d3Ref.current);
+      svgEl.selectAll("*").remove();
+      const svg = svgEl.attr("viewBox", [-width / 2, -height / 2, width, height]);
       
       const chords = chord(matrix);
 
       const group = svg.append("g")
-          .attr("font-size", 10)
-          .attr("font-family", "sans-serif")
+          .attr("font-family", "HomepageBaukasten, Arial")
+          .attr("font-size", 6)
         .selectAll("g")
         .data(chords.groups)
         .join("g");
@@ -147,25 +103,22 @@ function RelationGraph({ relations, setOpenList }) {
           .text(d => `${names[d.source.index]} → ${names[d.target.index]} ${d.source.value}`);
 
       svg.selectAll("path")
-        .attr("opacity",d=>{
-          if( d.value  > 0 ) {
-            return relations[d.value-1].user === parseInt(localStorage.getItem('user')?.uuid ) ? 1 :  0.3 //FIX
-          }
-          return 0.3
+        .attr("opacity",0.7)
+        .on("click",(d)=>{
+          const d1 = domains[d.target.__data__.source.index];
+          const d2 = domains[d.target.__data__.target.index];
+          setRelationsToShow(filterByDomain(relations,[d1,d2]))
+          setFilters(`${d1} and ${d2}`)
+          setOpenList(true)
         })
-        .on("click",(d)=>console.log(relations[d.target.__data__.source.value-1]))
       //d.target.__data__.source.index
 
 
-    },
-    []
+    },[ relations, matrix, names, setFilters, setOpenList, setRelationsToShow ]
   );
 
   return (
-    <svg
-      ref={ref}
-    >
-    </svg>
+    <svg ref={d3Ref}></svg>
   );
 }
 
