@@ -8,11 +8,13 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { lessonPath, relationPath } from "../../utils/paths";
 import AuthModal from "../components/AuthModal";
 import LessonListDialog from "../lesson/LessonList";
-import { getAllLessons, getAllRelations } from "../../services/urls";
+import { getAllLessons, getAllRelations, getLastChallenge } from "../../services/urls";
 import RelationGraph from "./components/RelationGraph";
 import RelationListDialog from "../relation/RelationList";
-import { tempRelations } from "../../utils/enums";
+import { tempLasChallenge, tempRelations } from "../../utils/enums";
 import { getUser } from "../../utils/user";
+import ChallengeGraph from "./components/ChallengeGraph";
+import ChallengeDetailDialog from "../challenge/ChallengeDetail";
 //const t_relations =  tempRelations()
 
   
@@ -23,14 +25,16 @@ function Home() {
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
+    const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
 
     const [lessons, setLessons] = useState([]);
     const [relations, setRelations] = useState([]);
+    const [lastChallenge, setLastChallenge] = useState(tempLasChallenge);
 
     //this temp variable is used so that the d3 graph does not get rendered constantly
     const [relationsToShow, setRelationsToShow] = useState([])
-
     const [relationsFilters, setRelationsFilters] = useState({});
+
 
 
     const handleCreateLesson = useCallback(()=>{
@@ -52,11 +56,14 @@ function Home() {
     },[navigate]);
 
     useEffect(()=>{
+        /*
         getAllRelations().then( r => {
             setRelations(r)
             setRelationsToShow(r)
         } );
         getAllLessons().then( l => setLessons(l) );
+        getLastChallenge().then( c => setLastChallenge(c) );
+        */
         
     },[]);
 
@@ -88,12 +95,26 @@ function Home() {
                         </Button>
                     </Stack>
                     {   relations.length > 0 & lessons.length > 0
-                        ? <RelationGraph 
-                            relations={relations} 
-                            setOpenList={setOpenRelationListDialog}
-                            setRelationsToShow={setRelationsToShow}
-                            setFilters={setRelationsFilters}
-                          />
+                        ? <div>
+                            <RelationGraph 
+                                relations={relations} 
+                                setOpenList={setOpenRelationListDialog}
+                                setRelationsToShow={setRelationsToShow}
+                                setFilters={setRelationsFilters}
+                            />
+                            <Toolbar />
+                          </div>
+                        : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
+                    }
+                    {
+                        lastChallenge
+                        ? <div>
+                            <ChallengeGraph
+                                challenge={lastChallenge}
+                                setOpenDetail={setOpenChallengeDetailDialog}
+                            />
+                            <Toolbar />
+                         </div>
                         : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
                     }
                 </Box>
@@ -116,6 +137,12 @@ function Home() {
                 onClose={()=>setOpenRelationListDialog(false)}
                 relations={relationsToShow}
                 filters={relationsFilters}
+            />
+            <ChallengeDetailDialog
+                open={openChallengeDetailDialog}
+                setOpen={setOpenChallengeDetailDialog}
+                onClose={()=>setOpenChallengeDetailDialog(false)}
+                challenge={lastChallenge}
             />
         </div>       
     );

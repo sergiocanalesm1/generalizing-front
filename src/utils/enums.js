@@ -61,5 +61,21 @@ export function tempRelations(){
       relations.push(r)
     }
     return relations
+}
+
+export const tempLasChallenge = {
+  id: 1,
+  creation_date:"2022-03-22T11:50:01.604116-05:00",
+  lesson_1:{
+    id:1,
+    name:"lesson 1",
+    creation_date: "2022-03-22T11:50:01.604116-05:00",
+    domain: domains[Math.floor(Math.random() * 20)]
+  },
+  lesson_2:{
+    id:2,
+    name:"lesson 2",
+    creation_date: "2022-03-22T11:50:01.604116-05:00",
+    domain: domains[Math.floor(Math.random() * 20)]
   }
-    
+}

@@ -31,3 +31,18 @@ export async function getAllRelations(){
         return fetchedRelations;
     }
 }
+
+export async function getLastChallenge(){
+    const response = await fetch(
+        `${_url}challenges/`,
+        {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+        },
+    });
+    if( response.ok ) {
+        const fetchedChallenges = await response.json();
+        return fetchedChallenges[ fetchedChallenges.length - 1 ];//fix, create an endpoint for this
+    }
+}
