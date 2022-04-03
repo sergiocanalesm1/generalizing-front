@@ -64,9 +64,9 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
       const group = svg.append("g")
           .attr("font-family", "HomepageBaukasten, Arial")
           .attr("font-size", 6)
-        .selectAll("g")
-        .data(chords.groups)
-        .join("g");
+          .selectAll("g")
+          .data(chords.groups)
+          .join("g");
 
       group.append("path")
           .attr("fill", d => color(names[d.index]))
@@ -83,37 +83,40 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
           `)
           .attr("text-anchor", d => d.angle > Math.PI ? "end" : null)
           .text(d => names[d.index])
+          .on("mouseover",(e,d)=>{
+            //console.log("event",e)
+            //console.log("data",d)
+            //console.log(d3.selectAll(d.index))
+            //.attr("font-weight", "bold").attr("stroke","blue");
+            
+          })
           ;
     
       group.append("title")
           .text(d => `${names[d.index]}
-    ${d3.sum(chords, c => (c.source.index === d.index) * c.source.value)} outgoing →
-    ${d3.sum(chords, c => (c.target.index === d.index) * c.source.value)} incoming ←`);
-
+${d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value)} relations`)
+          ;
 
       svg.append("g")
           .attr("fill-opacity", 0.75)
-        .selectAll("path")
-        .data(chords)
-        .join("path")
+          .selectAll("path")
+          .data(chords)
+          .join("path")
           .style("mix-blend-mode", "multiply")
           .attr("fill", d => color(names[d.target.index]))
           .attr("d", ribbon)
-        .append("title")
-          .text(d => `${names[d.source.index]} → ${names[d.target.index]} ${d.source.value}`);
+          .append("title")
+            .text(d => `${names[d.source.index]} → ${names[d.target.index]} ${d.source.value}`);
 
       svg.selectAll("path")
-        .attr("opacity",0.7)
-        .on("click",(d)=>{
-          const d1 = domains[d.target.__data__.source.index];
-          const d2 = domains[d.target.__data__.target.index];
-          setRelationsToShow(filterByDomain(relations,[d1,d2]))
-          setFilters(`${d1} and ${d2}`)
-          setOpenList(true)
-        })
-      //d.target.__data__.source.index
-
-
+          //.attr("opacity",1)
+          .on("click",(e,d)=>{
+            const d1 = domains[d.source.index];
+            const d2 = domains[d.target.index];
+            setRelationsToShow(filterByDomain(relations,[d1,d2]))
+            setFilters(`${d1} and ${d2}`)
+            setOpenList(true)
+          })
     },[ relations, matrix, names, setFilters, setOpenList, setRelationsToShow ]
   );
 

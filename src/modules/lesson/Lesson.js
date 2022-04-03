@@ -2,15 +2,18 @@ import { ArrowBack, Send } from "@mui/icons-material";
 import { Box, Button, Chip, FormHelperText, Grid, List, ListItem, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { createLesson } from "../../services/urls";
 import { domains, origins } from "../../utils/enums";
 import { homePath } from "../../utils/paths";
 import { stringToColor } from "../../utils/randoms";
-import { getUser } from "../../utils/user";
+import { getUserId, getUserUuid } from "../../utils/user";
 
 const styles = {
   lessonPaper: {
     m: 2,
-    p: 2
+    p: 2,
+    paddingLeft: 8,
+    paddingRight: 8
   },
   lessonBox:{
     maxWidth: '100%',
@@ -18,9 +21,6 @@ const styles = {
   },
 }
 
-domains.sort().push('Other');
-origins.sort().push('Other');
-  
 function Lesson() {
   const navigate = useNavigate();
 
@@ -58,51 +58,21 @@ function Lesson() {
     setTags([ ...tags, newTag ])
   }, [tags,currentChip])
 
-  const createLesson = useCallback( async()=> {
+  const create = useCallback( async()=> {
     lesson.tags = tags.map((t)=>t.label);
-    lesson.user = parseInt( getUser().id );
+    lesson.user = getUserId();
 
-    let url = `${process.env.REACT_APP_API_URL}lessons/`;
-    let response = await fetch(url,{
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(lesson)
+    await createLesson( lesson, files, ()=>{
+      navigate( homePath );
     })
-
-    if( response.ok ){
-        const createdLesson = await response.json();
-
-        if( files.length > 0 ) {
-          let formData = new FormData();
-          formData.append( 'lesson', parseInt(createdLesson['id']) )
-          formData.append( 'file', files );
-
-          url = `${process.env.REACT_APP_API_URL}lfiles/`;
-          response = await fetch(url,{
-              method: 'POST',
-              body: formData
-          });
-
-          if( response.ok ){
-            //show feedback
-            
-          }
-        }
-        navigate( homePath );
-        //show feedback
-        
-    }
     
   },[ files, lesson, navigate, tags ])
 
   useEffect(()=>{
-    if( Boolean(getUser()) ) {
+    if( !Boolean(getUserUuid()) ) {
       navigate( homePath );
     }
   },[navigate])
-
 
   return (
     <div>
@@ -279,7 +249,7 @@ function Lesson() {
             <Button 
               variant="contained"
               endIcon={<Send color="secondary" />}
-              onClick={createLesson}
+              onClick={create}
               disabled={!lesson.name}
             >
               Create!

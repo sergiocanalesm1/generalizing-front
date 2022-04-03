@@ -1,11 +1,11 @@
 import { Add, ArrowBack, Send } from "@mui/icons-material";
 import { Avatar, Box, Button, Dialog, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getAllLessons } from "../../services/urls";
+import { useLocation, useNavigate } from "react-router-dom";
+import { createRelation, getAllLessons } from "../../services/urls";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/randoms";
-import { getUser } from "../../utils/user";
+import { getUserId, getUserUuid } from "../../utils/user";
 import LessonDetailCard from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 
@@ -38,6 +38,7 @@ const  styles = {
 function Relation() {
 
   const navigate = useNavigate();
+  const { state } = useLocation();
 
   //TODO fix force update
   const [,updateState] = useState();
@@ -85,43 +86,17 @@ function Relation() {
     }
   },[chosenLessons]);
 
-  const createRelation = useCallback(async()=>{
-    relation.user = parseInt(getUser().id );
-    relation.lessons = chosenLessons.map((l)=>l.id);
-
-    let url = `${process.env.REACT_APP_API_URL}relations/`;
-    let response = await fetch(url,{
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(relation)
-    })
-
-    if( response.ok ){
-        const createdRelation = await response.json();
-
-        if( files.length > 0 ) {
-          let formData = new FormData();
-          formData.append( 'relation', parseInt(createdRelation.id) )
-          formData.append( 'file', files );
-
-          url = `${process.env.REACT_APP_API_URL}rfiles/`;
-          response = await fetch(url,{
-              method: 'POST',
-              body: formData
-          });
-
-          if( response.ok ){
-            //show feedback
-            
-          }
-        }
-        navigate( homePath );
-        //show feedback
-        
+  const create = useCallback(async()=>{
+    relation.user = getUserId();
+    relation.lessons = chosenLessons.map((l)=>l.id); 
+    if( state ){
+      relation.challenge = state.challengeId;
     }
-  },[chosenLessons, files, navigate, relation]);
+    await createRelation( relation, files, ()=>{
+      navigate( homePath );
+    })
+        //show feedback
+  },[chosenLessons, files, navigate, relation, state]);
 
   useEffect(()=>{
     if( lessonToChoose ){
@@ -132,8 +107,16 @@ function Relation() {
       forceUpdate();
       setLessonToChoose();
     }
-  },[lessonToChoose, chosenIndex, chosenLessons, forceUpdate])
+    if( state ){
+      setChosenLessons( state.challengeLessons );
+    }
+  },[ lessonToChoose, chosenIndex, chosenLessons, forceUpdate, state ])
 
+  useEffect(()=>{
+    if( !Boolean(getUserUuid()) ) {
+      navigate( homePath );
+    }
+  },[navigate])
 
   return (
     <div>
@@ -150,7 +133,11 @@ function Relation() {
 
           <Stack justifyContent="center" direction="row">
             <Typography variant="h2">
-                  Create a Relation
+              {
+                state
+                ? <>Relating Challenge {state.challengeId}</>
+                : <>Create a Relation</>
+              }
             </Typography>
           </Stack>
 
@@ -165,7 +152,9 @@ function Relation() {
             alignContent="center"
             direction="row"
           >
-            <Button onClick={()=>detailOrListLesson(0)}>
+            <Button 
+              onClick={() => detailOrListLesson(0)}
+            >
                 { chosenLessons[0]
                   ? <Avatar {...stringAvatar(chosenLessons[0].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
@@ -173,7 +162,9 @@ function Relation() {
                     </Avatar>
                 }
             </Button>
-            <Button onClick={()=>detailOrListLesson(1)}>
+            <Button 
+              onClick={() => detailOrListLesson(1)}
+            >
                   { chosenLessons[1]
                     ? <Avatar {...stringAvatar(chosenLessons[1].name, styles.relationAvatar)} />
                     : <Avatar sx={styles.relationAvatar}>
@@ -265,7 +256,7 @@ function Relation() {
             <Button 
               variant="contained"
               endIcon={<Send color="secondary" />}
-              onClick={createRelation}
+              onClick={create}
               disabled={!relation.name}
             >
               Relate!

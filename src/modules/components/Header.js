@@ -9,8 +9,8 @@ import AuthModal from './AuthModal';
 import { getAllLessons, getAllRelations } from '../../services/urls';
 import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
-import { tempRelations } from '../../utils/enums';
-import { clearUser, getUser } from '../../utils/user';
+import { clearUser, getUserUuid } from '../../utils/user';
+//import { tempRelations } from '../../utils/enums';
 
 
 function Header() {
@@ -35,8 +35,6 @@ function Header() {
   const [lessons, setLessons] = useState([]);
   const [relations, setRelations] = useState([]);
 
-  const handleProfile = () => {
-  };
 
   const handleLogout = useCallback(()=> {
     clearUser();
@@ -45,7 +43,7 @@ function Header() {
   },[navigate])
 
   const handleCreateLesson = useCallback(()=>{
-    if( Boolean(getUser()) ) {
+    if( Boolean(getUserUuid()) ) {
       navigate(lessonPath);
     }
     else  {
@@ -61,7 +59,7 @@ function Header() {
   },[]);
 
   const handleCreateRelation = useCallback(()=>{
-    if( Boolean(getUser()) ) {
+    if( Boolean(getUserUuid()) ) {
         navigate(relationPath);
     }
     else  {
@@ -71,12 +69,12 @@ function Header() {
 
   const handleViewRelations = useCallback(async()=>{
     const fetchedRelations = await getAllRelations();
-    setRelations(tempRelations());
+    setRelations(fetchedRelations);
     setOpenRelationListDialog(true);
   },[])
 
   useEffect(() => {
-    setIsLogged( Boolean(getUser()) );
+    setIsLogged( Boolean(getUserUuid()) );
     setAnchorElUser();
   }, [openAuthModal,navigate]);
 
@@ -165,7 +163,6 @@ function Header() {
                   open={Boolean(anchorElUser)}
                   onClose={()=>setAnchorElUser()}
                 >
-                  <MenuItem onClick={handleProfile}>Profile</MenuItem>
                   <MenuItem onClick={handleLogout}>Log Out</MenuItem>
                 </Menu>
               </Grid>

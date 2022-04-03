@@ -11,16 +11,19 @@ import LessonListDialog from "../lesson/LessonList";
 import { getAllLessons, getAllRelations, getLastChallenge } from "../../services/urls";
 import RelationGraph from "./components/RelationGraph";
 import RelationListDialog from "../relation/RelationList";
-import { tempLasChallenge, tempRelations } from "../../utils/enums";
-import { getUser } from "../../utils/user";
+import { getUserId, getUserUuid } from "../../utils/user";
 import ChallengeGraph from "./components/ChallengeGraph";
 import ChallengeDetailDialog from "../challenge/ChallengeDetail";
+import { sortByOwned } from "../../utils/filters";
+//import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
   
 function Home() {
     
     const navigate = useNavigate();
+    const [,updateState] = useState();
+    const forceUpdate = useCallback(() => updateState({}), []);
 
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
@@ -29,16 +32,16 @@ function Home() {
 
     const [lessons, setLessons] = useState([]);
     const [relations, setRelations] = useState([]);
-    const [lastChallenge, setLastChallenge] = useState(tempLasChallenge);
+    const [lastChallenge, setLastChallenge] = useState({});
 
     //this temp variable is used so that the d3 graph does not get rendered constantly
-    const [relationsToShow, setRelationsToShow] = useState([])
-    const [relationsFilters, setRelationsFilters] = useState({});
+    const [relationsToShow, setRelationsToShow] = useState([]);
+    const [relationsFilters, setRelationsFilters] = useState("");
 
 
 
     const handleCreateLesson = useCallback(()=>{
-        if( Boolean(getUser()) ) {
+        if( Boolean(getUserUuid()) ) {
             navigate(lessonPath);
         }
         else  {
@@ -47,7 +50,7 @@ function Home() {
     },[navigate])
 
     const handleCreateRelation = useCallback(()=>{
-        if( Boolean(getUser()) ) {
+        if( Boolean(getUserUuid()) ) {
             navigate(relationPath);
         }
         else  {
@@ -56,15 +59,16 @@ function Home() {
     },[navigate]);
 
     useEffect(()=>{
-        /*
         getAllRelations().then( r => {
             setRelations(r)
             setRelationsToShow(r)
         } );
-        getAllLessons().then( l => setLessons(l) );
-        getLastChallenge().then( c => setLastChallenge(c) );
-        */
-        
+        getAllLessons().then( l => {
+            setLessons(l)
+        });
+        getLastChallenge().then( c => {
+            setLastChallenge(c)
+        });
     },[]);
 
     return (
@@ -123,6 +127,7 @@ function Home() {
               open={openAuthModal}
               onClose={()=>{
                   setOpenAuthModal(false);
+                  forceUpdate();
                 }}
             />
             <LessonListDialog
@@ -143,6 +148,10 @@ function Home() {
                 setOpen={setOpenChallengeDetailDialog}
                 onClose={()=>setOpenChallengeDetailDialog(false)}
                 challenge={lastChallenge}
+                relations={relations} 
+                setOpenList={setOpenRelationListDialog}
+                setRelationsToShow={setRelationsToShow}
+                setFilters={setRelationsFilters}
             />
         </div>       
     );

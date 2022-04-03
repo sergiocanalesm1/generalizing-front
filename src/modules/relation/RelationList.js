@@ -53,7 +53,6 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                                 Filtering by: {filters}
                             </Typography>
                         }
-                        
                     </div>
                 </DialogTitle>
                 <DialogContent dividers>
@@ -73,6 +72,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                             </ListItemButton>
                         ))
                         }
+                        
                     </List>
                 </DialogContent>
                 <DialogActions>

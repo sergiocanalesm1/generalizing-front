@@ -32,7 +32,7 @@ function LessonDetailCard({lesson}) {
                     <Typography variant="small">{lesson.domain}, {lesson.origin}</Typography>
                 </Stack>
                 <List component={Stack} direction="row" justifyContent="space-evenly">
-                {lesson.tags.map( t =>(
+                { lesson.tags?.map( t =>(
                   <ListItem key={t}>
                     <Chip label={t} sx={{bgcolor:stringToColor(t), color:"#FFF"}}/>
                   </ListItem>

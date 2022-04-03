@@ -1,7 +1,10 @@
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Toolbar, Typography } from "@mui/material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Toolbar, Typography } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo, useState } from "react";
 import { stringAvatar } from "../../utils/randoms";
 import LessonDetailCard from "../lesson/LessonDetail";
+import { relationPath } from "../../utils/paths";
+import { filterByChallenge } from "../../utils/filters";
 
 const styles = {
     relationDetailCard:{
@@ -9,23 +12,36 @@ const styles = {
     }
 }
 
-function ChallengeDetailDialog({open, setOpen, onClose, challenge}) {
+function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, setRelationsToShow, setFilters, relations }) {
     /*
     create circles around challenge
-    make relation button passing challenge
     see list of relations of challenge
     */
-
+    const navigate = useNavigate()
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
 
-    const lessons = useMemo(()=>( [ challenge.lesson_1, challenge.lesson_2 ] ))
+    const lessons = useMemo(()=>( [ challenge.lesson_1, challenge.lesson_2 ] ),[challenge])
 
     const showLessonDetail = useCallback((lesson) => {
         setSelectedLessonDetail(lesson);
         setOpenDetail(true);
     },[])
 
+    const showRelationList = useCallback(()=>{
+        setFilters(`Challenge ${challenge.id}`);
+        setRelationsToShow( filterByChallenge( relations, challenge.id ) )
+        setOpenList(true)
+    },[challenge, relations, setFilters, setOpenList, setRelationsToShow])
+
+    const acceptChallenge = useCallback(()=>{
+        navigate( relationPath, {
+            state:{
+                challengeId: challenge.id,
+                challengeLessons: lessons
+            }
+        })
+    },[navigate, challenge, lessons])
 
     return(
         <div>
@@ -56,6 +72,7 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge}) {
                     >
                         {
                             lessons.map( (l) =>(
+                                l &&
                                 <Stack direction="column" alignContent="center" key={l.id}>
                                     <Stack direction="row" justifyContent="center">
                                         <Typography variant="small">{l.domain}</Typography>
@@ -76,13 +93,15 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge}) {
                     >
                         <Button 
                             variant="outlined"
+                            onClick={showRelationList}
                             >
                             Relations Created
                         </Button>
-                        <Button 
+                        <Button
+                            onClick={acceptChallenge}
                             variant="contained"
                         >
-                            I want to relate it!
+                            Accept the challenge!
                         </Button>
                     </Stack>
                 </DialogContent>

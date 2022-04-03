@@ -1,5 +1,5 @@
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
-import { useCallback, useState } from "react";
+import { Fragment, useCallback, useState } from "react";
 import { toDate } from "../../utils/dates";
 import { stringAvatar } from "../../utils/randoms";
 import LessonDetailCard from "./LessonDetail";
@@ -16,6 +16,10 @@ const styles = {
         }
     }
 };
+
+function capitalizeFirstLetter(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 
 function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosenLesson}) {
@@ -65,9 +69,15 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                 sx={styles.lessonListItem}
                             >
                                 <ListItemAvatar>
-                                <Avatar {...stringAvatar(l.name)} />
+                                    <Avatar {...stringAvatar(l.name)} />
                                 </ListItemAvatar>
-                                <ListItemText  primary={l.name} secondary={toDate(l.creation_date)}/>
+                                <ListItemText  primary={l.name} secondary={ 
+                                    <Fragment>
+                                        {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
+                                        <br />
+                                        {toDate(l.creation_date)}
+                                    </Fragment>
+                                }/>
                             </ListItemButton>
                         ))
                         }
