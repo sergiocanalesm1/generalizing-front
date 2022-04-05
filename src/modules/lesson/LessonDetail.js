@@ -1,5 +1,5 @@
-import { Card, CardContent, CardMedia, Chip, List, ListItem, Stack, Toolbar, Typography } from "@mui/material";
-import { stringToColor } from "../../utils/randoms";
+import { Card, CardContent, CardMedia, Chip, Stack, Toolbar, Typography } from "@mui/material";
+import { stringToColor } from "../../utils/strings";
 
 const styles = {
     lessonDetailCard:{
@@ -24,20 +24,19 @@ function LessonDetailCard({lesson}) {
                 <Toolbar  />
                 <Typography variant="body">{lesson.description}</Typography>
                 <br />
-                <Stack 
+
+                <Stack direction="row" justifyContent="space-evenly" sx={{p:1}}>
+                { lesson.tags?.map( t =>(
+                    <Chip key={t} label={t} sx={{bgcolor:stringToColor(t), color:"#FFF"}}/>
+                ))}
+              </Stack>
+              <Stack 
                     direction="row"
                     justifyContent="flex-end"
                     alignItems="center"
                 >
                     <Typography variant="small">{lesson.domain}, {lesson.origin}</Typography>
                 </Stack>
-                <List component={Stack} direction="row" justifyContent="space-evenly">
-                { lesson.tags?.map( t =>(
-                  <ListItem key={t}>
-                    <Chip label={t} sx={{bgcolor:stringToColor(t), color:"#FFF"}}/>
-                  </ListItem>
-                ))}
-              </List>
             </CardContent>
         </Card>
     );

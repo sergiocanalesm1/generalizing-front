@@ -1,7 +1,7 @@
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { toDate } from "../../utils/dates";
-import { stringAvatar } from "../../utils/randoms";
+import { stringAvatar } from "../../utils/strings";
 import RelationDetailCard from "./RelationDetail";
 
 const styles = {

@@ -11,10 +11,9 @@ import LessonListDialog from "../lesson/LessonList";
 import { getAllLessons, getAllRelations, getLastChallenge } from "../../services/urls";
 import RelationGraph from "./components/RelationGraph";
 import RelationListDialog from "../relation/RelationList";
-import { getUserId, getUserUuid } from "../../utils/user";
+import { getUserUuid } from "../../utils/user";
 import ChallengeGraph from "./components/ChallengeGraph";
 import ChallengeDetailDialog from "../challenge/ChallengeDetail";
-import { sortByOwned } from "../../utils/filters";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -143,16 +142,18 @@ function Home() {
                 relations={relationsToShow}
                 filters={relationsFilters}
             />
-            <ChallengeDetailDialog
-                open={openChallengeDetailDialog}
-                setOpen={setOpenChallengeDetailDialog}
-                onClose={()=>setOpenChallengeDetailDialog(false)}
-                challenge={lastChallenge}
-                relations={relations} 
-                setOpenList={setOpenRelationListDialog}
-                setRelationsToShow={setRelationsToShow}
-                setFilters={setRelationsFilters}
-            />
+            {   lastChallenge &&
+                <ChallengeDetailDialog
+                    open={openChallengeDetailDialog}
+                    setOpen={setOpenChallengeDetailDialog}
+                    onClose={()=>setOpenChallengeDetailDialog(false)}
+                    challenge={lastChallenge}
+                    relations={relations} 
+                    setOpenList={setOpenRelationListDialog}
+                    setRelationsToShow={setRelationsToShow}
+                    setFilters={setRelationsFilters}
+                />
+            }
         </div>       
     );
 }

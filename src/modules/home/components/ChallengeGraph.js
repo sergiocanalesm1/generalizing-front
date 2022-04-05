@@ -50,7 +50,7 @@ function ChallengeGraph({ challenge, challengeRelations, setOpenDetail }) {
             })  
 
 
-    },[ challenge, challengeRelations, setOpenDetail ]
+    },[ challenge, challengeRelations, setOpenDetail, theme ]
   );
 
   return (

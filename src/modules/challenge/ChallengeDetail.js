@@ -1,10 +1,10 @@
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Toolbar, Typography } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo, useState } from "react";
-import { stringAvatar } from "../../utils/randoms";
 import LessonDetailCard from "../lesson/LessonDetail";
 import { relationPath } from "../../utils/paths";
 import { filterByChallenge } from "../../utils/filters";
+import { stringAvatar } from "../../utils/strings";
 
 const styles = {
     relationDetailCard:{

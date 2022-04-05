@@ -1,11 +1,11 @@
 import { ArrowBack, Send } from "@mui/icons-material";
-import { Box, Button, Chip, FormHelperText, Grid, List, ListItem, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { createLesson } from "../../services/urls";
+import { useLocation, useNavigate } from "react-router-dom";
+import { methods, createOrUpdateLesson } from "../../services/urls";
 import { domains, origins } from "../../utils/enums";
 import { homePath } from "../../utils/paths";
-import { stringToColor } from "../../utils/randoms";
+import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 
 const styles = {
@@ -23,6 +23,7 @@ const styles = {
 
 function Lesson() {
   const navigate = useNavigate();
+  const { state } = useLocation();
 
   const [lesson, setLesson] = useState({
     "name" : "",
@@ -49,7 +50,7 @@ function Lesson() {
     setTags((tags) => tags.filter((t) => t.label !== tagToDelete.label));
   },[])
 
-  const createTag  = useCallback( async() => {
+  const createTag  = useCallback(() => {
     const newTag = {
       label: currentChip,
       color: stringToColor(currentChip)
@@ -58,21 +59,30 @@ function Lesson() {
     setTags([ ...tags, newTag ])
   }, [tags,currentChip])
 
-  const create = useCallback( async()=> {
+  const createOrUpdate = useCallback( async()=> {
     lesson.tags = tags.map((t)=>t.label);
     lesson.user = getUserId();
 
-    await createLesson( lesson, files, ()=>{
+    const method = state ? methods.UPDATE : methods.CREATE
+    await createOrUpdateLesson( lesson, files, method, ()=>{
       navigate( homePath );
     })
-    
-  },[ files, lesson, navigate, tags ])
+  },[ files, lesson, navigate, tags, state ])
 
   useEffect(()=>{
     if( !Boolean(getUserUuid()) ) {
       navigate( homePath );
     }
-  },[navigate])
+    if( state ){
+      setLesson( state.lesson );
+      setTags( state.lesson.tags.map( t => ({
+        label:t,
+        color:stringToColor(t)
+      })) );
+    }
+  },[navigate,state])
+
+  
 
   return (
     <div>
@@ -121,6 +131,7 @@ function Lesson() {
             name="description"
             multiline
             onChange={handleChange}
+            minRows={3}
             required
           />
 
@@ -221,13 +232,11 @@ function Lesson() {
               </Button>
             </Grid>
             <Grid item xs="auto">
-              <List component={Stack} direction="row">
+              <Stack direction="row" justifyContent="space-evenly">
                 {tags.map( t =>(
-                  <ListItem key={t.label}>
-                    <Chip label={t.label} onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
-                  </ListItem>
+                    <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
                 ))}
-              </List>
+              </Stack>
             </Grid>
           </Grid>
           
@@ -249,7 +258,7 @@ function Lesson() {
             <Button 
               variant="contained"
               endIcon={<Send color="secondary" />}
-              onClick={create}
+              onClick={createOrUpdate}
               disabled={!lesson.name}
             >
               Create!

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createRelation, getAllLessons } from "../../services/urls";
 import { homePath } from "../../utils/paths";
-import { stringAvatar } from "../../utils/randoms";
+import { stringAvatar } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import LessonDetailCard from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
@@ -188,6 +188,7 @@ function Relation() {
             multiline
             onChange={handleChange}
             required
+            minRows={3}
             disabled={chosenLessons.length < 2}
           />
 

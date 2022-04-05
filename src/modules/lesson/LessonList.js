@@ -1,13 +1,16 @@
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { Edit } from "@mui/icons-material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { Fragment, useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toDate } from "../../utils/dates";
-import { stringAvatar } from "../../utils/randoms";
+import { lessonPath } from "../../utils/paths";
+import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
+import { getUserId } from "../../utils/user";
 import LessonDetailCard from "./LessonDetail";
 
 const styles = {
     lessonList:{ 
         width: '100%',
-        maxWidth: 500,
         bgcolor: 'background.paper'
     },
     lessonListItem:{
@@ -17,12 +20,12 @@ const styles = {
     }
 };
 
-function capitalizeFirstLetter(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
+const id = getUserId();
 
 
 function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosenLesson}) {
+
+    const navigate = useNavigate();
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
@@ -44,6 +47,13 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
         setOpen(true);
     },[setOpen])
 
+    const handleEdit = useCallback(( lesson ) =>  {
+        setOpen(false);
+        navigate( lessonPath, {
+            state:{ lesson }
+        })
+    },[navigate,setOpen])
+
     return(
         <div>
             <Dialog
@@ -62,23 +72,34 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 <DialogContent dividers>
                     <List sx={styles.lessonList}>
                         { lessons.map((l)=>(
-                            <ListItemButton
-                                disableGutters
-                                key={l.id}
-                                onClick={()=>handleOpenDetail(l)}
-                                sx={styles.lessonListItem}
-                            >
-                                <ListItemAvatar>
-                                    <Avatar {...stringAvatar(l.name)} />
-                                </ListItemAvatar>
-                                <ListItemText  primary={l.name} secondary={ 
-                                    <Fragment>
-                                        {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
-                                        <br />
-                                        {toDate(l.creation_date)}
-                                    </Fragment>
-                                }/>
-                            </ListItemButton>
+                            <Stack direction="row" justifyContent="flex-start" key={l.id}>
+                                <ListItemButton
+                                    disableGutters
+                                    onClick={()=>handleOpenDetail(l)}
+                                    sx={styles.lessonListItem}
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar {...stringAvatar(l.name)} />
+                                    </ListItemAvatar>
+                                    <ListItemText  primary={l.name} secondary={ 
+                                        <Fragment>
+                                            {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
+                                            {l.tags && <br />}
+                                            {toDate(l.creation_date)}
+                                        </Fragment>
+                                    }/>
+                                </ListItemButton>
+                                {
+                                    l.user === id &&
+                                    <IconButton
+                                        edge="end" 
+                                        sx={{ color: 'gray' }}
+                                        onClick={() => handleEdit(l)}
+                                    >
+                                        <Edit />
+                                    </IconButton>
+                                }
+                            </Stack>
                         ))
                         }
                     </List>

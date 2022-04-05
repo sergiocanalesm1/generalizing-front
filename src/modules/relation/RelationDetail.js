@@ -1,6 +1,6 @@
 import { Avatar, Button, Card, CardContent, Dialog, List, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
-import { stringAvatar } from "../../utils/randoms";
+import { stringAvatar } from "../../utils/strings";
 import LessonDetailCard from "../lesson/LessonDetail";
 
 const styles = {

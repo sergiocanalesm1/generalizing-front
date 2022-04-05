@@ -3,6 +3,14 @@ import { getUserId } from "../utils/user";
 
 const _url = process.env.REACT_APP_API_URL;
 
+const CREATE = "CREATE";
+const UPDATE = "UPDATE";
+
+export const methods = {
+    [CREATE] : "POST",
+    [UPDATE] : "PUT"
+}
+
 export async function getAllLessons(){
 
     const response = await fetch(
@@ -86,9 +94,10 @@ export async function createRelation( relation, files, onSuccess ){
     onSuccess();
 }
 
-export async function createLesson( lesson, files, onSuccess ){
-    let response = await fetch(`${_url}lessons/`,{
-        method: 'POST',
+export async function createOrUpdateLesson( lesson, files, method, onSuccess ){
+    const uuid = method ? `${lesson.uuid}` : ``;
+    let response = await fetch(`${_url}lessons/${uuid}`,{
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },
@@ -100,7 +109,7 @@ export async function createLesson( lesson, files, onSuccess ){
 
         if( files.length > 0 ) {
           let formData = new FormData();
-          formData.append( 'lesson', createdLesson['id'] )
+          formData.append( 'lesson', createdLesson.id )
           formData.append( 'file', files );
 
           response = await fetch(`${_url}lfiles/`,{
@@ -113,5 +122,4 @@ export async function createLesson( lesson, files, onSuccess ){
         }
     }
     onSuccess()
-
 }
