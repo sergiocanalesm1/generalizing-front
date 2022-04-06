@@ -205,7 +205,6 @@ function Header() {
           setOpenAuthModal(false)
           setSuccess(true);
           setOpenFeedbackDialog(true);
-          navigate(path);
         }}
         onError={()=>{
           setSuccess(false);
@@ -229,7 +228,10 @@ function Header() {
         success={success}
         open={openFeedbackDialog}
         onClose={()=>{
-          setOpenFeedbackDialog(false)
+          setOpenFeedbackDialog(false);
+          if( success ){
+            navigate(path);
+          }
         }}
       />
     </div>

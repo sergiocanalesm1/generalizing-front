@@ -86,9 +86,10 @@ export async function getAllRelations(){
     }
 }
 
-export async function createRelation( relation, files, onSuccess, onError ){
-    let response = await fetch(`${_url}relations/`,{
-        method: 'POST',
+export async function createOrUpdateRelation( relation, files, method, onSuccess, onError ){
+    const uuid = method ? `${relation.uuid}` : ``;
+    let response = await fetch(`${_url}relations/${uuid}`,{
+        method: method,
         headers: {
           'Content-Type': 'application/json',
         },

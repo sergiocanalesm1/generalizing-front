@@ -173,7 +173,7 @@ function Lesson() {
                 </Grid>
                 <Grid item>
                 <Typography variant="small">
-                  {files.name}
+                  { files.name }
                 </Typography>
                 </Grid>
               </Grid>
@@ -227,8 +227,7 @@ function Lesson() {
           <Typography variant="body">
             Create <strong>tags</strong> for your lesson
           </Typography>
-          <Grid container>
-            <Grid item>
+          <Stack direction="row" justifyContent="flex-start">
               <TextField
                 value={currentChip}
                 name="chip"
@@ -240,15 +239,12 @@ function Lesson() {
               >
                 Tag it
               </Button>
-            </Grid>
-            <Grid item xs="auto">
-              <Stack direction="row" justifyContent="space-evenly">
+              <Stack direction="row" spacing={2}>
                 {tags.map( t =>(
                     <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
                 ))}
               </Stack>
-            </Grid>
-          </Grid>
+            </Stack>
           
 
           <Toolbar />

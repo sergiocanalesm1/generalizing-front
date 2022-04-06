@@ -2,7 +2,7 @@ import { Add, ArrowBack, Send } from "@mui/icons-material";
 import { Avatar, Box, Button, Dialog, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createRelation, getAllLessons } from "../../services/urls";
+import { createOrUpdateRelation, getAllLessons, methods } from "../../services/urls";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
@@ -31,9 +31,6 @@ const  styles = {
     height: 100,
     bgcolor: "#808080"
   },
-  relationAddIcon:{
-
-  }
 }
 
 function Relation() {
@@ -92,22 +89,25 @@ function Relation() {
 
   const create = useCallback(async()=>{
     relation.user = getUserId();
-    relation.lessons = chosenLessons.map((l)=>l.id); 
-    if( state ){
+    relation.lessons = chosenLessons.map((l)=>l.id);
+    if( state?.challengeId ){
       relation.challenge = state.challengeId;
     }
-    await createRelation( relation, files,
+    let method = methods.CREATE;
+    if( state?.relation ){
+      method = methods.UPDATE;
+    }
+    await createOrUpdateRelation( relation, files, method,
       ()=>{
         setSuccess(true);
         setOpenFeedbackDialog(true);
-        navigate( homePath )
       },
       ()=>{
         setSuccess(false);
         setOpenFeedbackDialog(true);
       }
     )
-  },[chosenLessons, files, navigate, relation, state]);
+  },[chosenLessons, files, relation, state]);
 
   useEffect(()=>{
     if( lessonToChoose ){
@@ -119,7 +119,13 @@ function Relation() {
       setLessonToChoose();
     }
     if( state ){
-      setChosenLessons( state.challengeLessons );
+      if( state.challengeLessons ){
+        setChosenLessons( state.challengeLessons );
+      }
+      if( state.relation ){
+        setChosenLessons( state.relation.lessons );
+        setRelation( state.relation );
+      }
     }
   },[ lessonToChoose, chosenIndex, chosenLessons, forceUpdate, state ])
 
@@ -299,7 +305,10 @@ function Relation() {
         success={success}
         open={openFeedbackDialog}
         onClose={()=>{
-            setOpenFeedbackDialog(false)
+            setOpenFeedbackDialog(false);
+            if( success ){
+              navigate(homePath);
+            }
         }}
       />      
     </div>

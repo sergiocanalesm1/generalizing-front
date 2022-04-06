@@ -1,7 +1,11 @@
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, List, ListItemAvatar, ListItemButton, ListItemText, Typography } from "@mui/material";
+import { Edit } from "@mui/icons-material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toDate } from "../../utils/dates";
+import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
+import { getUserId } from "../../utils/user";
 import RelationDetailCard from "./RelationDetail";
 
 const styles = {
@@ -17,7 +21,11 @@ const styles = {
     }
 };
 
+const id = getUserId();
+
 function RelationListDialog({open, setOpen, onClose, relations, filters}) {
+
+    const navigate = useNavigate();
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedRelation, setSelectedRelation] = useState();
@@ -33,6 +41,14 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
         setOpenDetail(false);
         setOpen(true);
     },[setOpen])
+
+    const handleEdit = useCallback(( relation ) =>  {
+        setOpen(false);
+        navigate( relationPath, {
+            state:{ relation }
+        })
+    },[navigate,setOpen])
+
     
 
     return(
@@ -57,19 +73,30 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        {/**/}
                         { relations.map((r)=>(
-                            <ListItemButton
-                                disableGutters
-                                key={r.id}
-                                sx={styles.relationListItem}
-                                onClick={()=>handleOpenDetail(r)}
-                            >
-                                <ListItemAvatar>
-                                    <Avatar {...stringAvatar(r.name)} />
-                                </ListItemAvatar>
-                                <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
-                            </ListItemButton>
+                            <Stack direction="row" justifyContent="flex-start" key={r.id}>
+                                <ListItemButton
+                                    disableGutters
+                                    key={r.id}
+                                    sx={styles.relationListItem}
+                                    onClick={()=>handleOpenDetail(r)}
+                                >
+                                    <ListItemAvatar>
+                                        <Avatar {...stringAvatar(r.name)} />
+                                    </ListItemAvatar>
+                                    <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
+                                </ListItemButton>
+                                {
+                                    r.user === id &&
+                                    <IconButton
+                                        edge="end" 
+                                        sx={{ color: 'gray' }}
+                                        onClick={() => handleEdit(r)}
+                                    >
+                                        <Edit />
+                                    </IconButton>
+                                }
+                            </Stack>
                         ))
                         }
                         

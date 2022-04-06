@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, Modal, TextField, Typography } from '@mui/material';
-import { setUser } from '../../utils/user';
 import { login, signin } from '../../services/urls';
 
 const style = {
@@ -48,15 +47,13 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
 
     const handleSubmit = useCallback( async() => {
         
-        let response;
-
         if( isLogin ) {
             await login(email,password,onSuccess,onError)
         }
         else {
             await signin(email,username,password,onSuccess,onError);
         }
-      }, [email, password, isLogin, username, onClose]);
+      }, [email, password, isLogin, username, onError, onSuccess]);
     
 
     return(
