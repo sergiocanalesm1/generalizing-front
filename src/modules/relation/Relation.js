@@ -6,6 +6,7 @@ import { createRelation, getAllLessons } from "../../services/urls";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
+import FeedbackDialog from "../components/FeedbackDialog";
 import LessonDetailCard from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 
@@ -54,6 +55,9 @@ function Relation() {
   const [openDetail, setOpenDetail] = useState(false);
   const [selectedLessonDetail, setSelectedLessonDetail] = useState();
 
+  const [openFeedbackDialog,setOpenFeedbackDialog] = useState(false);
+  const [success, setSuccess] = useState(false);
+
   const [files, setFiles] = useState([]);
 
   const [relation, setRelation] = useState({
@@ -92,10 +96,17 @@ function Relation() {
     if( state ){
       relation.challenge = state.challengeId;
     }
-    await createRelation( relation, files, ()=>{
-      navigate( homePath );
-    })
-        //show feedback
+    await createRelation( relation, files,
+      ()=>{
+        setSuccess(true);
+        setOpenFeedbackDialog(true);
+        navigate( homePath )
+      },
+      ()=>{
+        setSuccess(false);
+        setOpenFeedbackDialog(true);
+      }
+    )
   },[chosenLessons, files, navigate, relation, state]);
 
   useEffect(()=>{
@@ -284,6 +295,13 @@ function Relation() {
             lesson={selectedLessonDetail}
         />
       </Dialog>
+      <FeedbackDialog
+        success={success}
+        open={openFeedbackDialog}
+        onClose={()=>{
+            setOpenFeedbackDialog(false)
+        }}
+      />      
     </div>
   );
 }

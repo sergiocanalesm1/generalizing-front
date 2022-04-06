@@ -7,6 +7,7 @@ import { domains, origins } from "../../utils/enums";
 import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
+import FeedbackDialog from "../components/FeedbackDialog";
 
 const styles = {
   lessonPaper: {
@@ -37,7 +38,8 @@ function Lesson() {
 
   const [tags, setTags] = useState([]);
   const [currentChip, setCurrentChip] = useState("");
-
+  const [success, setSuccess] = useState(false);
+  const [openFeedbackDialog,setOpenFeedbackDialog] = useState( false );
 
   const handleChange = useCallback((e)=>{
     setLesson({
@@ -64,9 +66,17 @@ function Lesson() {
     lesson.user = getUserId();
 
     const method = state ? methods.UPDATE : methods.CREATE
-    await createOrUpdateLesson( lesson, files, method, ()=>{
-      navigate( homePath );
-    })
+    await createOrUpdateLesson( lesson, files, method, 
+      ()=>{
+      setSuccess(true);
+      setOpenFeedbackDialog(true);
+      navigate( homePath )
+      },
+      ()=>{
+        setSuccess(false);
+        setOpenFeedbackDialog(true);
+      }
+    )
   },[ files, lesson, navigate, tags, state ])
 
   useEffect(()=>{
@@ -267,6 +277,13 @@ function Lesson() {
           
         </Box>
       </Paper>
+      <FeedbackDialog
+        success={success}
+        open={openFeedbackDialog}
+        onClose={()=>{
+            setOpenFeedbackDialog(false)
+        }}
+      />
     </div>
     
   );
