@@ -6,11 +6,12 @@ import { AppBar, Button, ButtonGroup, Container, Grid, IconButton, Menu, MenuIte
 
 import { homePath, lessonPath, relationPath } from '../../utils/paths';
 import AuthModal from './AuthModal';
-import { getAllLessons, getAllRelations } from '../../services/urls';
 import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
 import { clearUser, getUserUuid } from '../../utils/user';
 import FeedbackDialog from './FeedbackDialog';
+import { getAllRelations } from '../../services/relations_services';
+import { getAllLessons } from '../../services/lessons_services';
 //import { tempRelations } from '../../utils/enums';
 
 

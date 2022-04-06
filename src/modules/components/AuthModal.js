@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, Modal, TextField, Typography } from '@mui/material';
-import { login, signin } from '../../services/urls';
+import { login, signin } from '../../services/user_services';
 
 const style = {
     modal :{

@@ -8,13 +8,15 @@ import { AddCircleOutline } from '@mui/icons-material';
 import { lessonPath, relationPath } from "../../utils/paths";
 import AuthModal from "../components/AuthModal";
 import LessonListDialog from "../lesson/LessonList";
-import { getAllLessons, getAllRelations, getLastChallenge } from "../../services/urls";
 import RelationGraph from "./components/RelationGraph";
 import RelationListDialog from "../relation/RelationList";
 import { getUserUuid } from "../../utils/user";
 import ChallengeGraph from "./components/ChallengeGraph";
 import ChallengeDetailDialog from "../challenge/ChallengeDetail";
 import FeedbackDialog from "../components/FeedbackDialog";
+import { getAllRelations } from "../../services/relations_services";
+import { getAllLessons } from "../../services/lessons_services";
+import { getLastChallenge } from "../../services/challenges_services";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -22,8 +24,6 @@ import FeedbackDialog from "../components/FeedbackDialog";
 function Home() {
     
     const navigate = useNavigate();
-    const [,updateState] = useState();
-    const forceUpdate = useCallback(() => updateState({}), []);
 
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [success, setSuccess] = useState( false );

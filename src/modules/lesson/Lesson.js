@@ -2,7 +2,8 @@ import { ArrowBack, Send } from "@mui/icons-material";
 import { Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { methods, createOrUpdateLesson } from "../../services/urls";
+import { createOrUpdateLesson } from "../../services/lessons_services";
+import { methods } from "../../services/urls";
 import { domains, origins } from "../../utils/enums";
 import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
@@ -34,7 +35,7 @@ function Lesson() {
     "user": ""
   });
 
-  const [files, setFiles] = useState([]);
+  const [files, setFiles] = useState({});
 
   const [tags, setTags] = useState([]);
   const [currentChip, setCurrentChip] = useState("");

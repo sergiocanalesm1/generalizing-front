@@ -79,7 +79,12 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                     sx={styles.lessonListItem}
                                 >
                                     <ListItemAvatar>
-                                        <Avatar {...stringAvatar(l.name)} />
+                                        {
+                                            l.files.length > 0
+                                            ? <Avatar src={l.files[0].file.split("?")[0]} />
+                                            : <Avatar {...stringAvatar(l.name)} />
+                                        }
+                                        
                                     </ListItemAvatar>
                                     <ListItemText  primary={l.name} secondary={ 
                                         <Fragment>
