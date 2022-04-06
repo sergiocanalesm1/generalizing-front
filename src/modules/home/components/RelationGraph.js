@@ -106,7 +106,9 @@ ${d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(ch
           .attr("fill", d => color(names[d.target.index]))
           .attr("d", ribbon)
           .append("title")
-            .text(d => `${names[d.source.index]} → ${names[d.target.index]} ${d.source.value}`);
+            .text(d => 
+`${names[d.source.index]} ⇔ ${names[d.target.index]} 
+${d.source.value} relations`);
 
       svg.selectAll("path")
           //.attr("opacity",1)

@@ -14,6 +14,7 @@ import RelationListDialog from "../relation/RelationList";
 import { getUserUuid } from "../../utils/user";
 import ChallengeGraph from "./components/ChallengeGraph";
 import ChallengeDetailDialog from "../challenge/ChallengeDetail";
+import FeedbackDialog from "../components/FeedbackDialog";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -25,6 +26,8 @@ function Home() {
     const forceUpdate = useCallback(() => updateState({}), []);
 
     const [openAuthModal, setOpenAuthModal] = useState( false );
+    const [success, setSuccess] = useState( false );
+    const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
     const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
@@ -37,6 +40,8 @@ function Home() {
     const [relationsToShow, setRelationsToShow] = useState([]);
     const [relationsFilters, setRelationsFilters] = useState("");
 
+    const [path,setPath] = useState("");
+
 
 
     const handleCreateLesson = useCallback(()=>{
@@ -45,6 +50,7 @@ function Home() {
         }
         else  {
             setOpenAuthModal(true);
+            setPath(lessonPath);
         }
     },[navigate])
 
@@ -54,6 +60,7 @@ function Home() {
         }
         else  {
             setOpenAuthModal(true);
+            setPath(relationPath);
         }
     },[navigate]);
 
@@ -110,7 +117,7 @@ function Home() {
                         : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
                     }
                     {
-                        lastChallenge
+                        lastChallenge !== {}
                         ? <div>
                             <ChallengeGraph
                                 challenge={lastChallenge}
@@ -123,10 +130,26 @@ function Home() {
                 </Box>
             </Box>
             <AuthModal
-              open={openAuthModal}
-              onClose={()=>{
-                  setOpenAuthModal(false);
-                  forceUpdate();
+                open={openAuthModal}
+                onClose={()=>{
+                    setOpenAuthModal(false)
+                }}
+                onSuccess={()=>{
+                    setOpenAuthModal(false)
+                    setSuccess(true);
+                    setOpenFeedbackDialog(true);
+                    navigate(path);
+                }}
+                onError={()=>{
+                    setSuccess(false);
+                    setOpenFeedbackDialog(true);
+                }}
+            />
+            <FeedbackDialog
+                success={success}
+                open={openFeedbackDialog}
+                onClose={()=>{
+                    setOpenFeedbackDialog(false)
                 }}
             />
             <LessonListDialog

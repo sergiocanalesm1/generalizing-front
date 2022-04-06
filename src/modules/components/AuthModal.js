@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, Modal, TextField, Typography } from '@mui/material';
 import { setUser } from '../../utils/user';
+import { login, signin } from '../../services/urls';
 
 const style = {
     modal :{
@@ -20,7 +21,7 @@ const style = {
     
   };
 
-function AuthModal( { open, onClose } ) {
+function AuthModal( { open, onClose, onSuccess, onError } ) {
     
     //TODO implement errors
 
@@ -49,43 +50,12 @@ function AuthModal( { open, onClose } ) {
         
         let response;
 
-        if( !isLogin ) {
-            const url = `${process.env.REACT_APP_API_URL}users/`;
-            response = await fetch(url,{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    username: username,
-                    password: password
-                })
-            })
+        if( isLogin ) {
+            await login(email,password,onSuccess,onError)
         }
-
-        else { //login
-            const url = `${process.env.REACT_APP_API_URL}login/`;
-            response = await fetch(url,{
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: email,
-                    password: password
-                })
-            })
+        else {
+            await signin(email,username,password,onSuccess,onError);
         }
-        if( response.ok ){
-            const user = await response.json();
-            const userToSet = {
-                id: user['id'] ,
-                uuid: user['uuid']
-            }
-            setUser( userToSet );
-        }
-        onClose()
       }, [email, password, isLogin, username, onClose]);
     
 

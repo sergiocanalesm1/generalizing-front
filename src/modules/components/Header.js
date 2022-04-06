@@ -10,6 +10,7 @@ import { getAllLessons, getAllRelations } from '../../services/urls';
 import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
 import { clearUser, getUserUuid } from '../../utils/user';
+import FeedbackDialog from './FeedbackDialog';
 //import { tempRelations } from '../../utils/enums';
 
 
@@ -22,6 +23,8 @@ function Header() {
   const [openAuthModal, setOpenAuthModal] = useState( false );
   const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
   const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
+  const [success, setSuccess] = useState( false );
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
 
   const [anchorElUser, setAnchorElUser] = useState();
   const refUserSettings = useRef();
@@ -35,6 +38,8 @@ function Header() {
   const [lessons, setLessons] = useState([]);
   const [relations, setRelations] = useState([]);
 
+  const [path,setPath] = useState("");
+
 
   const handleLogout = useCallback(()=> {
     clearUser();
@@ -47,6 +52,7 @@ function Header() {
       navigate(lessonPath);
     }
     else  {
+        setPath(lessonPath);
         setOpenAuthModal(true);
     }
 
@@ -63,6 +69,7 @@ function Header() {
         navigate(relationPath);
     }
     else  {
+        setPath(relationPath);
         setOpenAuthModal(true);
     }
   },[navigate]);
@@ -194,6 +201,16 @@ function Header() {
         onClose={()=>{
           setOpenAuthModal(false)
         }}
+        onSuccess={()=>{
+          setOpenAuthModal(false)
+          setSuccess(true);
+          setOpenFeedbackDialog(true);
+          navigate(path);
+        }}
+        onError={()=>{
+          setSuccess(false);
+          setOpenFeedbackDialog(true);
+        }}
       />
       <LessonListDialog
           open={openLessonListDialog}
@@ -207,6 +224,13 @@ function Header() {
           setOpen={setOpenRelationListDialog}
           onClose={()=>setOpenRelationListDialog(false)}
           relations={relations}
+      />
+      <FeedbackDialog
+        success={success}
+        open={openFeedbackDialog}
+        onClose={()=>{
+          setOpenFeedbackDialog(false)
+        }}
       />
     </div>
   );
