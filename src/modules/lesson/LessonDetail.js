@@ -1,17 +1,12 @@
-import { Card, CardContent, CardMedia, Chip, Stack, Toolbar, Typography } from "@mui/material";
-import { stringToColor } from "../../utils/strings";
+import { Button, Card, CardActions, CardContent, CardMedia, Chip, Stack, Toolbar, Typography } from "@mui/material";
+import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 
-const styles = {
-    lessonDetailCard:{
-        maxWidth:"100%"
-    }
-}
 
-function LessonDetailCard({lesson}) {
+function LessonDetailCard({ lesson, onClose }) {
     //TODO fix file url
     return(
-        <Card sx={styles.lessonDetailCard}>
-            {lesson.files && lesson.files.length > 0 && //TODO add default generalizing logo!
+        <Card>
+            {lesson.files && lesson.files.length > 0 &&
                 <CardMedia
                     component="img"
                     height="50%"
@@ -25,9 +20,9 @@ function LessonDetailCard({lesson}) {
                 <Typography variant="body">{lesson.description}</Typography>
                 <br />
 
-                <Stack direction="row" justifyContent="space-evenly" sx={{p:1}}>
+                <Stack direction="row" justifyContent="space-evenly" sx={{p:3}}>
                 { lesson.tags?.map( t =>(
-                    <Chip key={t} label={t} sx={{bgcolor:stringToColor(t), color:"#FFF"}}/>
+                    <Chip key={t} label={capitalizeFirstLetter(t)} sx={{bgcolor:stringToColor(t), color:"#FFF"}}/>
                 ))}
               </Stack>
               <Stack 
@@ -38,6 +33,13 @@ function LessonDetailCard({lesson}) {
                     <Typography variant="small">{lesson.domain}, {lesson.origin}</Typography>
                 </Stack>
             </CardContent>
+            <Stack direction="row" justifyContent="flex-end">
+                <CardActions onClick={onClose}>
+                    <Button  color="primary">
+                        Close
+                    </Button>
+                </CardActions>
+            </Stack>
         </Card>
     );
 }

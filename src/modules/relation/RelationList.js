@@ -21,7 +21,6 @@ const styles = {
     }
 };
 
-const id = getUserId();
 
 function RelationListDialog({open, setOpen, onClose, relations, filters}) {
 
@@ -87,7 +86,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                                     <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
                                 </ListItemButton>
                                 {
-                                    r.user === id &&
+                                    r.user === getUserId() &&
                                     <IconButton
                                         edge="end" 
                                         sx={{ color: 'gray' }}
@@ -114,7 +113,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                 <RelationDetailCard
                     relation={selectedRelation}
                     setOpen={setOpenDetail}
-
+                    onClose={handleDetailClose}
                 />
             </Dialog>
         </div>

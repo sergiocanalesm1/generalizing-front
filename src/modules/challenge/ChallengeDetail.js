@@ -6,17 +6,9 @@ import { relationPath } from "../../utils/paths";
 import { filterByChallenge } from "../../utils/filters";
 import { stringAvatar } from "../../utils/strings";
 
-const styles = {
-    relationDetailCard:{
-        maxWidth:"100%"
-    }
-}
 
 function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, setRelationsToShow, setFilters, relations }) {
-    /*
-    create circles around challenge
-    see list of relations of challenge
-    */
+
     const navigate = useNavigate()
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
@@ -61,7 +53,8 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                 <DialogContent dividers>
                     <Stack direction="row" justifyContent="center" alignItems="center">
                         <Typography variant="body">
-                            All users are given these two lessons. Check out the relations created by many different users!
+                            All users are given these two lessons. Are you up for the challenge? Try relating these concepts any way you see fit!
+                            Also, check out the relations created by many different users
                         </Typography>
                     </Stack>
                     <br />
@@ -78,7 +71,7 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                                         <Typography variant="small">{l.domain}</Typography>
                                     </Stack>
                                     <Button onClick={()=>showLessonDetail(l)}>
-                                        <Avatar {...stringAvatar(l.name, styles.relationAvatar)} />
+                                        <Avatar {...stringAvatar( l.name )} />
                                     </Button>
                                 </Stack>
                             ))

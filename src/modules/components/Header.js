@@ -91,13 +91,15 @@ function Header() {
       <AppBar position="fixed">
         <Container maxWidth="xl">
           <Toolbar>
-            <Typography
-              variant="h6"
-              component="div"
-              color="secondary"
-            >
-              GENERALIZING
-            </Typography>
+            <Button onClick={()=>navigate(homePath)} sx={{paddingRight:5}}>
+              <Typography
+                variant="h3"
+                component="div"
+                color="secondary"
+              >
+                GENERALIZING
+              </Typography>
+            </Button>
             <Stack direction="row" justifyContent="flex-start" alignItems="center">
             <Button 
                 ref={refRelations}

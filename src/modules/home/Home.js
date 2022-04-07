@@ -3,20 +3,20 @@ import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useState } from "react";
 
 import { Box, Button, CircularProgress, Stack, Toolbar } from "@mui/material";
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutline, Attractions } from '@mui/icons-material';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import AuthModal from "../components/AuthModal";
 import LessonListDialog from "../lesson/LessonList";
 import RelationGraph from "./components/RelationGraph";
 import RelationListDialog from "../relation/RelationList";
-import { getUserUuid } from "../../utils/user";
-import ChallengeGraph from "./components/ChallengeGraph";
+import { getFirstTimer, getUserId, setFirstTimer } from "../../utils/user";
 import ChallengeDetailDialog from "../challenge/ChallengeDetail";
 import FeedbackDialog from "../components/FeedbackDialog";
 import { getAllRelations } from "../../services/relations_services";
 import { getAllLessons } from "../../services/lessons_services";
 import { getLastChallenge } from "../../services/challenges_services";
+import WelcomingDialog from "../components/Welcoming";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -32,6 +32,8 @@ function Home() {
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
     const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
 
+    const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
+
     const [lessons, setLessons] = useState([]);
     const [relations, setRelations] = useState([]);
     const [lastChallenge, setLastChallenge] = useState({});
@@ -45,7 +47,7 @@ function Home() {
 
 
     const handleCreateLesson = useCallback(()=>{
-        if( Boolean(getUserUuid()) ) {
+        if( Boolean( getUserId() ) ) {
             navigate(lessonPath);
         }
         else  {
@@ -55,7 +57,7 @@ function Home() {
     },[navigate])
 
     const handleCreateRelation = useCallback(()=>{
-        if( Boolean(getUserUuid()) ) {
+        if( Boolean( getUserId() ) ) {
             navigate(relationPath);
         }
         else  {
@@ -64,7 +66,14 @@ function Home() {
         }
     },[navigate]);
 
+    const handleViewChallenge = useCallback(()=>{
+        setOpenChallengeDetailDialog(true);
+    },[])
+
     useEffect(()=>{
+        if( !getFirstTimer() ){
+            setOpenWelcomingDialog(true);
+        }
         getAllRelations().then( r => {
             setRelations(r)
             setRelationsToShow(r)
@@ -92,17 +101,28 @@ function Home() {
                         <Button 
                             variant="contained"
                             startIcon={<AddCircleOutline />}
-                            onClick={handleCreateRelation}
-                        >
-                            Add Relation
-                        </Button>
-                        <Button 
-                            variant="contained"
-                            startIcon={<AddCircleOutline />}
                             onClick={handleCreateLesson}
                         >
                             Add Lesson
                         </Button>
+                        <Button 
+                            variant="contained"
+                            startIcon={<AddCircleOutline />}
+                            onClick={handleCreateRelation}
+                        >
+                            Create Relation
+                        </Button>
+                        {
+                            lastChallenge &&
+                            <Button 
+                                variant="contained"
+                                startIcon={<Attractions />}
+                                onClick={handleViewChallenge}
+                            >
+                                Challenge
+                            </Button>
+                        }
+  
                     </Stack>
                     {   relations.length > 0 & lessons.length > 0
                         ? <div>
@@ -114,17 +134,6 @@ function Home() {
                             />
                             <Toolbar />
                           </div>
-                        : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
-                    }
-                    {
-                        lastChallenge !== {}
-                        ? <div>
-                            <ChallengeGraph
-                                challenge={lastChallenge}
-                                setOpenDetail={setOpenChallengeDetailDialog}
-                            />
-                            <Toolbar />
-                         </div>
                         : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
                     }
                 </Box>
@@ -177,6 +186,13 @@ function Home() {
                     setFilters={setRelationsFilters}
                 />
             }
+            <WelcomingDialog
+                open={openWelcomingDialog}
+                onClose={()=>{
+                    setFirstTimer();
+                    setOpenWelcomingDialog(false)
+                }}
+            />
         </div>       
     );
 }

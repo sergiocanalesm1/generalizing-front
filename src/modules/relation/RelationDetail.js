@@ -1,15 +1,10 @@
-import { Avatar, Button, Card, CardContent, Dialog, List, Stack, Toolbar, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardActions, CardContent, Dialog, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { stringAvatar } from "../../utils/strings";
 import LessonDetailCard from "../lesson/LessonDetail";
 
-const styles = {
-    relationDetailCard:{
-        maxWidth:"100%"
-    }
-}
 
-function RelationDetailCard({relation, setOpen}) {
+function RelationDetailCard({relation, setOpen, onClose}) {
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
@@ -22,7 +17,7 @@ function RelationDetailCard({relation, setOpen}) {
     //TODO fix file url
     return(
         <div>
-            <Card sx={styles.relationDetailCard}>
+            <Card>
                 <CardContent>
                     <Stack direction="row" justifyContent="center">
                         <Typography variant="h4">{relation.name}</Typography>
@@ -44,7 +39,11 @@ function RelationDetailCard({relation, setOpen}) {
                                         <Typography variant="small">{l.domain}</Typography>
                                     </Stack>
                                     <Button onClick={()=>showLessonDetail(l)}>
-                                        <Avatar {...stringAvatar(l.name, styles.relationAvatar)} />
+                                        {   
+                                            l.files.length > 0
+                                            ? <Avatar src={l.files[0].file.split("?")[0]} />
+                                            : <Avatar {...stringAvatar(l.name)} />
+                                        }
                                     </Button>
                                 </Stack>
                             ))
@@ -54,9 +53,14 @@ function RelationDetailCard({relation, setOpen}) {
                     <Toolbar  />
                     <Typography variant="body">{relation.explanation}</Typography>
                     <br />
-                    <List component={Stack} direction="row" justifyContent="space-evenly">
-                </List>
                 </CardContent>
+                <Stack direction="row" justifyContent="flex-end">
+                    <CardActions onClick={onClose}>
+                        <Button  color="primary">
+                            Close
+                        </Button>
+                    </CardActions>
+                </Stack>
             </Card>
             <Dialog
                 open={openDetail}
@@ -68,6 +72,10 @@ function RelationDetailCard({relation, setOpen}) {
             >
                 <LessonDetailCard
                     lesson={selectedLessonDetail}
+                    onClose={()=>{
+                        setOpenDetail(false);
+                        setOpen(true)
+                    }}
                 />
             </Dialog>
         </div>

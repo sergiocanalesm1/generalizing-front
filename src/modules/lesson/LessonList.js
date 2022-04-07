@@ -20,8 +20,6 @@ const styles = {
     }
 };
 
-const id = getUserId();
-
 
 function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosenLesson}) {
 
@@ -95,7 +93,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                     }/>
                                 </ListItemButton>
                                 {
-                                    l.user === id &&
+                                    l.user === getUserId() &&
                                     <IconButton
                                         edge="end" 
                                         sx={{ color: 'gray' }}
@@ -120,6 +118,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
             >
                 <LessonDetailCard
                     lesson={selectedLesson}
+                    onClose={handleDetailClose}
                 />
             </Dialog>
         </div>
