@@ -1,6 +1,6 @@
 import { sortByOwned } from "../utils/filters";
 import { getUserId } from "../utils/user";
-import { url } from "./urls";
+import { methods, url } from "./urls";
 
 export async function getAllRelations(){
 
@@ -22,7 +22,7 @@ export async function getAllRelations(){
 }
 
 export async function createOrUpdateRelation( relation, files, method, onSuccess, onError ){
-    const uuid = method ? `${relation.uuid}` : ``;
+    const uuid = method === methods.UPDATE ? `${relation.uuid}` : ``;
     let response = await fetch(`${url}relations/${uuid}`,{
         method: method,
         headers: {

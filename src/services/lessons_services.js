@@ -1,6 +1,6 @@
 import { sortByOwned } from "../utils/filters";
 import { getUserId } from "../utils/user";
-import { url } from "./urls";
+import { methods, url } from "./urls";
 
 export async function getAllLessons(){
 
@@ -22,7 +22,7 @@ export async function getAllLessons(){
 }
 
 export async function createOrUpdateLesson( lesson, files, method, onSuccess, onError ){
-    const uuid = method ? `${lesson.uuid}` : ``;
+    const uuid = method === methods.UPDATE ? `${lesson.uuid}` : ``;
     let response = await fetch(`${url}lessons/${uuid}`,{
         method: method,
         headers: {
