@@ -59,6 +59,8 @@ function Relation() {
 
   const [files, setFiles] = useState([]);
 
+  const [isUpdate,setIsUpdate] = useState(false);
+
   const [relation, setRelation] = useState({
     name : "",
     user : "",
@@ -89,16 +91,13 @@ function Relation() {
     }
   },[chosenLessons]);
 
-  const create = useCallback(async()=>{
+  const createOrUpdate = useCallback(async()=>{
     relation.user = getUserId();
     relation.lessons = chosenLessons.map((l)=>l.id);
     if( state?.challengeId ){
       relation.challenge = state.challengeId;
     }
-    let method = methods.CREATE;
-    if( state?.relation ){
-      method = methods.UPDATE;
-    }
+    const method = isUpdate ? methods.UPDATE : methods.CREATE;
     await createOrUpdateRelation( relation, files, method,
       ()=>{
         setSuccess(true);
@@ -109,7 +108,7 @@ function Relation() {
         setOpenFeedbackDialog(true);
       }
     )
-  },[chosenLessons, files, relation, state]);
+  },[chosenLessons, files, relation, state, isUpdate]);
 
   useEffect(()=>{
     if( lessonToChoose ){
@@ -125,6 +124,7 @@ function Relation() {
         setChosenLessons( state.challengeLessons );
       }
       if( state.relation ){
+        setIsUpdate(true);
         setChosenLessons( state.relation.lessons );
         setRelation( state.relation );
       }
@@ -280,10 +280,10 @@ function Relation() {
             <Button 
               variant="contained"
               endIcon={<Send color="secondary" />}
-              onClick={create}
+              onClick={createOrUpdate}
               disabled={!relation.name}
             >
-              Relate!
+              { isUpdate ? "Update" : "Relate!" }
             </Button>
           </Stack>
         </Box>

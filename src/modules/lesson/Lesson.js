@@ -42,6 +42,8 @@ function Lesson() {
   const [success, setSuccess] = useState(false);
   const [openFeedbackDialog,setOpenFeedbackDialog] = useState( false );
 
+  const [isUpdate,setIsUpdate] = useState(false);
+
   const handleChange = useCallback((e)=>{
     setLesson({
       ...lesson,
@@ -66,25 +68,25 @@ function Lesson() {
     lesson.tags = tags.map((t)=>t.label);
     lesson.user = getUserId();
 
-    const method = state ? methods.UPDATE : methods.CREATE
+    const method = isUpdate ? methods.UPDATE : methods.CREATE
     await createOrUpdateLesson( lesson, files, method, 
       ()=>{
-      setSuccess(true);
-      setOpenFeedbackDialog(true);
-      navigate( homePath )
+        setSuccess(true);
+        setOpenFeedbackDialog(true);
       },
       ()=>{
         setSuccess(false);
         setOpenFeedbackDialog(true);
       }
     )
-  },[ files, lesson, navigate, tags, state ])
+  },[ files, lesson, tags, isUpdate ])
 
   useEffect(()=>{
     if( !Boolean(getUserUuid()) ) {
       navigate( homePath );
     }
     if( state ){
+      setIsUpdate(true);
       setLesson( state.lesson );
       setTags( state.lesson.tags.map( t => ({
         label:t,
@@ -268,7 +270,7 @@ function Lesson() {
               onClick={createOrUpdate}
               disabled={!lesson.name}
             >
-              Create!
+              { isUpdate ? "Update" : "Create!" }
             </Button>
           </Stack>
           
@@ -279,6 +281,9 @@ function Lesson() {
         open={openFeedbackDialog}
         onClose={()=>{
             setOpenFeedbackDialog(false)
+            if(success){
+              navigate( homePath )
+            }
         }}
       />
     </div>

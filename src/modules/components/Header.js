@@ -49,6 +49,7 @@ function Header() {
   },[navigate])
 
   const handleCreateLesson = useCallback(()=>{
+    setAnchorElLessons();
     if( Boolean(getUserUuid()) ) {
       navigate(lessonPath);
     }
@@ -60,12 +61,14 @@ function Header() {
   },[navigate])
 
   const handleViewLessons = useCallback(async()=>{
-      const fetchedLessons = await getAllLessons();
-      setLessons(fetchedLessons);
-      setOpenLessonListDialog(true);
+    setAnchorElLessons();
+    const fetchedLessons = await getAllLessons();
+    setLessons(fetchedLessons);
+    setOpenLessonListDialog(true);
   },[]);
 
   const handleCreateRelation = useCallback(()=>{
+    setAnchorElRelations();
     if( Boolean(getUserUuid()) ) {
         navigate(relationPath);
     }
@@ -76,6 +79,7 @@ function Header() {
   },[navigate]);
 
   const handleViewRelations = useCallback(async()=>{
+    setAnchorElRelations();
     const fetchedRelations = await getAllRelations();
     setRelations(fetchedRelations);
     setOpenRelationListDialog(true);

@@ -93,9 +93,12 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
           ;
     
       group.append("title")
-          .text(d => `${names[d.index]}
-${d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value)} relations`)
-          ;
+          .text(d => {
+const total_relations = d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value);
+console.log(total_relations)
+return `${names[d.index]}
+${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
+})
 
       svg.append("g")
           .attr("fill-opacity", 0.75)
@@ -108,7 +111,7 @@ ${d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(ch
           .append("title")
             .text(d => 
 `${names[d.source.index]} ⇔ ${names[d.target.index]} 
-${d.source.value} relations`);
+${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`);
 
       svg.selectAll("path")
           //.attr("opacity",1)
