@@ -1,0 +1,9 @@
+@font-face {
+    font-family: "gilroy";
+    src: url( "../fonts/Gilroy/Gilroy-Black.woff" ) format( "woff" ), url( "../fonts/Gilroy/Gilroy-Black.woff2" ) format( "woff2" );
+}
+
+@font-face {
+    font-family: "HomepageBaukasten";
+    src: url( "../fonts/HomepageBaukasten/HomepageBaukasten-Book.woff" ) format( "woff" ), url( "../fonts/HomepageBaukasten/HomepageBaukasten-Book.woff2" ) format( "woff2" );
+}
