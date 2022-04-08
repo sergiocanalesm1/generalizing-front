@@ -10,7 +10,7 @@ function WelcomingDialog({open,onClose}){
         onClose={onClose}
         fullWidth
     >
-        <Card>
+        <Card sx={{overflow: 'auto'}}>
             <CardMedia
                 component="img"
                 height="50%"

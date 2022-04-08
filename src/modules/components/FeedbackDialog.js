@@ -6,7 +6,7 @@ function FeedbackDialog( {success, open, onClose } ){
         <Dialog
             open={open}
             onClose={onClose}
-            
+            scroll="paper"
         >
             <DialogTitle sx={{minWidth:300}}>
                 <div>

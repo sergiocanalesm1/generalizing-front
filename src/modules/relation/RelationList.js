@@ -106,6 +106,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                 </DialogActions>
             </Dialog>
             <Dialog
+                scroll="paper"
                 fullWidth
                 open={openDetail}
                 onClose={handleDetailClose}

@@ -5,7 +5,7 @@ import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 function LessonDetailCard({ lesson, onClose }) {
     //TODO fix file url
     return(
-        <Card>
+        <Card sx={{overflow: 'auto'}}>
             {lesson.files && lesson.files.length > 0 &&
                 <CardMedia
                     component="img"

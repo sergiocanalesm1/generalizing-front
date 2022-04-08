@@ -299,6 +299,7 @@ function Relation() {
         setChosenLesson={setLessonToChoose}
       />
       <Dialog
+        scroll="paper"
         open={openDetail}
         onClose={()=>setOpenDetail(false)}
         fullWidth

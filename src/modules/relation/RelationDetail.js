@@ -17,7 +17,7 @@ function RelationDetailCard({relation, setOpen, onClose}) {
     //TODO fix file url
     return(
         <div>
-            <Card>
+            <Card sx={{overflow: 'auto'}}>
                 <CardContent>
                     <Stack direction="row" justifyContent="center">
                         <Typography variant="h4">{relation.name}</Typography>
@@ -63,6 +63,7 @@ function RelationDetailCard({relation, setOpen, onClose}) {
                 </Stack>
             </Card>
             <Dialog
+                scroll="paper"
                 open={openDetail}
                 fullWidth
                 onClose={() => {

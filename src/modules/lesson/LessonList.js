@@ -115,6 +115,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 fullWidth
                 open={openDetail}
                 onClose={handleDetailClose}
+                scroll="paper"
             >
                 <LessonDetailCard
                     lesson={selectedLesson}

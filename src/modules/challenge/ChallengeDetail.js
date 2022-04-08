@@ -104,6 +104,7 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
             </Dialog>
             <Dialog
                 open={openDetail}
+                scroll="paper"
                 fullWidth
                 onClose={() => {
                     setOpenDetail(false);
@@ -111,6 +112,7 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                 }}
             >
                 <LessonDetailCard
+                    onClose={()=>setOpenDetail(false)}
                     lesson={selectedLessonDetail}
                 />
             </Dialog>
