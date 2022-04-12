@@ -18,21 +18,26 @@ function WelcomingDialog({open,onClose}){
                 alt="generalizing"
             />
             <CardContent>
+                <br/>
                 <Stack 
                     direction="row"
                     justifyContent="center"
                 >
-                    <Typography variant="h4">Welcome to Generalizing!</Typography>
+                    <Typography variant="h4">Welcome to Generalizing</Typography>
+                </Stack>
+                <Stack 
+                    direction="row"
+                    justifyContent="center"
+                >
+                    <Typography variant="body">Get more creative and have fun!</Typography>
                 </Stack>
                 <Toolbar  />
-                <Typography variant="body">Get more creative and have fun!</Typography>
-                <br />
                 <Typography variant="body">
-                    Add <strong>lessons</strong> you have learned and that you find cool from your everyday life.
+                • Add <strong>lessons</strong> you have learned and that you find cool from your everyday life.
                     <br />
-                    Create <strong>relations</strong> between lessons any way you see fit! (get creative, there is no incorrect relation)
+                • Create <strong>relations</strong> between lessons any way you see fit! (get creative, there is no incorrect relation)
                     <br />
-                    Explore lessons and relations created by other users and feel free to use them
+                • Explore lessons and relations created by other users and feel free to use them
                 </Typography>
 
             </CardContent>
