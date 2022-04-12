@@ -189,7 +189,7 @@ function Relation() {
                   ?                                         
                     chosenLessons[1].files?.length > 0
                     ? <Avatar src={chosenLessons[1].files[0].file.split("?")[0]} sx={styles.relationAvatar}/>
-                    : <Avatar {...stringAvatar(chosenLessons[0].name, styles.relationAvatar)} />
+                    : <Avatar {...stringAvatar(chosenLessons[1].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
                       <Add fontSize="large"/>
                     </Avatar>
