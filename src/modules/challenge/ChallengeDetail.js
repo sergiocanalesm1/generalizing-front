@@ -5,11 +5,18 @@ import LessonDetailCard from "../lesson/LessonDetail";
 import { relationPath } from "../../utils/paths";
 import { filterByChallenge } from "../../utils/filters";
 import { stringAvatar } from "../../utils/strings";
+import { getUserId } from "../../utils/user";
+import AuthModal from "../components/AuthModal";
+import FeedbackDialog from "../components/FeedbackDialog";
 
 
 function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, setRelationsToShow, setFilters, relations }) {
 
     const navigate = useNavigate()
+
+    const [openAuthModal, setOpenAuthModal] = useState( false );
+    const [success, setSuccess] = useState( false );
+    const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
 
@@ -27,12 +34,17 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
     },[challenge, relations, setFilters, setOpenList, setRelationsToShow])
 
     const acceptChallenge = useCallback(()=>{
-        navigate( relationPath, {
-            state:{
-                challengeId: challenge.id,
-                challengeLessons: lessons
-            }
-        })
+        if(Boolean(getUserId())){
+            navigate( relationPath, {
+                state:{
+                    challengeId: challenge.id,
+                    challengeLessons: lessons
+                }
+            })
+        }
+        else{
+            setOpenAuthModal(true);
+        }
     },[navigate, challenge, lessons])
 
     return(
@@ -116,6 +128,34 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                     lesson={selectedLessonDetail}
                 />
             </Dialog>
+            <AuthModal
+                open={openAuthModal}
+                onClose={()=>{
+                    setOpenAuthModal(false)
+                }}
+                onSuccess={()=>{
+                    setOpenAuthModal(false)
+                    setSuccess(true);
+                    setOpenFeedbackDialog(true);
+                    navigate( relationPath, {
+                        state:{
+                            challengeId: challenge.id,
+                            challengeLessons: lessons
+                        }
+                    })
+                }}
+                onError={()=>{
+                    setSuccess(false);
+                    setOpenFeedbackDialog(true);
+                }}
+            />
+            <FeedbackDialog
+                success={success}
+                open={openFeedbackDialog}
+                onClose={()=>{
+                    setOpenFeedbackDialog(false)
+                }}
+            />
         </div>
         
     )

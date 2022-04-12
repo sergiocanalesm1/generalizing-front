@@ -95,7 +95,6 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
       group.append("title")
           .text(d => {
 const total_relations = d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value);
-console.log(total_relations)
 return `${names[d.index]}
 ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
 })
