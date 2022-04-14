@@ -1,5 +1,5 @@
 import * as d3 from 'd3';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import  { domains } from '../../../utils/enums';
 import { filterByDomain } from '../../../utils/filters';
 
@@ -49,10 +49,6 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
   const data = useMemo(()=>getData(relations),[relations])
   const names = domains;
   const matrix = useMemo(()=>getMatrix(names,data),[names,data])
-  const [mouseOverIndex, setMouseOverIndex] = useState({
-    "source":-1,
-    "target":-1
-  })
 
 
   const d3Ref = useRef()
@@ -124,8 +120,6 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
 `${names[d.source.index]} ⇔ ${names[d.target.index]} 
 ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
 ;
-
-
 
     },[ relations, matrix, names, setFilters, setOpenList, setRelationsToShow ]
   );
