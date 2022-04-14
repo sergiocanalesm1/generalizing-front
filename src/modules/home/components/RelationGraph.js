@@ -50,6 +50,7 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
   const names = domains;
   const matrix = useMemo(()=>getMatrix(names,data),[names,data])
 
+
   const d3Ref = useRef()
 
   useEffect(()=>{
@@ -83,13 +84,6 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
           `)
           .attr("text-anchor", d => d.angle > Math.PI ? "end" : null)
           .text(d => names[d.index])
-          .on("mouseover",(e,d)=>{
-            //console.log("event",e)
-            //console.log("data",d)
-            //console.log(d3.selectAll(d.index))
-            //.attr("font-weight", "bold").attr("stroke","blue");
-            
-          })
           ;
     
       group.append("title")
@@ -107,13 +101,7 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
           .style("mix-blend-mode", "multiply")
           .attr("fill", d => color(names[d.target.index]))
           .attr("d", ribbon)
-          .append("title")
-            .text(d => 
-`${names[d.source.index]} ⇔ ${names[d.target.index]} 
-${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`);
-
-      svg.selectAll("path")
-          //.attr("opacity",1)
+          .attr("id", d => `p${d.source.index}${d.target.index}`)//p is neccesary because ids must begin with letter
           .on("click",(e,d)=>{
             const d1 = domains[d.source.index];
             const d2 = domains[d.target.index];
@@ -121,6 +109,18 @@ ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`);
             setFilters(`${d1} and ${d2}`)
             setOpenList(true)
           })
+          .on("mouseover",(e,d)=>{
+            d3.select(`#p${d.source.index}${d.target.index}`).attr("fill-opacity", 1)
+          })
+          .on("mouseout",(e,d)=>{
+            d3.select(`#p${d.source.index}${d.target.index}`).attr("fill-opacity", 0.75)
+          })
+          .append("title")
+            .text(d => 
+`${names[d.source.index]} ⇔ ${names[d.target.index]} 
+${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
+;
+
     },[ relations, matrix, names, setFilters, setOpenList, setRelationsToShow ]
   );
 
