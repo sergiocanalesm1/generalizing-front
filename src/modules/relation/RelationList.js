@@ -1,12 +1,13 @@
 import { Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
 import RelationDetailCard from "./RelationDetail";
+import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
 
 const styles = {
     relationList:{ 
@@ -18,8 +19,14 @@ const styles = {
         '&:hover': {
             opacity:"0,5"
         }
-    }
+    },
 };
+
+const relationsSortObj = {
+    random: "RANDOM",
+    mine: "MINE",
+    latest: "LATEST"
+}
 
 
 function RelationListDialog({open, setOpen, onClose, relations, filters}) {
@@ -28,6 +35,8 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedRelation, setSelectedRelation] = useState();
+    const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
+    const [proxyRelations, setProxyRelations] = useState([]);
 
 
     const handleOpenDetail = useCallback(( relation )=>{
@@ -48,14 +57,35 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
         })
     },[navigate,setOpen])
 
-    
+    const handleRelationsSortClick = useCallback((criteria) => {
+        setRelationsSort(relationsSortObj[criteria]);
+        if( relationsSortObj[criteria] === relationsSortObj.random ){
+            shuffle(relations);
+        }
+        if( relationsSortObj[criteria] === relationsSortObj.mine ){
+            relations.sort(sortByOwned);//cache
+        }
+        if( relationsSortObj[criteria] === relationsSortObj.latest ){
+            relations.sort(sortByLatest);//cache
+        }
+        setProxyRelations(relations);
+    },[relations])
+
+    const handleClose = useCallback(()=>{
+        setRelationsSort(relationsSortObj.random);
+        onClose()
+    },[onClose])
+
+    useEffect(()=>{
+        setProxyRelations(relations);
+    },[relations])
 
     return(
         <div>
             <Dialog
                 scroll="paper"
                 open={open}
-                onClose={onClose}
+                onClose={handleClose}
                 fullWidth
             >
                 <DialogTitle>
@@ -68,11 +98,28 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                                 Filtering by: {filters}
                             </Typography>
                         }
+                        <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                            {
+                                Object.keys(relationsSortObj).map( rs => (
+                                    <Button
+                                        key={rs}
+                                        sx={{ borderRadius: 28 }}
+                                        size="small"
+                                        color="neutral"
+                                        variant={ relationsSortObj[rs] === relationsSort ? "contained" :"outlined" }
+                                        disableElevation
+                                        onClick={() => handleRelationsSortClick(rs) }
+                                    >
+                                        {relationsSortObj[rs]}    
+                                    </Button>
+                                ))
+                            }
+                        </Stack>
                     </div>
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        { relations.map((r)=>(
+                        { proxyRelations.map((r)=>(
                             <Stack direction="row" justifyContent="flex-start" key={r.id}>
                                 <ListItemButton
                                     disableGutters
@@ -102,7 +149,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                     </List>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>Close</Button>
+                    <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
             </Dialog>
             <Dialog

@@ -1,8 +1,9 @@
 import { Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toDate } from "../../utils/dates";
+import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
 import { lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
@@ -20,6 +21,12 @@ const styles = {
     }
 };
 
+const lessonsSortObj = {
+    random: "RANDOM",
+    mine: "MINE",
+    latest: "LATEST"
+}
+
 
 function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosenLesson}) {
 
@@ -27,6 +34,8 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
+    const [lessonsSort, setlessonsSort] = useState( lessonsSortObj.random );
+    const [proxyLessons, setProxyLessons] = useState([]);
 
     const handleOpenDetail = useCallback(( lesson )=>{
         if( canChoose ) {
@@ -52,12 +61,35 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
         })
     },[navigate,setOpen])
 
+    const handlelessonsSortClick = useCallback((criteria) => {
+        setlessonsSort(lessonsSortObj[criteria]);
+        if( lessonsSortObj[criteria] === lessonsSortObj.random ){
+            shuffle(lessons);
+        }
+        if( lessonsSortObj[criteria] === lessonsSortObj.mine ){
+            lessons.sort(sortByOwned);//cache
+        }
+        if( lessonsSortObj[criteria] === lessonsSortObj.latest ){
+            lessons.sort(sortByLatest);//cache
+        }
+        setProxyLessons(lessons);
+    },[lessons])
+
+    const handleClose = useCallback(()=>{
+        setlessonsSort(lessonsSortObj.random);
+        onClose()
+    },[onClose])
+
+    useEffect(()=>{
+        setProxyLessons(lessons);
+    },[lessons])
+
     return(
         <div>
             <Dialog
                 scroll="paper"
                 open={open}
-                onClose={onClose}
+                onClose={handleClose}
                 fullWidth
             >
                 <DialogTitle>
@@ -65,11 +97,28 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                         <Typography variant="h3">
                             View Lessons
                         </Typography>
+                        <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                            {
+                                Object.keys(lessonsSortObj).map( ls => (
+                                    <Button
+                                        key={ls}
+                                        sx={{ borderRadius: 28 }}
+                                        size="small"
+                                        color="neutral"
+                                        variant={ lessonsSortObj[ls] === lessonsSort ? "contained" :"outlined" }
+                                        disableElevation
+                                        onClick={() => handlelessonsSortClick(ls) }
+                                    >
+                                        {lessonsSortObj[ls]}    
+                                    </Button>
+                                ))
+                            }
+                        </Stack>
                     </div>
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.lessonList}>
-                        { lessons.map((l)=>(
+                        { proxyLessons.map((l)=>(
                             <Stack direction="row" justifyContent="flex-start" key={l.id}>
                                 <ListItemButton
                                     disableGutters
@@ -108,7 +157,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                     </List>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>Close</Button>
+                    <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
             </Dialog>
             <Dialog

@@ -52,6 +52,10 @@ const theme = createTheme({
         //main: '#9CFFD9' //ACUAMARINE
         main: '#FFF'
       },
+      neutral:{
+        main: '#000000',
+        contrastText:'#FFF'
+      }
     },
     background : {
       
