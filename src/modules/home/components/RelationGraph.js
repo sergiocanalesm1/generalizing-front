@@ -4,6 +4,10 @@ import  { domains } from '../../../utils/enums';
 import { filterByDomain } from '../../../utils/filters';
 
 
+function getId(sI,tI){
+  return `p${sI}-${tI}`; //p is neccesary because ids must begin with letter
+}
+
 function getData(fetchedRelations){
 
   return fetchedRelations.map( (r,i) => {
@@ -101,7 +105,7 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
           .style("mix-blend-mode", "multiply")
           .attr("fill", d => color(names[d.target.index]))
           .attr("d", ribbon)
-          .attr("id", d => `p${d.source.index}${d.target.index}`)//p is neccesary because ids must begin with letter
+          .attr("id", d => getId(d.source.index,d.target.index))
           .on("click",(e,d)=>{
             const d1 = domains[d.source.index];
             const d2 = domains[d.target.index];
@@ -110,10 +114,10 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
             setOpenList(true)
           })
           .on("mouseover",(e,d)=>{
-            d3.select(`#p${d.source.index}${d.target.index}`).attr("fill-opacity", 1)
+            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 1)
           })
           .on("mouseout",(e,d)=>{
-            d3.select(`#p${d.source.index}${d.target.index}`).attr("fill-opacity", 0.75)
+            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 0.75)
           })
           .append("title")
             .text(d => 

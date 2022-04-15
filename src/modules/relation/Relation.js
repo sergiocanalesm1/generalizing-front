@@ -197,72 +197,75 @@ function Relation() {
             </Button>
           </Stack>
 
-          <Toolbar />
-            
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              <strong>Explain</strong> how you relate these concepts
-            </Typography>
-          </Stack>
-          <TextField
-            value={relation.explanation}
-            fullWidth
-            name="explanation"
-            multiline
-            onChange={handleChange}
-            required
-            minRows={3}
-            disabled={chosenLessons.length < 2}
-          />
 
           <Toolbar />
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              Give it a <strong>name</strong>
-            </Typography>
-          </Stack>
-          <TextField
-            value={relation.name}
-            fullWidth
-            name="name"
-            onChange={handleChange}
-            required
-            disabled={chosenLessons.length < 2}
-          />
+          
+          <Grid container direction="row" justifyContent="space-between">
+          <Grid item xs={9}>
+            <Stack justifyContent="center" direction="row">
+              <Typography variant="body">
+                <strong>Explain</strong> how you relate these concepts
+              </Typography>
+            </Stack>
+            <TextField
+              value={relation.explanation}
+              fullWidth
+              name="explanation"
+              multiline
+              onChange={handleChange}
+              required
+              minRows={3}
+              disabled={chosenLessons.length < 2}
+            />
+          </Grid>
 
-          <Toolbar />
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              Provide an optional file showing your product
-            </Typography>
-          </Stack>
-          <Grid
-            container
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Grid item>
-              <Button
-                variant="contained"
-                component="label"
-                disabled={chosenLessons.length < 2}
-              >
-                Upload
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) => setFiles(e.target.files[0])}
-                />
-              </Button>
-            </Grid>
-            <Grid item>
-            <Typography variant="small">
-              {files.name}
-            </Typography>
+          <Grid item xs={3}>
+            <Stack
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              spacing={1}
+            >
+              <Typography variant="body" align="center">
+                Provide an optional file showing your product
+              </Typography>
+                <Button
+                  variant="contained"
+                  component="label"
+                  disabled={chosenLessons.length < 2}
+                >
+                  Upload
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => setFiles(e.target.files[0])}
+                  />
+                </Button>
+              <Typography variant="small">
+                {files.name}
+              </Typography>
+            </Stack>
             </Grid>
           </Grid>
 
+          <Toolbar />
+          <Stack justifyContent="center" direction="column" alignItems="center" >
+            <Box sx={{width:800}}>
+            <Stack justifyContent="center" direction="row">
+              <Typography variant="body">
+                Give it a <strong>name</strong>
+              </Typography>
+            </Stack>
+              <TextField
+                fullWidth
+                value={relation.name}
+                name="name"
+                onChange={handleChange}
+                required
+                disabled={chosenLessons.length < 2}
+              />
+            </Box>
+          </Stack>
           <Toolbar />
           <Stack
             direction="row"
