@@ -1,5 +1,4 @@
-import { sortByOwned } from "../utils/filters";
-import { getUserId } from "../utils/user";
+import { shuffle } from "../utils/filters";
 import { methods, url } from "./urls";
 
 export async function getAllRelations(){
@@ -14,9 +13,7 @@ export async function getAllRelations(){
     });
     if( response.ok ) {
         const fetchedRelations = await response.json();
-        if( Boolean(getUserId()) ){
-            fetchedRelations.sort(sortByOwned);
-        }
+        shuffle( fetchedRelations );
         return fetchedRelations;
     }
 }

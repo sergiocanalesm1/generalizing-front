@@ -116,20 +116,64 @@ function Lesson() {
           </Stack>
 
           <Toolbar />
+          <Grid container>
+            <Grid item xs={7}>
+            <Stack justifyContent="center" direction="column">
+                <Typography variant="body" align="center">
+                  <strong>Name</strong> what you learned
+                </Typography>
 
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              <strong>Name</strong> what you learned
-            </Typography>
-          </Stack>
-
-          <TextField
-            value={lesson.name}
-            fullWidth
-            name="name"
-            onChange={handleChange}
-            required
-          />
+                <TextField
+                  value={lesson.name}
+                  fullWidth
+                  name="name"
+                  onChange={handleChange}
+                  required
+                />
+              </Stack>
+            </Grid>
+            <Grid item xs={5}>
+              <Stack justifyContent="center" direction="column">
+                <Typography variant="body" align="center">
+                  Select domain and where you learned it from
+                </Typography>
+              </Stack>
+              <Grid 
+                container
+                justifyContent="space-evenly"
+                alignItems="center"
+              >
+                <Grid item>
+                  <Select
+                    name="domain"
+                    value={lesson.domain}
+                    label="Domain"
+                    onChange={handleChange}
+                    required
+                  >
+                    {domains.map(d => (
+                      <MenuItem value={d} key={d}> {d} </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Domain</FormHelperText>
+                </Grid>
+                <Grid item>
+                  <Select
+                    name="origin"
+                    value={lesson.origin}
+                    label="Origin"
+                    onChange={handleChange}
+                    required
+                  >
+                    {origins.map(o => (
+                      <MenuItem value={o} key={o}> {o} </MenuItem>
+                    ))}
+                  </Select>
+                  <FormHelperText>Origin</FormHelperText>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
 
           <Toolbar />
             
@@ -181,52 +225,7 @@ function Lesson() {
                 </Grid>
               </Grid>
             </Grid>
-
             <Grid item>
-              <Typography variant="body">
-                Select domain and where you learned it from
-              </Typography>
-
-              <br />
-              <Grid 
-                container
-                justifyContent="space-evenly"
-                alignItems="center"
-              >
-                <Grid item>
-                  <Select
-                    name="domain"
-                    value={lesson.domain}
-                    label="Domain"
-                    onChange={handleChange}
-                    required
-                  >
-                    {domains.map(d => (
-                      <MenuItem value={d} key={d}> {d} </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>Domain</FormHelperText>
-                </Grid>
-                <Grid item>
-                  <Select
-                    name="origin"
-                    value={lesson.origin}
-                    label="Origin"
-                    onChange={handleChange}
-                    required
-                  >
-                    {origins.map(o => (
-                      <MenuItem value={o} key={o}> {o} </MenuItem>
-                    ))}
-                  </Select>
-                  <FormHelperText>Origin</FormHelperText>
-                </Grid>
-              </Grid>
-            </Grid>
-          </Grid>
-
-          <Toolbar />
-            
           <Typography variant="body">
             Create <strong>tags</strong> for your lesson
           </Typography>
@@ -242,10 +241,17 @@ function Lesson() {
               >
                 Tag it
               </Button>
+          </Stack>
+            </Grid>          
+          </Grid>
+          
+          {tags.length > 0 && <Toolbar /> }
+            
+          <Stack direction="row" justifyContent="center">
               <Stack direction="row" spacing={2}>
                 {tags.map( t =>(
-                    <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
-                ))}
+                  <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
+                  ))}
               </Stack>
             </Stack>
           
