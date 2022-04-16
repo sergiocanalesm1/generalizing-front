@@ -19,13 +19,26 @@ function LessonDetailCard({ lesson, onClose }) {
                 <Toolbar  />
                 <Typography variant="body">{lesson.description}</Typography>
                 <br />
-
-                <Stack direction="row" justifyContent="space-evenly" sx={{p:3}}>
-                { lesson.tags?.map( t =>(
-                    <Chip key={t} label={capitalizeFirstLetter(t)} sx={{bgcolor:stringToColor(t), color:"#FFF"}}/>
-                ))}
-              </Stack>
-              <Stack 
+                    <Stack 
+                        direction="row" 
+                        justifyContent="space-evenly" 
+                        sx={{
+                            p:1,
+                            display: 'flex',
+                            flexWrap: 'wrap'
+                        }}>
+                    { lesson.tags?.map( t =>(
+                        <Chip 
+                            key={t}
+                            label={capitalizeFirstLetter(t)}
+                            sx={{
+                                bgcolor:stringToColor(t),
+                                color:"#FFF",
+                                m:1}}
+                            />
+                    ))}
+                    </Stack>
+                <Stack 
                     direction="row"
                     justifyContent="flex-end"
                     alignItems="center"
