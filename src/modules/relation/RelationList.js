@@ -7,7 +7,7 @@ import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
 import RelationDetailCard from "./RelationDetail";
-import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
+//import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
 
 const styles = {
     relationList:{ 
@@ -22,11 +22,13 @@ const styles = {
     },
 };
 
+/*
 const relationsSortObj = {
     random: "RANDOM",
     mine: "MINE",
     latest: "LATEST"
 }
+*/
 
 
 function RelationListDialog({open, setOpen, onClose, relations, filters}) {
@@ -35,8 +37,8 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedRelation, setSelectedRelation] = useState();
-    const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
-    const [proxyRelations, setProxyRelations] = useState([]);
+    //const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
+    //const [proxyRelations, setProxyRelations] = useState([]);
 
 
     const handleOpenDetail = useCallback(( relation )=>{
@@ -57,6 +59,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
         })
     },[navigate,setOpen])
 
+    /*
     const handleRelationsSortClick = useCallback((criteria) => {
         setRelationsSort(relationsSortObj[criteria]);
         if( relationsSortObj[criteria] === relationsSortObj.random ){
@@ -70,14 +73,15 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
         }
         setProxyRelations(relations);
     },[relations])
+    */
 
     const handleClose = useCallback(()=>{
-        setRelationsSort(relationsSortObj.random);
+        //setRelationsSort(relationsSortObj.random);
         onClose()
     },[onClose])
 
     useEffect(()=>{
-        setProxyRelations(relations);
+        //setProxyRelations(relations);
     },[relations])
 
     return(
@@ -99,7 +103,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                             </Typography>
                         }
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                            {
+                            {/*
                                 Object.keys(relationsSortObj).map( rs => (
                                     <Button
                                         key={rs}
@@ -113,7 +117,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                                         {relationsSortObj[rs]}    
                                     </Button>
                                 ))
-                            }
+                                */}
                         </Stack>
                     </div>
                 </DialogTitle>

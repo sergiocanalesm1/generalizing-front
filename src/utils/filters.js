@@ -13,6 +13,11 @@ export function filterByChallenge( relations, challengeId ){
   return relations.filter( r => (r.challenge === challengeId ))
 }
 
+export function filterByOwned( relations ){
+  const id = getUserId()
+  return relations.filter( r => (r.user === id));
+}
+
 export function sortByOwned( o1, o2 ){
   const id = getUserId();
   if( o1.user === id ){
