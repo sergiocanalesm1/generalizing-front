@@ -3,7 +3,7 @@ import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Icon
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toDate } from "../../utils/dates";
-import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
+import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
 import { lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
@@ -36,6 +36,8 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
     const [selectedLesson, setSelectedLesson] = useState();
     const [lessonsSort, setlessonsSort] = useState( lessonsSortObj.random );
     const [proxyLessons, setProxyLessons] = useState([]);
+    const [latestLessons, setLatestLessons] = useState([]);
+    const [ownedLessons, setOwnedLessons] = useState([]);
 
     const handleOpenDetail = useCallback(( lesson )=>{
         if( canChoose ) {
@@ -65,18 +67,33 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
         setlessonsSort(lessonsSortObj[criteria]);
         if( lessonsSortObj[criteria] === lessonsSortObj.random ){
             shuffle(lessons);
+            setProxyLessons(lessons);
         }
         if( lessonsSortObj[criteria] === lessonsSortObj.mine ){
-            lessons.sort(sortByOwned);//cache
+            if( ownedLessons.length === 0 ){
+                const temp = filterByOwned(lessons);
+                setOwnedLessons(temp);
+                setProxyLessons(temp);
+            }
+            else{
+                setProxyLessons(ownedLessons)
+            }
         }
         if( lessonsSortObj[criteria] === lessonsSortObj.latest ){
-            lessons.sort(sortByLatest);//cache
+            if( latestLessons.length === 0 ){
+                const temp = lessons;
+                temp.sort(sortByLatest);
+                setLatestLessons(temp);
+                setProxyLessons(temp);
+            }
+            else{
+                setProxyLessons(latestLessons);
+            }
         }
-        setProxyLessons(lessons);
-    },[lessons])
+    },[lessons, latestLessons, ownedLessons])
 
     const handleClose = useCallback(()=>{
-        setlessonsSort(lessonsSortObj.random);
+        setlessonsSort(lessonsSortObj.random);//random?
         onClose()
     },[onClose])
 
