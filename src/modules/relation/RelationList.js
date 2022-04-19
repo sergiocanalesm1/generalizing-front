@@ -123,7 +123,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        { relations.map((r)=>(
+                        { proxyRelations.map((r)=>(
                             <Stack direction="row" justifyContent="flex-start" key={r.id}>
                                 <ListItemButton
                                     disableGutters
