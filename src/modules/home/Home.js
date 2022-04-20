@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Box, Button, CircularProgress, Stack, Toolbar } from "@mui/material";
+import { Box, Button, CircularProgress, Grid, Stack, Toolbar } from "@mui/material";
 import { AddCircleOutline, Attractions } from '@mui/icons-material';
 
 import { lessonPath, relationPath } from "../../utils/paths";
@@ -91,41 +91,49 @@ function Home() {
             <Box>
                 <Box>
                     <Toolbar />
-                    <Stack
-                        direction="row"
+                    <Grid
+                        container
                         justifyContent="center"
                         alignItems="center"
-                        spacing={2}
-                        sx={{m:2}}
+                        sx={{marginTop:2}}
+                        spacing={1}
                     >
-                        <Button 
-                            variant="contained"
-                            startIcon={<AddCircleOutline />}
-                            onClick={handleCreateLesson}
-                        >
-                            Add Lesson
-                        </Button>
-                        <Button 
-                            variant="contained"
-                            startIcon={<AddCircleOutline />}
-                            onClick={handleCreateRelation}
-                        >
-                            Create Relation
-                        </Button>
-                        {
-                            lastChallenge &&
-                            <Button 
+                        <Grid item xs={12} md={2}>
+                            <Button
+                                fullWidth
                                 variant="contained"
-                                startIcon={<Attractions />}
-                                onClick={handleViewChallenge}
+                                startIcon={<AddCircleOutline />}
+                                onClick={handleCreateLesson}
                             >
-                                Challenge
+                                Add Lesson
                             </Button>
-                        }
-  
-                    </Stack>
+                        </Grid>
+                        <Grid item xs={12} md={2}>
+                            <Button 
+                                fullWidth
+                                variant="contained"
+                                startIcon={<AddCircleOutline />}
+                                onClick={handleCreateRelation}
+                            >
+                                Create Relation
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} md={2}>
+                            {
+                                lastChallenge &&
+                                <Button
+                                fullWidth
+                                    variant="contained"
+                                    startIcon={<Attractions />}
+                                    onClick={handleViewChallenge}
+                                >
+                                    Challenge
+                                </Button>
+                            }
+                        </Grid>
+                    </Grid>
                     {   relations.length > 0 & lessons.length > 0
-                        ? <div>
+                        ? <Box>
                             <RelationGraph 
                                 relations={relations} 
                                 setOpenList={setOpenRelationListDialog}
@@ -133,7 +141,7 @@ function Home() {
                                 setFilters={setRelationsFilters}
                             />
                             <Toolbar />
-                          </div>
+                          </Box>
                         : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
                     }
                 </Box>

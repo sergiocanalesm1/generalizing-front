@@ -137,12 +137,6 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                     setOpenAuthModal(false)
                     setSuccess(true);
                     setOpenFeedbackDialog(true);
-                    navigate( relationPath, {
-                        state:{
-                            challengeId: challenge.id,
-                            challengeLessons: lessons
-                        }
-                    })
                 }}
                 onError={()=>{
                     setSuccess(false);
@@ -154,6 +148,9 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                 open={openFeedbackDialog}
                 onClose={()=>{
                     setOpenFeedbackDialog(false)
+                    if(success){
+                        acceptChallenge();
+                    }
                 }}
             />
         </div>

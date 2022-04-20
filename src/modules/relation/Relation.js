@@ -128,6 +128,9 @@ function Relation() {
         setChosenLessons( state.relation.lessons );
         setRelation( state.relation );
       }
+      if( state.newRelation ){
+        setChosenLessons( state.newRelation.lessons );
+      }
     }
   },[ lessonToChoose, chosenIndex, chosenLessons, forceUpdate, state ])
 
@@ -153,7 +156,7 @@ function Relation() {
           <Stack justifyContent="center" direction="row">
             <Typography variant="h2">
               {
-                state
+                state?.challengeId
                 ? <>Relating Challenge {state.challengeId}</>
                 : <>Create a Relation</>
               }
