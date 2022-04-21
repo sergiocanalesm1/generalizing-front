@@ -117,7 +117,7 @@ function Lesson() {
 
           <Toolbar />
           <Grid container>
-            <Grid item xs={7}>
+            <Grid item xs={12} md={7}>
             <Stack justifyContent="center" direction="column">
                 <Typography variant="body" align="center">
                   <strong>Name</strong> what you learned
@@ -132,7 +132,7 @@ function Lesson() {
                 />
               </Stack>
             </Grid>
-            <Grid item xs={5}>
+            <Grid item xs={12} md={5}>
               <Stack justifyContent="center" direction="column">
                 <Typography variant="body" align="center">
                   Select domain and where you learned it from
@@ -178,7 +178,7 @@ function Lesson() {
           <Toolbar />
             
           <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
+            <Typography variant="body" align="center">
               <strong>Explain</strong> what you learned the simpler you can. Include links to references if helpful
             </Typography>
           </Stack>
@@ -226,59 +226,66 @@ function Lesson() {
               </Grid>
             </Grid>
             <Grid item>
-          <Typography variant="body">
-            Create <strong>tags</strong> for your lesson
-          </Typography>
-          <Stack direction="row" justifyContent="flex-start">
-              <TextField
-                value={currentChip}
-                name="chip"
-                onChange={(e)=>{setCurrentChip(e.target.value)}}
-              />
-              <Button
-                onClick={createTag}
-                variant="contained"
+              <Typography variant="body">
+                Create <strong>tags</strong> for your lesson
+              </Typography>
+              <Grid 
+                container
+                justifyContent="flex-start"
               >
-                Tag it
-              </Button>
-          </Stack>
+                <Grid item xs={12} md={8}>
+                  <TextField
+                    value={currentChip}
+                    name="chip"
+                    onChange={(e)=>{setCurrentChip(e.target.value)}}
+                  />
+                </Grid>
+                <Grid item xs={12} md={4}>
+                  <Button
+                    onClick={createTag}
+                    variant="contained"
+                  >
+                    Tag it
+                  </Button>
+                </Grid>
+              </Grid>
             </Grid>          
-          </Grid>
-          
-          {tags.length > 0 && <Toolbar /> }
-            
-          <Stack direction="row" justifyContent="center">
-              <Stack direction="row" spacing={2}>
-                {tags.map( t =>(
-                  <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
-                  ))}
-              </Stack>
-            </Stack>
-          
+              </Grid>
+              
+              {tags.length > 0 && <Toolbar /> }
+                
+              <Stack direction="row" justifyContent="center">
+                  <Stack direction="row" spacing={2}>
+                    {tags.map( t =>(
+                      <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
+                      ))}
+                  </Stack>
+                </Stack>
+              
 
-          <Toolbar />
-          <Stack
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-            spacing={2}
-          >
-            <Button 
-              variant="outlined"
-              startIcon={<ArrowBack />}
-              onClick={() => navigate(homePath)}
-            >
-              Go Back
-            </Button>
-            <Button 
-              variant="contained"
-              endIcon={<Send color="secondary" />}
-              onClick={createOrUpdate}
-              disabled={!lesson.name}
-            >
-              { isUpdate ? "Update" : "Create!" }
-            </Button>
-          </Stack>
+              <Toolbar />
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <Button 
+                  variant="outlined"
+                  startIcon={<ArrowBack />}
+                  onClick={() => navigate(homePath)}
+                >
+                  Go Back
+                </Button>
+                <Button 
+                  variant="contained"
+                  endIcon={<Send color="secondary" />}
+                  onClick={createOrUpdate}
+                  disabled={!lesson.name}
+                >
+                  { isUpdate ? "Update" : "Create!" }
+                </Button>
+            </Stack>
           
         </Box>
       </Paper>

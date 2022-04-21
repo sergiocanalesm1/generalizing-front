@@ -14,7 +14,10 @@ export function filterByChallenge( relations, challengeId ){
 }
 
 export function filterByOwned( relations ){
-  const id = getUserId()
+  const id = getUserId();
+  if( !Boolean(id) ){
+    return [];
+  }
   return relations.filter( r => (r.user === id));
 }
 

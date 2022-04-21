@@ -1,18 +1,43 @@
-import { Avatar, Button, Card, CardActions, CardContent, Dialog, Stack, Toolbar, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardActions, CardContent, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
+import { getUserId } from "../../utils/user";
+import AuthModal from "../components/AuthModal";
+import FeedbackDialog from "../components/FeedbackDialog";
 import LessonDetailCard from "../lesson/LessonDetail";
 
 
 function RelationDetailCard({relation, setOpen, onClose}) {
 
+    const navigate = useNavigate();
+
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
+    const [openAuthModal, setOpenAuthModal] = useState(false);
+    const [success, setSuccess] = useState(true);
+    const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
 
     const showLessonDetail = useCallback((lesson) => {
         setSelectedLessonDetail(lesson);
         setOpenDetail(true);
     },[])
+
+    const newRelation = useCallback(()=>{
+        if(Boolean(getUserId())){
+            navigate( relationPath, {
+                state:{
+                    newRelation: {
+                        lessons: relation.lessons
+                    }
+                }
+            })
+        }
+        else{
+            setOpenAuthModal(true);
+        }
+    },[navigate, relation.lessons])
 
     //TODO fix file url
     return(
@@ -54,13 +79,24 @@ function RelationDetailCard({relation, setOpen, onClose}) {
                     <Typography variant="body">{relation.explanation}</Typography>
                     <br />
                 </CardContent>
-                <Stack direction="row" justifyContent="flex-end">
-                    <CardActions onClick={onClose}>
-                        <Button  color="primary">
-                            Close
-                        </Button>
-                    </CardActions>
-                </Stack>
+                <Grid container>
+                    <Grid item xs={12} md={10}>
+                        <CardActions>
+                            <Button onClick={newRelation}>
+                                Another idea? Relate these lessons!
+                            </Button>
+                        </CardActions>
+                    </Grid>
+                    <Grid item xs={12} md={2}>
+                        <Stack direction="row" justifyContent="flex-end">
+                            <CardActions onClick={onClose}>
+                                <Button>
+                                    Close
+                                </Button>
+                            </CardActions>
+                        </Stack>
+                    </Grid>
+                </Grid>
             </Card>
             <Dialog
                 scroll="paper"
@@ -79,6 +115,31 @@ function RelationDetailCard({relation, setOpen, onClose}) {
                     }}
                 />
             </Dialog>
+            <AuthModal
+                open={openAuthModal}
+                onClose={()=>{
+                    setOpenAuthModal(false)
+                }}
+                onSuccess={()=>{
+                    setOpenAuthModal(false)
+                    setSuccess(true);
+                    setOpenFeedbackDialog(true);
+                }}
+                onError={()=>{
+                    setSuccess(false);
+                    setOpenFeedbackDialog(true);
+                }}
+            />
+            <FeedbackDialog
+                success={success}
+                open={openFeedbackDialog}
+                onClose={()=>{
+                    setOpenFeedbackDialog(false)
+                    if(success){
+                        newRelation();
+                    }
+                }}
+            />
         </div>
     );
 }

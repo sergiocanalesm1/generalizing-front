@@ -30,12 +30,11 @@ function getMatrix(dom,data){
   return matrix;
 
 }
-
+const heightConstant = window.innerWidth < 700 ? 1.2 : 0.5;
 const width = 945;
-const height=width*0.5;
+const height=width*heightConstant;
 const innerRadius = Math.min(width, height) * 0.3;
 const outerRadius = innerRadius + 10;
-
 
 const chord = d3.chord()
   .padAngle(10 / innerRadius)
@@ -50,12 +49,13 @@ const ribbon = d3.ribbonArrow()
   
 
 function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters }) {
+  
   const data = useMemo(()=>getData(relations),[relations])
   const names = domains;
   const matrix = useMemo(()=>getMatrix(names,data),[names,data])
+  
+  const d3Ref = useRef();
 
-
-  const d3Ref = useRef()
 
   useEffect(()=>{
       const color = d3.scaleOrdinal(names, d3.quantize(d3.interpolateRainbow, names.length));
@@ -68,7 +68,7 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
 
       const group = svg.append("g")
           .attr("font-family", "HomepageBaukasten, Arial")
-          .attr("font-size", 6)
+          .attr("font-size", window.innerWidth > 700 ? 6 : 12)
           .selectAll("g")
           .data(chords.groups)
           .join("g");

@@ -95,7 +95,9 @@ function Header() {
       <AppBar position="fixed">
         <Container maxWidth="xl">
           <Toolbar>
-            <Button onClick={()=>navigate(homePath)} sx={{paddingRight:5}}>
+            <Button 
+              onClick={()=>navigate(homePath)}
+              sx={{paddingRight:5}}>
               <Typography
                 variant="h3"
                 component="div"
@@ -104,7 +106,35 @@ function Header() {
                 GENERALIZING
               </Typography>
             </Button>
-            <Stack direction="row" justifyContent="flex-start" alignItems="center">
+            <Stack direction="row" justifyContent="flex-start" alignItems="center" 
+              sx={{
+                display:{
+                  xs:'none',
+                  md:'flex'
+                }
+              }}
+            >
+            <Button 
+              ref={refLessons}
+              onClick={()=>setAnchorElLessons(refLessons.current)}
+            >
+              <Typography
+                variant="h6"
+                component="div"
+                color="secondary"
+              >
+                Lessons
+              </Typography>
+            </Button>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElLessons}
+              open={Boolean(anchorElLessons)}
+              onClose={()=>setAnchorElLessons()}
+            >
+              <MenuItem onClick={handleCreateLesson}>Create Lesson</MenuItem>
+              <MenuItem onClick={handleViewLessons}>View Lessons</MenuItem>
+            </Menu>
             <Button 
                 ref={refRelations}
                 onClick={()=>setAnchorElRelations(refRelations.current)}
@@ -116,37 +146,16 @@ function Header() {
                 >
                   Relations
                 </Typography>
-              </Button>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElRelations}
-                open={Boolean(anchorElRelations)}
-                onClose={()=>setAnchorElRelations()}
-              >
-                <MenuItem onClick={handleCreateRelation}>Create Relation</MenuItem>
-                <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
-              </Menu>
-              <Button 
-                ref={refLessons}
-                onClick={()=>setAnchorElLessons(refLessons.current)}
-              >
-                <Typography
-                  variant="h6"
-                  component="div"
-                  color="secondary"
-                >
-                  Lessons
-                </Typography>
-              </Button>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElLessons}
-                open={Boolean(anchorElLessons)}
-                onClose={()=>setAnchorElLessons()}
-              >
-                <MenuItem onClick={handleCreateLesson}>Create Lesson</MenuItem>
-                <MenuItem onClick={handleViewLessons}>View Lessons</MenuItem>
-              </Menu>
+            </Button>
+            <Menu
+              id="menu-appbar"
+              anchorEl={anchorElRelations}
+              open={Boolean(anchorElRelations)}
+              onClose={()=>setAnchorElRelations()}
+            >
+              <MenuItem onClick={handleCreateRelation}>Create Relation</MenuItem>
+              <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
+            </Menu>
           </Stack>
           {isLogged 
             ? 
