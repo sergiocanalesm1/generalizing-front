@@ -154,7 +154,7 @@ function Relation() {
         >
 
           <Stack justifyContent="center" direction="row">
-            <Typography variant="h2">
+            <Typography variant="h2" align="center">
               {
                 state?.challengeId
                 ? <>Relating Challenge {state.challengeId}</>
@@ -204,9 +204,9 @@ function Relation() {
           <Toolbar />
           
           <Grid container direction="row" justifyContent="space-between">
-          <Grid item xs={9}>
+          <Grid item xs={12} md={9}>
             <Stack justifyContent="center" direction="row">
-              <Typography variant="body">
+              <Typography variant="body" align="center">
                 <strong>Explain</strong> how you relate these concepts
               </Typography>
             </Stack>
@@ -222,7 +222,7 @@ function Relation() {
             />
           </Grid>
 
-          <Grid item xs={3}>
+          <Grid item xs={12} md={3}>
             <Stack
               direction="column"
               justifyContent="center"
@@ -252,13 +252,13 @@ function Relation() {
           </Grid>
 
           <Toolbar />
-          <Stack justifyContent="center" direction="column" alignItems="center" >
-            <Box sx={{width:800}}>
-            <Stack justifyContent="center" direction="row">
+          <Grid container justifyContent="center" alignItems="center" >
+            <Grid item container justifyContent="center">
               <Typography variant="body">
                 Give it a <strong>name</strong>
               </Typography>
-            </Stack>
+            </Grid>
+            <Grid item container justifyContent="center" xs={12} md={7}>
               <TextField
                 fullWidth
                 value={relation.name}
@@ -267,8 +267,8 @@ function Relation() {
                 required
                 disabled={chosenLessons.length < 2}
               />
-            </Box>
-          </Stack>
+            </Grid>
+          </Grid>
           <Toolbar />
           <Stack
             direction="row"
