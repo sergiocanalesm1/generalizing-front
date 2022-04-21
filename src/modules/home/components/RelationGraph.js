@@ -30,9 +30,9 @@ function getMatrix(dom,data){
   return matrix;
 
 }
-//const width = window.innerWidth * 0.5625;
+const heightConstant = window.innerWidth < 700 ? 1.2 : 0.5;
 const width = 945;
-const height=width*0.5;
+const height=width*heightConstant;
 const innerRadius = Math.min(width, height) * 0.3;
 const outerRadius = innerRadius + 10;
 
@@ -68,8 +68,7 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
 
       const group = svg.append("g")
           .attr("font-family", "HomepageBaukasten, Arial")
-          //.attr("font-size", window.innerWidth > 600 ? 6 : 3)
-          .attr("font-size",6)
+          .attr("font-size", window.innerWidth > 700 ? 6 : 12)
           .selectAll("g")
           .data(chords.groups)
           .join("g");
