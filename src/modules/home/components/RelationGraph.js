@@ -88,6 +88,11 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
           `)
           .attr("text-anchor", d => d.angle > Math.PI ? "end" : null)
           .text(d => names[d.index])
+          .on("mouseover",(e,d)=>{
+            console.log(data);
+            console.log(d)
+            //d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 1)
+          })
           ;
     
       group.append("title")

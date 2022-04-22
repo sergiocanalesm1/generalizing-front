@@ -94,6 +94,8 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
 
     const handleClose = useCallback(()=>{
         setlessonsSort(lessonsSortObj.random);//random?
+        setLatestLessons([]);
+        setOwnedLessons([]);
         onClose()
     },[onClose])
 
@@ -117,6 +119,9 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
                             {
                                 Object.keys(lessonsSortObj).map( ls => (
+                                    lessonsSortObj[ls] === lessonsSortObj.mine & !Boolean(getUserId())
+                                    ? <></>
+                                    :
                                     <Button
                                         key={ls}
                                         sx={{ borderRadius: 28 }}
