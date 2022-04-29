@@ -1,4 +1,5 @@
 import { Button, Card, CardActions, CardContent, CardMedia, Chip, Stack, Toolbar, Typography } from "@mui/material";
+import ReactLinkify from "react-linkify";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 
 
@@ -17,7 +18,11 @@ function LessonDetailCard({ lesson, onClose }) {
             <CardContent>
                 <Typography variant="h4">{lesson.name}</Typography>
                 <Toolbar  />
-                <Typography variant="body">{lesson.description}</Typography>
+                <Typography variant="body">
+                    <ReactLinkify>
+                        {lesson.description}
+                    </ReactLinkify>
+                </Typography>
                 <br />
                     <Stack 
                         direction="row" 
