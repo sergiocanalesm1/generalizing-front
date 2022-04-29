@@ -1,4 +1,3 @@
-import { shuffle } from "../utils/filters";
 import { methods, url } from "./urls";
 
 export async function getAllRelations(){
@@ -13,7 +12,7 @@ export async function getAllRelations(){
     });
     if( response.ok ) {
         const fetchedRelations = await response.json();
-        shuffle( fetchedRelations );
+        fetchedRelations.reverse();//latest first
         return fetchedRelations;
     }
 }
