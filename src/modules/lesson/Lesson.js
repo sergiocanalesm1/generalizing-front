@@ -281,7 +281,7 @@ function Lesson() {
                   variant="contained"
                   endIcon={<Send color="secondary" />}
                   onClick={createOrUpdate}
-                  disabled={!lesson.name}
+                  disabled={ !lesson.name || !lesson.description }
                 >
                   { isUpdate ? "Update" : "Create!" }
                 </Button>

@@ -287,7 +287,7 @@ function Relation() {
               variant="contained"
               endIcon={<Send color="secondary" />}
               onClick={createOrUpdate}
-              disabled={!relation.name}
+              disabled={!relation.name  || !relation.explanation }
             >
               { isUpdate ? "Update" : "Relate!" }
             </Button>
