@@ -32,7 +32,7 @@ export async function createOrUpdateRelation( relation, files, method, onSuccess
 
         if( files.name ) {
           let formData = new FormData();
-          formData.append( 'relation', parseInt(createdRelation.id) )
+          formData.append( 'relation', createdRelation.id )
           formData.append( 'file', files );
 
           response = await fetch(`${url}rfiles/`,{
