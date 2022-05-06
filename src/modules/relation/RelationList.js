@@ -132,7 +132,13 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                                     onClick={()=>handleOpenDetail(r)}
                                 >
                                     <ListItemAvatar>
-                                        <Avatar {...stringAvatar(r.name)} />
+                                        {/* TODO validate if file is img */}
+                                        {
+                                            r.files.length > 0
+                                            ? <Avatar src={r.files[0].file.split("?")[0]} />
+                                            : <Avatar {...stringAvatar(r.name)} />
+                                        }
+                                        
                                     </ListItemAvatar>
                                     <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
                                 </ListItemButton>

@@ -1,4 +1,4 @@
-import { Avatar, Button, Card, CardActions, CardContent, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
+import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { relationPath } from "../../utils/paths";
@@ -74,7 +74,18 @@ function RelationDetailCard({relation, setOpen, onClose}) {
                             ))
                         }
                     </Stack>
-                        
+                    
+                    {relation.files && relation.files.length > 0 &&
+                        <div>
+                            <br />
+                            <CardMedia
+                                component="img"
+                                height="50%"
+                                image={relation.files[0].file.split("?")[0]}
+                                alt="relation_file"
+                            />
+                        </div>
+                    }
                     <Toolbar  />
                     <Typography variant="body">{relation.explanation}</Typography>
                     <br />
