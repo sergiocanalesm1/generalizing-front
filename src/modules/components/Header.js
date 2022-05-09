@@ -97,9 +97,14 @@ function Header() {
           <Toolbar>
             <Button 
               onClick={()=>navigate(homePath)}
-              sx={{paddingRight:5}}>
+              sx={{
+                '@media only screen and (max-width: 600px)': {
+                  pl:3
+                },
+                pr:5
+              }}>
               <Typography
-                variant="h3"
+                variant="h1"
                 component="div"
                 color="secondary"
               >
@@ -132,7 +137,7 @@ function Header() {
               open={Boolean(anchorElLessons)}
               onClose={()=>setAnchorElLessons()}
             >
-              <MenuItem onClick={handleCreateLesson}>Create Lesson</MenuItem>
+              <MenuItem onClick={handleCreateLesson}>Add Lesson</MenuItem>
               <MenuItem onClick={handleViewLessons}>View Lessons</MenuItem>
             </Menu>
             <Button 
@@ -141,7 +146,7 @@ function Header() {
               >
                 <Typography
                   variant="h6"
-                  component="div"
+                  component="span"
                   color="secondary"
                 >
                   Relations
@@ -159,7 +164,15 @@ function Header() {
           </Stack>
           {isLogged 
             ? 
-              <Grid container justifyContent="flex-end">
+              <Grid container justifyContent="flex-end" alignItems="center">
+                <Typography
+                  variant="h6"
+                  component="span"
+                  color="secondary"
+                  onClick={()=>console.log('holabb')}
+                >
+                  Lost?
+                </Typography>
                 <IconButton
                   ref={refUserSettings}
                   size="large"
