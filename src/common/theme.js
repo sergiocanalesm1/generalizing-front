@@ -5,7 +5,7 @@ const theme = createTheme({
     typography : {
       fontFamily : 'HomepageBaukasten, Arial',
       button:{
-        fontSize:10
+        //fontSize:10
       },
       h1 : {
         fontSize   : '1.8em',

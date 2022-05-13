@@ -165,14 +165,6 @@ function Header() {
           {isLogged 
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
-                <Typography
-                  variant="h6"
-                  component="span"
-                  color="secondary"
-                  onClick={()=>console.log('holabb')}
-                >
-                  Lost?
-                </Typography>
                 <IconButton
                   ref={refUserSettings}
                   size="large"

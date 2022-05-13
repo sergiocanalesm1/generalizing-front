@@ -179,7 +179,7 @@ function Lesson() {
             
           <Stack justifyContent="center" direction="row">
             <Typography variant="body" align="center">
-              <strong>Explain</strong> what you learned the simpler you can. Include links to references if helpful
+              <strong>Explain</strong> the lesson as simple as you can
             </Typography>
           </Stack>
           <TextField
