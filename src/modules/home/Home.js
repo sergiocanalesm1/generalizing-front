@@ -220,6 +220,12 @@ function Home() {
                 lessons={lessons}
                 relations={relations}
             />
+            <HelpDialog
+                open={openHelpDialog}
+                onClose={()=>setOpenHelpDialog(false)}
+                lessons={lessons}
+                relations={relations}
+            />
         </div>       
     );
 }
