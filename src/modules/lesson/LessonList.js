@@ -7,7 +7,7 @@ import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
 import { lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
-import LessonDetailCard from "./LessonDetail";
+import LessonDetailDialog from "./LessonDetail";
 
 const styles = {
     lessonList:{ 
@@ -158,7 +158,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                     <ListItemText  primary={l.name} secondary={ 
                                         <Fragment>
                                             {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
-                                            {l.tags && <br />}
+                                            {l.tags.length > 0 && <br />}
                                             {toDate(l.creation_date)}
                                         </Fragment>
                                     }/>
@@ -182,17 +182,13 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                     <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog
-                fullWidth
+
+            <LessonDetailDialog
                 open={openDetail}
+                lesson={selectedLesson}
                 onClose={handleDetailClose}
-                scroll="paper"
-            >
-                <LessonDetailCard
-                    lesson={selectedLesson}
-                    onClose={handleDetailClose}
-                />
-            </Dialog>
+            />
+
         </div>
         
     )

@@ -17,6 +17,7 @@ import { getAllRelations } from "../../services/relations_services";
 import { getAllLessons } from "../../services/lessons_services";
 import { getLastChallenge } from "../../services/challenges_services";
 import WelcomingDialog from "../components/Welcoming";
+import HelpDialog from "../components/HelpDialog";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -25,12 +26,13 @@ function Home() {
     
     const navigate = useNavigate();
 
-    const [openAuthModal, setOpenAuthModal] = useState( false );
     const [success, setSuccess] = useState( false );
+    const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
     const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
+    const [openHelpDialog, setOpenHelpDialog] = useState( false );
 
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
 
@@ -98,6 +100,15 @@ function Home() {
                         sx={{marginTop:2}}
                         spacing={1}
                     >
+                        <Grid item xs={12} md={1}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                onClick={() => setOpenHelpDialog(true)}
+                            >
+                                WTF
+                            </Button>
+                        </Grid>
                         <Grid item xs={12} md={2}>
                             <Button
                                 fullWidth
@@ -200,6 +211,12 @@ function Home() {
                     setFirstTimer();
                     setOpenWelcomingDialog(false)
                 }}
+            />
+            <HelpDialog
+                open={openHelpDialog}
+                onClose={()=>setOpenHelpDialog(false)}
+                lessons={lessons}
+                relations={relations}
             />
         </div>       
     );
