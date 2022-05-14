@@ -1,13 +1,13 @@
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Toolbar, Typography } from "@mui/material";
 import { useNavigate } from 'react-router-dom';
 import { useCallback, useMemo, useState } from "react";
-import LessonDetailCard from "../lesson/LessonDetail";
 import { relationPath } from "../../utils/paths";
 import { filterByChallenge } from "../../utils/filters";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
 import AuthModal from "../components/AuthModal";
 import FeedbackDialog from "../components/FeedbackDialog";
+import LessonDetailDialog from "../lesson/LessonDetail";
 
 
 function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, setRelationsToShow, setFilters, relations }) {
@@ -114,20 +114,14 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                     <Button onClick={onClose}>Close</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog
-                open={openDetail}
-                scroll="paper"
-                fullWidth
-                onClose={() => {
-                    setOpenDetail(false);
-                    setOpen(true)
-                }}
-            >
-                <LessonDetailCard
-                    onClose={()=>setOpenDetail(false)}
+            <LessonDetailDialog
+                    onClose={() => {
+                        setOpenDetail(false);
+                        setOpen(true)
+                    }}
+                    open={openDetail}
                     lesson={selectedLessonDetail}
-                />
-            </Dialog>
+            />
             <AuthModal
                 open={openAuthModal}
                 onClose={()=>{

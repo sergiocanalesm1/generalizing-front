@@ -50,3 +50,8 @@ export async function createOrUpdateRelation( relation, files, method, onSuccess
         onError()
     }
 }
+
+export async function getRelation( uuid ){
+    const relations = await getAllRelations();
+    return relations.filter( r => (r.uuid === uuid ))[0];
+}

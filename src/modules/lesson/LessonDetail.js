@@ -5,6 +5,9 @@ import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 
 function LessonDetailDialog({ lesson, open, onClose }) {
     //TODO fix file url
+    if( !lesson ){
+        return <></>;
+    }
     return(
         <Dialog
             fullWidth

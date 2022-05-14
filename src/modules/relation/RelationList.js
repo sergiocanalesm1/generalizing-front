@@ -6,7 +6,7 @@ import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
-import RelationDetailCard from "./RelationDetail";
+import RelationDetailDialog from "./RelationDetail";
 //import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
 
 const styles = {
@@ -162,18 +162,12 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                     <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog
-                scroll="paper"
-                fullWidth
+            <RelationDetailDialog
                 open={openDetail}
+                relation={selectedRelation}
+                setOpen={setOpenDetail}
                 onClose={handleDetailClose}
-            >
-                <RelationDetailCard
-                    relation={selectedRelation}
-                    setOpen={setOpenDetail}
-                    onClose={handleDetailClose}
-                />
-            </Dialog>
+            />
         </div>
     )
 }

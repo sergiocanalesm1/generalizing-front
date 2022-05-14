@@ -49,3 +49,8 @@ export async function createOrUpdateLesson( lesson, files, method, onSuccess, on
         onError();
     }
 }
+
+export async function getLesson( uuid ){
+    const lessons = await getAllLessons();
+    return lessons.filter( l => (l.uuid === uuid) )[0];
+}

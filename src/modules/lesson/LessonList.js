@@ -184,7 +184,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
             </Dialog>
 
             <LessonDetailDialog
-            open={openDetail}
+                open={openDetail}
                 lesson={selectedLesson}
                 onClose={handleDetailClose}
             />

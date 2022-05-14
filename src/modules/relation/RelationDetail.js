@@ -6,10 +6,10 @@ import { stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
 import AuthModal from "../components/AuthModal";
 import FeedbackDialog from "../components/FeedbackDialog";
-import LessonDetailCard from "../lesson/LessonDetail";
+import LessonDetailDialog from "../lesson/LessonDetail";
 
 
-function RelationDetailCard({relation, setOpen, onClose}) {
+function RelationDetailDialog({open, relation, setOpen, onClose}) {
 
     const navigate = useNavigate();
 
@@ -37,95 +37,97 @@ function RelationDetailCard({relation, setOpen, onClose}) {
         else{
             setOpenAuthModal(true);
         }
-    },[navigate, relation.lessons])
+    },[navigate, relation])
+
+    if( !relation ){
+        return<></>;
+    }
 
     //TODO fix file url
     return(
         <div>
-            <Card sx={{overflow: 'auto'}}>
-                <CardContent>
-                    <Stack direction="row" justifyContent="center">
-                        <Typography variant="h4">{relation.name}</Typography>
-                    </Stack>
-                    
-                    <br />
-                    <Stack direction="row" justifyContent="center">
-                        <Typography variant="h6">Lessons:</Typography>
-                    </Stack>
-                    <Stack
-                        justifyContent="space-evenly"
-                        alignContent="center"
-                        direction="row"
-                    >
-                        {
-                            relation.lessons.map( (l) =>(
-                                <Stack direction="column" alignContent="center" key={l.id}>
-                                    <Stack direction="row" justifyContent="center">
-                                        <Typography variant="small">{l.domain}</Typography>
-                                    </Stack>
-                                    <Button onClick={()=>showLessonDetail(l)}>
-                                        {   
-                                            l.files.length > 0
-                                            ? <Avatar src={l.files[0].file.split("?")[0]} />
-                                            : <Avatar {...stringAvatar(l.name)} />
-                                        }
-                                    </Button>
-                                </Stack>
-                            ))
-                        }
-                    </Stack>
-                    
-                    {relation.files && relation.files.length > 0 &&
-                        <div>
-                            <br />
-                            <CardMedia
-                                component="img"
-                                height="50%"
-                                image={relation.files[0].file.split("?")[0]}
-                                alt="relation_file"
-                            />
-                        </div>
-                    }
-                    <Toolbar  />
-                    <Typography variant="body">{relation.explanation}</Typography>
-                    <br />
-                </CardContent>
-                <Grid container>
-                    <Grid item xs={12} md={10}>
-                        <CardActions>
-                            <Button onClick={newRelation}>
-                                Another idea? Relate these lessons!
-                            </Button>
-                        </CardActions>
-                    </Grid>
-                    <Grid item xs={12} md={2}>
-                        <Stack direction="row" justifyContent="flex-end">
-                            <CardActions onClick={onClose}>
-                                <Button>
-                                    Close
-                                </Button>
-                            </CardActions>
-                        </Stack>
-                    </Grid>
-                </Grid>
-            </Card>
             <Dialog
                 scroll="paper"
-                open={openDetail}
                 fullWidth
-                onClose={() => {
+                onClose={onClose}
+                open={open}
+            >
+                <Card sx={{overflow: 'auto'}}>
+                    <CardContent>
+                        <Stack direction="row" justifyContent="center">
+                            <Typography variant="h4">{relation.name}</Typography>
+                        </Stack>
+                        
+                        <br />
+                        <Stack direction="row" justifyContent="center">
+                            <Typography variant="h6">Lessons:</Typography>
+                        </Stack>
+                        <Stack
+                            justifyContent="space-evenly"
+                            alignContent="center"
+                            direction="row"
+                        >
+                            {
+                                relation.lessons.map( (l) =>(
+                                    <Stack direction="column" alignContent="center" key={l.id}>
+                                        <Stack direction="row" justifyContent="center">
+                                            <Typography variant="small">{l.domain}</Typography>
+                                        </Stack>
+                                        <Button onClick={()=>showLessonDetail(l)}>
+                                            {   
+                                                l.files.length > 0
+                                                ? <Avatar src={l.files[0].file.split("?")[0]} />
+                                                : <Avatar {...stringAvatar(l.name)} />
+                                            }
+                                        </Button>
+                                    </Stack>
+                                ))
+                            }
+                        </Stack>
+                        
+                        {relation.files && relation.files.length > 0 &&
+                            <div>
+                                <br />
+                                <CardMedia
+                                    component="img"
+                                    height="50%"
+                                    image={relation.files[0].file.split("?")[0]}
+                                    alt="relation_file"
+                                />
+                            </div>
+                        }
+                        <Toolbar  />
+                        <Typography variant="body">{relation.explanation}</Typography>
+                        <br />
+                    </CardContent>
+                    <Grid container>
+                        <Grid item xs={12} md={10}>
+                            <CardActions>
+                                <Button onClick={newRelation}>
+                                    Another idea? Relate these lessons!
+                                </Button>
+                            </CardActions>
+                        </Grid>
+                        <Grid item xs={12} md={2}>
+                            <Stack direction="row" justifyContent="flex-end">
+                                <CardActions onClick={onClose}>
+                                    <Button>
+                                        Close
+                                    </Button>
+                                </CardActions>
+                            </Stack>
+                        </Grid>
+                    </Grid>
+                </Card>
+            </Dialog>
+            <LessonDetailDialog
+                open={openDetail}   
+                lesson={selectedLessonDetail}
+                onClose={()=>{
                     setOpenDetail(false);
                     setOpen(true)
                 }}
-            >
-                <LessonDetailCard
-                    lesson={selectedLessonDetail}
-                    onClose={()=>{
-                        setOpenDetail(false);
-                        setOpen(true)
-                    }}
-                />
-            </Dialog>
+            />
             <AuthModal
                 open={openAuthModal}
                 onClose={()=>{
@@ -155,4 +157,4 @@ function RelationDetailCard({relation, setOpen, onClose}) {
     );
 }
 
-export default RelationDetailCard;
+export default RelationDetailDialog;

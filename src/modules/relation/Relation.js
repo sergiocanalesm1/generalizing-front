@@ -1,5 +1,5 @@
 import { Add, ArrowBack, Send } from "@mui/icons-material";
-import { Avatar, Box, Button, Dialog, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAllLessons } from "../../services/lessons_services";
@@ -9,7 +9,7 @@ import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
-import LessonDetailCard from "../lesson/LessonDetail";
+import LessonDetailDialog from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 
 
@@ -304,17 +304,11 @@ function Relation() {
         canChoose
         setChosenLesson={setLessonToChoose}
       />
-      <Dialog
-        scroll="paper"
+      <LessonDetailDialog
         open={openDetail}
-        onClose={()=>setOpenDetail(false)}
-        fullWidth
-      > 
-        <LessonDetailCard
             lesson={selectedLessonDetail}
             onClose={()=>setOpenDetail(false)}
-        />
-      </Dialog>
+      />
       <FeedbackDialog
         success={success}
         open={openFeedbackDialog}
