@@ -28,7 +28,7 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     const [username,setUsername] = useState('');
     const [password,setPassword] = useState('');
 
-    const [isLogin,setIsLogin] = useState(true);
+    const [isLogin,setIsLogin] = useState(false);
     const [signupOrSignText,setSignupOrSignText] = useState('');
     const [footText, setFootText] = useState('');
 

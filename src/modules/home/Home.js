@@ -211,6 +211,8 @@ function Home() {
                     setFirstTimer();
                     setOpenWelcomingDialog(false)
                 }}
+                lessons={lessons}
+                relations={relations}
             />
             <HelpDialog
                 open={openHelpDialog}
