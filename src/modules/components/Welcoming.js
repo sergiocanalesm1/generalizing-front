@@ -8,7 +8,7 @@ import AuthModal from "./AuthModal";
 import FeedbackDialog from "./FeedbackDialog";
 import HelpDialog from "./HelpDialog";
 
-function WelcomingDialog({open,onClose}){
+function WelcomingDialog( {open,onClose, lessons, relations} ){
 
     const navigate = useNavigate();
 
@@ -56,7 +56,7 @@ function WelcomingDialog({open,onClose}){
                     </CardContent>
                     <Stack direction="row" justifyContent="flex-end">
                         <CardActions>
-                            <Button onClick={onClose} color="primary">
+                            <Button onClick={()=>setOpenHelpDialog(true)} color="primary">
                                 WTF
                             </Button>
                             <Button onClick={()=>setOpenAuthModal(true)} color="primary">
@@ -71,7 +71,12 @@ function WelcomingDialog({open,onClose}){
                 open={openFeedbackDialog}
                 onClose={()=>{
                     setOpenFeedbackDialog(false)
+                    if( success ){
+                        navigate(lessonPath);
+
+                    }
                 }}
+
             />
             <HelpDialog
                 open={openHelpDialog}
@@ -86,13 +91,18 @@ function WelcomingDialog({open,onClose}){
                     setOpenAuthModal(false)
                     setSuccess(true);
                     setOpenFeedbackDialog(true);
-                    navigate(lessonPath);
-                    onClose();
+                    
                 }}
                 onError={()=>{
                     setSuccess(false);
                     setOpenFeedbackDialog(true);
                 }}
+            />
+            <HelpDialog
+                open={openHelpDialog}
+                onClose={()=>setOpenHelpDialog(false)}
+                lessons={lessons}
+                relations={relations}
             />
         </div>
     )

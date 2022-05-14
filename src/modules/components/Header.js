@@ -209,7 +209,7 @@ function Header() {
                       setOpenAuthModal(true);
                     }}
                   >
-                    Login
+                    Sign up | Login
                   </Button>
                 </ButtonGroup>
               </Grid>
