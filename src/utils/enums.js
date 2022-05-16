@@ -20,7 +20,9 @@ export const domains = [
   'Philosophy',
   'Physics',
   'Political Science',
+  'Psychology',
   'Software Engineering',
+  'Sports',
   'Other'
 ];
 

@@ -4,11 +4,12 @@ import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Stack, Toolb
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { lessonPath } from "../../utils/paths";
+import { setFirstTimer } from "../../utils/user";
 import AuthModal from "./AuthModal";
 import FeedbackDialog from "./FeedbackDialog";
 import HelpDialog from "./HelpDialog";
 
-function WelcomingDialog( {open,onClose, lessons, relations} ){
+function WelcomingDialog( {open, lessons, relations} ){
 
     const navigate = useNavigate();
 
@@ -72,8 +73,8 @@ function WelcomingDialog( {open,onClose, lessons, relations} ){
                 onClose={()=>{
                     setOpenFeedbackDialog(false)
                     if( success ){
+                        setFirstTimer();
                         navigate(lessonPath);
-
                     }
                 }}
 
