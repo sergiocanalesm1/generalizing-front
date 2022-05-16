@@ -55,15 +55,19 @@ function WelcomingDialog( {open, lessons, relations} ){
                         </Stack>
 
                     </CardContent>
-    
-                        <CardActions>
-                            <Button onClick={()=>setOpenHelpDialog(true)} color="primary">
-                                WTF, i need more info
-                            </Button>
-                            <Button onClick={()=>setOpenAuthModal(true)} color="primary">
-                                Ready to Sign up and start
-                            </Button>
-                        </CardActions>
+                        <Stack 
+                            direction="row"
+                            justifyContent="space-around"
+                        >
+                            <CardActions>
+                                <Button onClick={()=>setOpenHelpDialog(true)} color="primary">
+                                    WTF, i need more info
+                                </Button>
+                                <Button onClick={()=>setOpenAuthModal(true)} color="primary">
+                                    Ready to Sign up and start
+                                </Button>
+                            </CardActions>
+                        </Stack>
                 </Card>
             </Dialog>
             <FeedbackDialog
