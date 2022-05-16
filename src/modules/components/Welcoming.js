@@ -32,14 +32,14 @@ function WelcomingDialog( {open, lessons, relations} ){
                         image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/generalizing.png"
                         alt="generalizing"
                     />
+                    <CardMedia
+                        component="img"
+                        height="50%"
+                        image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/Logo-white.png"
+                        alt="generalizing-logo"
+                        sx={{p:2}}
+                    />
                     <CardContent>
-                        <br/>
-                        <Stack 
-                            direction="row"
-                            justifyContent="center"
-                        >
-                            <Typography variant="h4">Welcome to Generalizing</Typography>
-                        </Stack>
                         <Stack 
                             direction="row"
                             justifyContent="center"

@@ -1,4 +1,4 @@
-import { Button, Card, CardActions, CardContent, Dialog, Link, Stack, Toolbar, Typography } from "@mui/material";
+import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Link, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { getLesson } from "../../services/lessons_services";
 import { getRelation } from "../../services/relations_services";
@@ -50,6 +50,13 @@ function HelpDialog( {open, lessons, relations, onClose} ){
                 maxWidth="md"
             >
                 <Card sx={{overflow: 'auto'}}>
+                    <CardMedia
+                        component="img"
+                        height="50%"
+                        image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/Logo-white.png"
+                        alt="generalizing-logo"
+                        sx={{p:2}}
+                    />
                     <CardContent sx={{p:5}}>
 
                         <Typography variant="h4">The Driving Force</Typography>
