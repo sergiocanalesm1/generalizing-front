@@ -9,11 +9,7 @@ import AuthModal from "./AuthModal";
 import FeedbackDialog from "./FeedbackDialog";
 import HelpDialog from "./HelpDialog";
 
-<<<<<<< HEAD
 function WelcomingDialog( {open, lessons, relations} ){
-=======
-function WelcomingDialog( {open,onClose, lessons, relations} ){
->>>>>>> 41ad79963b0352138e9a9d9dbd6c1475d416dd21
 
     const navigate = useNavigate();
 
