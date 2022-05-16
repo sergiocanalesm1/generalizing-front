@@ -77,13 +77,8 @@ function WelcomingDialog( {open,onClose, lessons, relations} ){
                 onClose={()=>{
                     setOpenFeedbackDialog(false)
                     if( success ){
-<<<<<<< HEAD
                         setFirstTimer();
                         navigate(lessonPath);
-=======
-                        navigate(lessonPath);
-
->>>>>>> 41ad79963b0352138e9a9d9dbd6c1475d416dd21
                     }
                 }}
 
