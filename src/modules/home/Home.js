@@ -10,7 +10,7 @@ import AuthModal from "../components/AuthModal";
 import LessonListDialog from "../lesson/LessonList";
 import RelationGraph from "./components/RelationGraph";
 import RelationListDialog from "../relation/RelationList";
-import { getFirstTimer, getUserId, setFirstTimer } from "../../utils/user";
+import { getFirstTimer, getUserId } from "../../utils/user";
 import ChallengeDetailDialog from "../challenge/ChallengeDetail";
 import FeedbackDialog from "../components/FeedbackDialog";
 import { getAllRelations } from "../../services/relations_services";
@@ -208,7 +208,6 @@ function Home() {
             <WelcomingDialog
                 open={openWelcomingDialog}
                 onClose={()=>{
-                    setFirstTimer();
                     setOpenWelcomingDialog(false)
                 }}
                 lessons={lessons}
