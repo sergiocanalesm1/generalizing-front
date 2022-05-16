@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-import { AccountCircle } from '@mui/icons-material';
+import { AccountCircle, HelpOutline } from '@mui/icons-material';
 import { AppBar, Button, ButtonGroup, CardMedia, Container, Grid, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
 
 import { homePath, lessonPath, relationPath } from '../../utils/paths';
@@ -12,6 +12,7 @@ import { clearUser, getUserUuid } from '../../utils/user';
 import FeedbackDialog from './FeedbackDialog';
 import { getAllRelations } from '../../services/relations_services';
 import { getAllLessons } from '../../services/lessons_services';
+import HelpDialog from './HelpDialog';
 //import { tempRelations } from '../../utils/enums';
 
 
@@ -26,6 +27,7 @@ function Header() {
   const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
   const [success, setSuccess] = useState( false );
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+  const [openHelpDialog, setOpenHelpDialog] = useState( false );
 
   const [anchorElUser, setAnchorElUser] = useState();
   const refUserSettings = useRef();
@@ -165,34 +167,48 @@ function Header() {
           {isLogged 
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
+                <Grid item>
+                  <IconButton
+                    ref={refUserSettings}
+                    size="large"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={()=>setAnchorElUser(refUserSettings.current)}
+                    color="secondary"
+                  >
+                    <AccountCircle />
+                  </IconButton>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorElUser}
+                    anchorOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    keepMounted
+                    transformOrigin={{
+                      vertical: 'top',
+                      horizontal: 'right',
+                    }}
+                    open={Boolean(anchorElUser)}
+                    onClose={()=>setAnchorElUser()}
+                  >
+                    <MenuItem onClick={handleLogout}>Log Out</MenuItem>
+                  </Menu>
+                </Grid>
+                <Grid item>
                 <IconButton
-                  ref={refUserSettings}
-                  size="large"
-                  aria-label="account of current user"
-                  aria-controls="menu-appbar"
-                  aria-haspopup="true"
-                  onClick={()=>setAnchorElUser(refUserSettings.current)}
-                  color="secondary"
-                >
-                  <AccountCircle />
-                </IconButton>
-                <Menu
-                  id="menu-appbar"
-                  anchorEl={anchorElUser}
-                  anchorOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: 'top',
-                    horizontal: 'right',
-                  }}
-                  open={Boolean(anchorElUser)}
-                  onClose={()=>setAnchorElUser()}
-                >
-                  <MenuItem onClick={handleLogout}>Log Out</MenuItem>
-                </Menu>
+                    size="large"
+                    aria-label="account of current user"
+                    aria-controls="menu-appbar"
+                    aria-haspopup="true"
+                    onClick={()=>setOpenHelpDialog(true)}
+                    color="secondary"
+                  >
+                    <HelpOutline />
+                  </IconButton>
+                </Grid>
               </Grid>
               
             : <Grid
@@ -244,6 +260,12 @@ function Header() {
           setOpen={setOpenRelationListDialog}
           onClose={()=>setOpenRelationListDialog(false)}
           relations={relations}
+      />
+      <HelpDialog
+        open={openHelpDialog}
+        onClose={()=>setOpenHelpDialog(false)}
+        lessons={lessons}
+        relations={relations}
       />
       <FeedbackDialog
         success={success}
