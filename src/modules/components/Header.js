@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import { AccountCircle } from '@mui/icons-material';
-import { AppBar, Button, ButtonGroup, Container, Grid, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
+import { AppBar, Button, ButtonGroup, CardMedia, Container, Grid, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
 
 import { homePath, lessonPath, relationPath } from '../../utils/paths';
 import AuthModal from './AuthModal';
@@ -93,7 +93,7 @@ function Header() {
   return (
     <div>
       <AppBar position="fixed">
-        <Container maxWidth="xl">
+        <Container maxWidth={false}>
           <Toolbar>
             <Button 
               onClick={()=>navigate(homePath)}
@@ -101,15 +101,15 @@ function Header() {
                 '@media only screen and (max-width: 600px)': {
                   pl:3
                 },
-                pr:5
+                pr:5,
+                maxWidth:450
+                
               }}>
-              <Typography
-                variant="h1"
-                component="div"
-                color="secondary"
-              >
-                GENERALIZING
-              </Typography>
+              <CardMedia
+                component="img"
+                image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/Logo-blue.png"
+                alt="generalizing-logo"
+              />
             </Button>
             <Stack direction="row" justifyContent="flex-start" alignItems="center" 
               sx={{
