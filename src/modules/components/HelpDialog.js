@@ -68,7 +68,9 @@ function HelpDialog( {open, lessons, relations, onClose} ){
                             Most worldwide breakthroughs are made by people who dare to take knowledge from one domain and use it to solve problems and create solutions on another one: creativity is born in domain blending.
                             <br />
                             <br />
-                            Here you’ll be able to break your routine and add a spark to it. Take a moment to share what you are learning in your everyday life and try to relate it with what is being uploaded on other domains. This way, we are making sure that rather than keeping our associations rigid, we are keeping them playful.
+                            Here you’ll be able to break your routine and add a spark to it. Take a moment to share what you are learning in your everyday life (we call this a <em>Lesson</em>)
+                            and try to relate it with what is being uploaded on other domains (we call this a <em>Relation</em>). 
+                            This way, we are making sure that rather than keeping our associations rigid, we are keeping them playful.
                         </Typography>
 
                         <Toolbar />
@@ -83,7 +85,9 @@ function HelpDialog( {open, lessons, relations, onClose} ){
                         from a song (<Link onClick={() => showLesson( lessonsToShow.song )}>like this one</Link>) or from other different origins. 
                         A lesson needs to be explained thoroughly, as people who have never heard of what you are learning must understand it. 
                         Even the most difficult concepts have simpler meanings (<Link onClick={() => showLesson( lessonsToShow.tough )}>like this one</Link>). 
-                        Don’t worry if something you wish to upload is already on the platform, you must not be discouraged to share it, as the same concept may be interpreted in infinite ways due to our unique subjectivity!
+                        Don’t worry if something you wish to upload is already on the platform, you must not be discouraged to share it anyway, as the same concept may be interpreted in infinite ways due to our unique subjectivity!
+                        <br />
+                        All lessons are uploaded by the users, so you too will be asked to add at least one lesson before starting to relate.
                         <br />
                         <Link onClick={() => setOpenLessonList(true)}>Check lessons already created</Link>
                         
@@ -95,10 +99,10 @@ function HelpDialog( {open, lessons, relations, onClose} ){
                         <Typography variant="h4">What is a Relation exactly?</Typography>
                         <br />
                         <Typography variant="body">
-                            A relation is more than the sum of its lessons. 
-                            You must use your subjectivity to create something new from the lessons being related. 
-                            Try thinking in products, services, or methodologies that may even lay in other domains (<Link onClick={showRelation}>like this one</Link>). 
-                            There is not an incorrect relation, so give yourself the chance to think differently, to shift perspectives and create something nobody has created before.
+                            A relation is more than a common denominator between two lessons. 
+                            Instead, a relation is understood as an operation between them, which implies creating something new.
+                            Generalizing encourages you to use your subjectivity to create a new thought, something that leads you to and should be shared as a new idea of a product, service, methodology, artwork, philosophical thought, etc.
+                            This idea of yours may even lay in a different domain than its lessons (<Link onClick={showRelation}>like this one</Link>). There is not an incorrect relation, so give yourself the chance to think differently, to shift perspectives and create something nobody has created before.
                             <br />
                             <Link onClick={() => setOpenRelationList(true)}>Check relations already created</Link>
 

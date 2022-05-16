@@ -32,6 +32,13 @@ function WelcomingDialog( {open, lessons, relations} ){
                         image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/generalizing.png"
                         alt="generalizing"
                     />
+                    <Toolbar />
+                    <Stack 
+                        direction="row"
+                        justifyContent="center"
+                    >
+                            <Typography variant="h3">Welcome To</Typography>
+                        </Stack>
                     <CardMedia
                         component="img"
                         height="50%"
@@ -44,27 +51,19 @@ function WelcomingDialog( {open, lessons, relations} ){
                             direction="row"
                             justifyContent="center"
                         >
-                            <Typography variant="body">Get more creative and have fun!</Typography>
+                            <Typography variant="body">Add <em>Lessons</em> and create <em>Relations</em> to get more creative</Typography>
                         </Stack>
-                        <Toolbar  />
-                        <Typography variant="body">
-                        • Add <em>Lessons</em> you have learned and that you find cool from your everyday life.
-                            <br />
-                        • Create <em>Relations</em> between lessons any way you see fit! (get creative, there is no incorrect relation)
-                            <br />
-                        </Typography>
 
                     </CardContent>
-                    <Stack direction="row" justifyContent="flex-end">
+    
                         <CardActions>
                             <Button onClick={()=>setOpenHelpDialog(true)} color="primary">
-                                WTF
+                                WTF, i need more info
                             </Button>
                             <Button onClick={()=>setOpenAuthModal(true)} color="primary">
-                                Sign up and add a lesson!
+                                Ready to Sign up and start
                             </Button>
                         </CardActions>
-                    </Stack>
                 </Card>
             </Dialog>
             <FeedbackDialog
