@@ -63,3 +63,10 @@ export function shuffle(array) {
 
   return array;
 }
+
+export function combineLessonsWithRelations( relations, lessons ){
+  for( let i=0 ; i<relations.length ; i++){
+    const lesson1 = relations[i].lesson[0];
+    lesson1.relations ? lesson1.relations.push( relations[i] ) : lesson1.relations = [ relations[i] ];
+  }
+}

@@ -31,7 +31,7 @@ const relationsSortObj = {
 */
 
 
-function RelationListDialog({open, setOpen, onClose, relations, filters}) {
+function RelationListDialog({open, setOpen, onClose, relations, filterType, filters}) {
 
     const navigate = useNavigate();
 

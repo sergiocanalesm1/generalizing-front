@@ -88,6 +88,12 @@ function Home() {
         });
     },[]);
 
+    useEffect(()=>{
+        if( relations.length > 0 && relations.length > 0){
+            
+        }
+    },[relations])
+
     return (
         <div>
             <Box>
