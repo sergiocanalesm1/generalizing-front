@@ -1,6 +1,6 @@
 //https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/generalizing.png
 
-import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Stack, Toolbar, Typography } from "@mui/material";
+import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { lessonPath } from "../../utils/paths";
@@ -55,19 +55,24 @@ function WelcomingDialog( {open, lessons, relations} ){
                         </Stack>
 
                     </CardContent>
-                        <Stack 
-                            direction="row"
-                            justifyContent="space-around"
-                        >
+                        <Grid container>
+                        <Grid item xs={12} md={6}>
                             <CardActions>
                                 <Button onClick={()=>setOpenHelpDialog(true)} color="primary">
                                     WTF, i need more info
                                 </Button>
-                                <Button onClick={()=>setOpenAuthModal(true)} color="primary">
-                                    Ready to Sign up and start
-                                </Button>
                             </CardActions>
-                        </Stack>
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                            <Stack direction="row" justifyContent="flex-end">
+                                <CardActions>
+                                    <Button onClick={()=>setOpenAuthModal(true)} color="primary">
+                                        Ready to Sign up and start
+                                    </Button>
+                                </CardActions>
+                            </Stack>
+                        </Grid>
+                    </Grid>
                 </Card>
             </Dialog>
             <FeedbackDialog

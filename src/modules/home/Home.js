@@ -109,7 +109,7 @@ function Home() {
                                 WTF
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={3}>
                             <Button
                                 fullWidth
                                 variant="contained"
@@ -119,7 +119,7 @@ function Home() {
                                 Add Lesson
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={3}>
                             <Button 
                                 fullWidth
                                 variant="contained"
@@ -129,7 +129,7 @@ function Home() {
                                 Create Relation
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={3}>
                             {
                                 lastChallenge &&
                                 <Button
@@ -138,7 +138,7 @@ function Home() {
                                     startIcon={<Attractions />}
                                     onClick={handleViewChallenge}
                                 >
-                                    Challenge
+                                    Challenge of the Week
                                 </Button>
                             }
                         </Grid>
