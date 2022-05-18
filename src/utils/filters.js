@@ -63,3 +63,22 @@ export function shuffle(array) {
 
   return array;
 }
+
+export function combineLessonsWithRelations( relations, lessons ){
+
+  const cached_lesson_obj = {};
+  for( let i=0 ; i < lessons.length ; i++){
+    cached_lesson_obj[ lessons[i].id ] = lessons[i]; 
+  }
+  for( let i=0 ; i<relations.length ; i++){
+    const lesson1 = cached_lesson_obj[ relations[i].lessons[0].id ];
+    lesson1.relations ? lesson1.relations.push( relations[i] ) : lesson1.relations = [ relations[i] ];
+    const lesson2 = cached_lesson_obj[ relations[i].lessons[1].id ];
+    lesson2.relations ? lesson2.relations.push( relations[i] ) : lesson2.relations = [ relations[i] ];
+
+    cached_lesson_obj[ relations[i].lessons[0].id ] = lesson1;
+    cached_lesson_obj[ relations[i].lessons[1].id ] = lesson2;
+  }
+
+  return Object.keys(cached_lesson_obj).map( id => (cached_lesson_obj[id]));
+}

@@ -62,7 +62,7 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
                 <DialogTitle>
                     <div>
                         <Typography variant="h3">
-                            Challenge {challenge.id}
+                            Challenge of the Week
                         </Typography>
                     </div>
                 </DialogTitle>

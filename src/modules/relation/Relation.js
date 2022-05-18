@@ -3,8 +3,9 @@ import { Avatar, Box, Button, Grid, Paper, Stack, TextField, Toolbar, Typography
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAllLessons } from "../../services/lessons_services";
-import { createOrUpdateRelation } from "../../services/relations_services";
+import { createOrUpdateRelation, getAllRelations } from "../../services/relations_services";
 import { methods } from "../../services/urls";
+import { combineLessonsWithRelations } from "../../utils/filters";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
@@ -76,7 +77,9 @@ function Relation() {
   }, [relation] );
 
   const detailOrListLesson = useCallback(async(index)=>{
+    const fetchedRelations = await getAllRelations();
     const fetchedLessons = await getAllLessons();
+    combineLessonsWithRelations(fetchedRelations, fetchedLessons);
     setLessons(fetchedLessons);
 
     if( !chosenLessons[index] ){

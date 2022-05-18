@@ -31,7 +31,7 @@ const relationsSortObj = {
 */
 
 
-function RelationListDialog({open, setOpen, onClose, relations, filters}) {
+function RelationListDialog({open, setOpen, onClose, relations, filterType, filters}) {
 
     const navigate = useNavigate();
 
@@ -99,7 +99,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filters}) {
                         </Typography>
                         { filters &&
                             <Typography variant="small" >
-                                Filtering by: {filters}
+                                Filtering by {filterType}: {filters}
                             </Typography>
                         }
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>

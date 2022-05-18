@@ -18,6 +18,7 @@ import { getAllLessons } from "../../services/lessons_services";
 import { getLastChallenge } from "../../services/challenges_services";
 import WelcomingDialog from "../components/Welcoming";
 import HelpDialog from "../components/HelpDialog";
+import { combineLessonsWithRelations } from "../../utils/filters";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -76,12 +77,13 @@ function Home() {
         if( !getFirstTimer() ){
             setOpenWelcomingDialog(true);
         }
+        
         getAllRelations().then( r => {
-            setRelations(r)
-            setRelationsToShow(r)
-        } );
-        getAllLessons().then( l => {
-            setLessons(l)
+            getAllLessons().then( l => {
+                setLessons( combineLessonsWithRelations(r, l) );
+                setRelations(r)
+                setRelationsToShow(r)
+            } );
         });
         getLastChallenge().then( c => {
             setLastChallenge(c)
@@ -109,7 +111,7 @@ function Home() {
                                 WTF
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={3}>
                             <Button
                                 fullWidth
                                 variant="contained"
@@ -119,7 +121,7 @@ function Home() {
                                 Add Lesson
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={3}>
                             <Button 
                                 fullWidth
                                 variant="contained"
@@ -129,7 +131,7 @@ function Home() {
                                 Create Relation
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={2}>
+                        <Grid item xs={12} md={3}>
                             {
                                 lastChallenge &&
                                 <Button
@@ -138,7 +140,7 @@ function Home() {
                                     startIcon={<Attractions />}
                                     onClick={handleViewChallenge}
                                 >
-                                    Challenge
+                                    Challenge of the Week
                                 </Button>
                             }
                         </Grid>
@@ -192,6 +194,7 @@ function Home() {
                 onClose={()=>setOpenRelationListDialog(false)}
                 relations={relationsToShow}
                 filters={relationsFilters}
+                filterType={'Domains'}
             />
             {   lastChallenge &&
                 <ChallengeDetailDialog
