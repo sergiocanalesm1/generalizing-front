@@ -47,6 +47,10 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
         }
     },[navigate, challenge, lessons])
 
+    if( !challenge ){
+        return<></>;
+    }
+
     return(
         <div>
             <Dialog
