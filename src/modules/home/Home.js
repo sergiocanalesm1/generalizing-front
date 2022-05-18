@@ -84,10 +84,15 @@ function Home() {
                 setRelations(r)
                 setRelationsToShow(r)
             } );
+            getLastChallenge().then( c => {
+                const updatedLessons = combineLessonsWithRelations(r, [c.lesson_1, c.lesson_2]);
+                c.lesson_1 = updatedLessons[0];
+                c.lesson_2 = updatedLessons[1];
+                setLastChallenge(c);
+                
+            });
         });
-        getLastChallenge().then( c => {
-            setLastChallenge(c)
-        });
+        
     },[]);
 
     return (
