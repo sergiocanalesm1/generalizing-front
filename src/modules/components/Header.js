@@ -13,6 +13,7 @@ import FeedbackDialog from './FeedbackDialog';
 import { getAllRelations } from '../../services/relations_services';
 import { getAllLessons } from '../../services/lessons_services';
 import HelpDialog from './HelpDialog';
+import { combineLessonsWithRelations } from '../../utils/filters';
 //import { tempRelations } from '../../utils/enums';
 
 
@@ -64,7 +65,9 @@ function Header() {
 
   const handleViewLessons = useCallback(async()=>{
     setAnchorElLessons();
+    const fetchedRelations = await getAllRelations();
     const fetchedLessons = await getAllLessons();
+    combineLessonsWithRelations(fetchedRelations, fetchedLessons) 
     setLessons(fetchedLessons);
     setOpenLessonListDialog(true);
   },[]);

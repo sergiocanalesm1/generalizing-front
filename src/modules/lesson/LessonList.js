@@ -64,6 +64,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
     },[navigate,setOpen])
 
     const handlelessonsSortClick = useCallback((criteria) => {
+
         setlessonsSort(lessonsSortObj[criteria]);
         if( lessonsSortObj[criteria] === lessonsSortObj.random ){
             shuffle(lessons);
@@ -100,8 +101,11 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
     },[onClose])
 
     useEffect(()=>{
-        setProxyLessons(lessons);
-    },[lessons])
+        if(open){
+            setProxyLessons(lessons);
+        }
+    },[open,lessons])
+
 
     return(
         <div>
@@ -140,7 +144,8 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.lessonList}>
-                        { proxyLessons.map((l)=>(
+                        { proxyLessons.map((l)=>{
+                            return(
                             <Stack direction="row" justifyContent="flex-start" key={l.id}>
                                 <ListItemButton
                                     disableGutters
@@ -174,7 +179,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                     </IconButton>
                                 }
                             </Stack>
-                        ))
+                        )})
                         }
                     </List>
                 </DialogContent>
