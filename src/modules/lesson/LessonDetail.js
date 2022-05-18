@@ -16,8 +16,6 @@ function LessonDetailDialog({ lesson, open, onClose }) {
         return <></>;
     }
 
-
-
     return(
         <div>
             <Dialog
