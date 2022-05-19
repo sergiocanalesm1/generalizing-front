@@ -18,6 +18,7 @@ import { getAllLessons } from "../../services/lessons_services";
 import { getLastChallenge } from "../../services/challenges_services";
 import WelcomingDialog from "../components/Welcoming";
 import HelpDialog from "../components/HelpDialog";
+import { combineLessonsWithRelations } from "../../utils/filters";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -76,23 +77,23 @@ function Home() {
         if( !getFirstTimer() ){
             setOpenWelcomingDialog(true);
         }
+        
         getAllRelations().then( r => {
-            setRelations(r)
-            setRelationsToShow(r)
-        } );
-        getAllLessons().then( l => {
-            setLessons(l)
+            getAllLessons().then( l => {
+                setLessons( combineLessonsWithRelations(r, l) );
+                setRelations(r)
+                setRelationsToShow(r)
+            } );
+            getLastChallenge().then( c => {
+                const updatedLessons = combineLessonsWithRelations(r, [c.lesson_1, c.lesson_2]);
+                c.lesson_1 = updatedLessons[0];
+                c.lesson_2 = updatedLessons[1];
+                setLastChallenge(c);
+                
+            });
         });
-        getLastChallenge().then( c => {
-            setLastChallenge(c)
-        });
+        
     },[]);
-
-    useEffect(()=>{
-        if( relations.length > 0 && relations.length > 0){
-            
-        }
-    },[relations])
 
     return (
         <div>
@@ -198,6 +199,7 @@ function Home() {
                 onClose={()=>setOpenRelationListDialog(false)}
                 relations={relationsToShow}
                 filters={relationsFilters}
+                filterType={'Domains'}
             />
             {   lastChallenge &&
                 <ChallengeDetailDialog

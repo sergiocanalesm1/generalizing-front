@@ -99,7 +99,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                         </Typography>
                         { filters &&
                             <Typography variant="small" >
-                                Filtering by: {filters}
+                                Filtering by {filterType}: {filters}
                             </Typography>
                         }
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
@@ -123,7 +123,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        { relations.map((r)=>(
+                        { relations?.map((r)=>(
                             <Stack direction="row" justifyContent="flex-start" key={r.id}>
                                 <ListItemButton
                                     disableGutters
