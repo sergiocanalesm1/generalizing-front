@@ -1,5 +1,5 @@
 import { ArrowBack, Send } from "@mui/icons-material";
-import { Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOrUpdateLesson } from "../../services/lessons_services";
@@ -9,6 +9,7 @@ import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
+import { getAllTags } from "../../services/tags_services";
 
 const styles = {
   lessonPaper: {
@@ -43,6 +44,8 @@ function Lesson() {
   const [openFeedbackDialog,setOpenFeedbackDialog] = useState( false );
 
   const [isUpdate,setIsUpdate] = useState(false);
+
+  const [dbTags, setDbTags] = useState([]);
 
   const handleChange = useCallback((e)=>{
     setLesson({
@@ -93,9 +96,11 @@ function Lesson() {
         color:stringToColor(t)
       })) );
     }
+    getAllTags().then( fetchedTags => {
+      setDbTags( fetchedTags.map( t => (capitalizeFirstLetter(t.tag)) ) )
+    })
   },[navigate,state])
 
-  
 
   return (
     <div>
@@ -193,12 +198,13 @@ function Lesson() {
           />
 
           <Toolbar />
-          <Grid container justifyContent="space-evenly" alignItems="center">
-            <Grid item>
-              <Typography variant="body">
-                Provide photos if helpful
-              </Typography>
-              <br />
+          <Grid container justifyContent="center" alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Stack direction="row" justifyContent="center">
+                <Typography variant="body">
+                  Provide photos if helpful
+                </Typography>
+              </Stack>
               <Grid
                 container
                 direction="column"
@@ -218,32 +224,43 @@ function Lesson() {
                     />
                   </Button>
                 </Grid>
-                <Grid item>
+                <Grid item >
                 <Typography variant="small">
                   { files.name }
                 </Typography>
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item>
-              <Typography variant="body">
-                Create <strong>tags</strong> for your lesson
-              </Typography>
-              <Grid 
+            <Grid item xs={12} md={6}>
+              <Stack direction="row" justifyContent="center">
+                <Typography variant="body">
+                  Create <strong>tags</strong> for your lesson
+                </Typography>
+              </Stack>
+              <Grid
+                item
                 container
-                justifyContent="flex-start"
+                justifyContent="center"
+                alignItems="center"
               >
-                <Grid item xs={12} md={8}>
-                  <TextField
-                    value={currentChip}
-                    name="chip"
-                    onChange={(e)=>{setCurrentChip(e.target.value)}}
-                  />
+                
+                <Grid item xs={12} md={6}>
+                  { dbTags.length > 0 &&
+                    <Autocomplete 
+                      options={dbTags}
+                      value={currentChip}
+                      name="chip"
+                      onInputChange={(event, newInputValue) => {
+                        setCurrentChip(newInputValue)
+                      }}
+                      renderInput={(params) => <TextField {...params}/>}
+                    />}
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={2}>
                   <Button
                     onClick={createTag}
                     variant="contained"
+                    fullWidth
                   >
                     Tag it
                   </Button>
