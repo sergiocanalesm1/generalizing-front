@@ -244,7 +244,7 @@ function Lesson() {
                 alignItems="center"
               >
                 
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={6}>
                   { dbTags.length > 0 &&
                     <Autocomplete 
                       options={dbTags}
@@ -256,10 +256,11 @@ function Lesson() {
                       renderInput={(params) => <TextField {...params}/>}
                     />}
                 </Grid>
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={2}>
                   <Button
                     onClick={createTag}
                     variant="contained"
+                    fullWidth
                   >
                     Tag it
                   </Button>
