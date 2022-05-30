@@ -10,6 +10,7 @@ import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
+import MyEditor from "../home/components/MyEditor";
 import LessonDetailDialog from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 
@@ -33,6 +34,21 @@ const  styles = {
     width: 100,
     height: 100,
     bgcolor: "#808080"
+  },
+  root: {
+
+  },
+  editor: {
+    '&:hover': {
+      outline:"solid 0.5px"
+    },
+    '&:focus-within': {
+      outline:"#00B7EB solid 1px"
+    },
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    cursor: 'text',
+    p:1,
   },
 }
 
@@ -62,11 +78,14 @@ function Relation() {
 
   const [isUpdate,setIsUpdate] = useState(false);
 
+  const [rawText, setRawText] = useState();
+
   const [relation, setRelation] = useState({
     name : "",
     user : "",
     lessons : "",
     explanation : "",
+    isExplanationRaw : true,
   });
 
   const handleChange = useCallback((e)=>{
@@ -100,6 +119,11 @@ function Relation() {
     if( state?.challengeId ){
       relation.challenge = state.challengeId;
     }
+
+    if( relation.isExplanationRaw ){
+      relation.explanation = JSON.stringify( rawText );
+    }
+
     const method = isUpdate ? methods.UPDATE : methods.CREATE;
     await createOrUpdateRelation( relation, files, method,
       ()=>{
@@ -111,7 +135,7 @@ function Relation() {
         setOpenFeedbackDialog(true);
       }
     )
-  },[chosenLessons, files, relation, state, isUpdate]);
+  },[chosenLessons, files, relation, state, isUpdate, rawText]);
 
   useEffect(()=>{
     if( lessonToChoose ){
@@ -183,7 +207,7 @@ function Relation() {
                 { chosenLessons[0]
                   ?                                         
                     chosenLessons[0].files?.length > 0
-                    ? <Avatar src={chosenLessons[0].files[0].file.split("?")[0]} sx={styles.relationAvatar}/>
+                    ? <Avatar src={chosenLessons[0].files[ chosenLessons[0].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
                     : <Avatar {...stringAvatar(chosenLessons[0].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
                       <Add fontSize="large"/>
@@ -194,7 +218,7 @@ function Relation() {
                 { chosenLessons[1]
                   ?                                         
                     chosenLessons[1].files?.length > 0
-                    ? <Avatar src={chosenLessons[1].files[0].file.split("?")[0]} sx={styles.relationAvatar}/>
+                    ? <Avatar src={chosenLessons[1].files[ chosenLessons[1].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
                     : <Avatar {...stringAvatar(chosenLessons[1].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
                       <Add fontSize="large"/>
@@ -213,16 +237,28 @@ function Relation() {
                 <strong>Explain</strong> how you relate these concepts
               </Typography>
             </Stack>
-            <TextField
-              value={relation.explanation}
-              fullWidth
-              name="explanation"
-              multiline
-              onChange={handleChange}
-              required
-              minRows={3}
-              disabled={chosenLessons.length < 2}
-            />
+
+            { relation.isExplanationRaw
+              ? <Box sx={styles.root}>
+                  <Box sx={styles.editor}>
+                      <MyEditor
+                        setText={setRawText}
+                        rawText={ isUpdate ? relation.explanation : undefined}
+                      />
+                  </Box>
+                </Box>
+              : <TextField
+                  value={relation.explanation}
+                  fullWidth
+                  name="explanation"
+                  multiline
+                  onChange={handleChange}
+                  required
+                  minRows={3}
+                  disabled={chosenLessons.length < 2}
+                  autcomplete={false}
+                />
+            }
           </Grid>
 
           <Grid item xs={12} md={3}>
@@ -290,7 +326,7 @@ function Relation() {
               variant="contained"
               endIcon={<Send color="secondary" />}
               onClick={createOrUpdate}
-              disabled={!relation.name  || !relation.explanation }
+              disabled={!relation.name  || !(relation.explanation || rawText) }
             >
               { isUpdate ? "Update" : "Relate!" }
             </Button>

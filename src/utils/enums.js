@@ -1,7 +1,8 @@
 export const domains = [
-  'Aerospace Engineering', 
+  'Aerospace Engineering',
+  'Agriculture',
   'Anthropology',
-  'Arquitecture',
+  'Architecture',
   'Art',
   'Biology',
   'Business',
@@ -11,6 +12,7 @@ export const domains = [
   'Economics',
   'Education',
   'Electrical Engineering',
+  'History',
   'Law',
   'Literature',
   'Mathematics',

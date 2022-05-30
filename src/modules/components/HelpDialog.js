@@ -101,7 +101,7 @@ function HelpDialog( {open, lessons, relations, onClose} ){
                         <Typography variant="body">
                             A relation is more than a common denominator between two lessons. 
                             Instead, a relation is understood as an operation between them, which implies creating something new.
-                            Generalizing encourages you to use your subjectivity to create a new thought, something that leads you to and should be shared as a new idea of a product, service, methodology, artwork, philosophical thought, etc.
+                            Generalizing encourages you to use your subjectivity to create a real world application of your relation  (as a product, service, methodology, artwork, philosophical thought, etc).
                             This idea of yours may even lay in a different domain than its lessons (<Link onClick={showRelation}>like this one</Link>). There is not an incorrect relation, so give yourself the chance to think differently, to shift perspectives and create something nobody has created before.
                             <br />
                             <Link onClick={() => setOpenRelationList(true)}>Check relations already created</Link>
