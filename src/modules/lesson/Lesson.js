@@ -10,7 +10,7 @@ import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
 import { getAllTags } from "../../services/tags_services";
-import MyEditor from "../home/components/Editor";
+import MyEditor from "../home/components/MyEditor";
 
 const styles = {
   lessonPaper: {
@@ -31,7 +31,7 @@ const styles = {
       outline:"solid 0.5px"
     },
     '&:focus-within': {
-      outline:"#00B7EB solid"
+      outline:"#00B7EB solid 1px"
     },
     border: '1px solid #ccc',
     borderRadius: '5px',
@@ -49,10 +49,11 @@ function Lesson() {
     "description": "",
     "origin": origins[ origins.length - 1 ],
     "domain": domains[ domains.length - 1 ],
-    "user": ""
+    "user": "",
+    "isDescriptionRaw": true
   });
 
-  const [editorText, setEditorText] = useState(null);
+  const [rawText, setRawText] = useState(null);
 
   const [files, setFiles] = useState({});
 
@@ -89,7 +90,12 @@ function Lesson() {
     lesson.tags = tags.map((t)=>t.label);
     lesson.user = getUserId();
 
+    if( lesson.isDescriptionRaw ){
+      lesson.description = JSON.stringify( rawText );
+    }
+
     const method = isUpdate ? methods.UPDATE : methods.CREATE
+    
     await createOrUpdateLesson( lesson, files, method, 
       ()=>{
         setSuccess(true);
@@ -100,7 +106,7 @@ function Lesson() {
         setOpenFeedbackDialog(true);
       }
     )
-  },[ files, lesson, tags, isUpdate ])
+  },[ files, lesson, tags, isUpdate, rawText ])
 
   useEffect(()=>{
     if( !Boolean(getUserUuid()) ) {
@@ -205,23 +211,26 @@ function Lesson() {
               <strong>Explain</strong> the lesson as simple as you can
             </Typography>
           </Stack>
-          <Box sx={styles.root}>
-              <Box sx={styles.editor}>
-                  <MyEditor
-                    setText={setEditorText}
-                  />
+          { lesson.isDescriptionRaw
+            ? <Box sx={styles.root}>
+                <Box sx={styles.editor}>
+                    <MyEditor
+                      setText={setRawText}
+                      rawText={ isUpdate ? lesson.description : undefined}
+                    />
+                </Box>
               </Box>
-          </Box>
-          {/*<TextField
-            value={lesson.description}
-            fullWidth
-            name="description"
-            multiline
-            onChange={handleChange}
-            minRows={3}
-            required
-            autoComplete={false}
-          />*/}
+            : <TextField
+                value={lesson.description}
+                fullWidth
+                name="description"
+                multiline
+                onChange={handleChange}
+                minRows={3}
+                required
+                autoComplete={false}
+              />
+          }
 
           <Toolbar />
           <Grid container justifyContent="center" alignItems="center">
@@ -324,7 +333,7 @@ function Lesson() {
                   variant="contained"
                   endIcon={<Send color="secondary" />}
                   onClick={createOrUpdate}
-                  disabled={ !lesson.name || !lesson.description }
+                  disabled={ !lesson.name || !(lesson.description || rawText) }
                 >
                   { isUpdate ? "Update" : "Create!" }
                 </Button>

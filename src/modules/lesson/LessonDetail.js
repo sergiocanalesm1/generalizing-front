@@ -1,8 +1,18 @@
-import { Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import Linkify from "react-linkify";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
+import MyEditor from "../home/components/MyEditor";
 import RelationListDialog from "../relation/RelationList";
+
+const styles = {
+    root: {
+  
+    },
+    editor: {
+      p:1,
+    },
+  }
 
 
 function LessonDetailDialog({ lesson, open, onClose }) {
@@ -15,7 +25,6 @@ function LessonDetailDialog({ lesson, open, onClose }) {
     if( !lesson ){
         return <></>;
     }
-    console.log(lesson)
 
     return(
         <div>
@@ -37,17 +46,29 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                     <CardContent>
                         <Typography variant="h4">{lesson.name}</Typography>
                         <Toolbar  />
-                        <Typography variant="body">
-                        <Linkify
-                            componentDecorator={(decoratedHref, decoratedText, key) => (
-                                <a target="blank" href={decoratedHref} key={key}>
-                                    {decoratedText}
-                                </a>
-                            )}
-                        >
-                            {lesson.description}
-                        </Linkify>
-                        </Typography>
+
+                        { lesson.isDescriptionRaw
+                          ? 
+                            <Box sx={styles.root}>
+                                <Box sx={styles.editor}>
+                                    <MyEditor
+                                        readOnly
+                                        rawText={lesson.description}
+                                    />
+                                </Box>
+                            </Box>
+                          : <Typography variant="body">
+                                <Linkify
+                                    componentDecorator={(decoratedHref, decoratedText, key) => (
+                                        <a target="blank" href={decoratedHref} key={key}>
+                                            {decoratedText}
+                                        </a>
+                                    )}
+                                >
+                                    {lesson.description}
+                                </Linkify>
+                            </Typography>
+                        }
                         <br />
                             <Stack 
                                 direction="row" 
