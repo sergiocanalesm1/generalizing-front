@@ -84,6 +84,10 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
         //setProxyRelations(relations);
     },[relations])
 
+    if( !relations ){
+        return <></>;
+    }
+
     return(
         <div>
             <Dialog
@@ -134,7 +138,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                                     <ListItemAvatar>
                                         {/* TODO validate if file is img */}
                                         {
-                                            r.files.length > 0
+                                            r.files?.length > 0
                                             ? <Avatar src={r.files[0].file.split("?")[0]} />
                                             : <Avatar {...stringAvatar(r.name)} />
                                         }

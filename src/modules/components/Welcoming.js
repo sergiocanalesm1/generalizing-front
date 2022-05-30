@@ -25,26 +25,22 @@ function WelcomingDialog( {open, lessons, relations} ){
                 open={open}
                 fullWidth
             >
-                <Card sx={{overflow: 'auto'}}>
-                    <CardMedia
-                        component="img"
-                        height="50%"
-                        image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/generalizing.png"
-                        alt="generalizing"
-                    />
-                    <Toolbar />
+                <Card sx={{
+                    overflow: 'auto',
+                    p:3,
+                    pr:4
+                }}>
+
                     <Stack 
                         direction="row"
                         justifyContent="center"
                     >
-                            <Typography variant="h3">Welcome To</Typography>
-                        </Stack>
+                            <Typography variant="h3">Welcome to Generalizing!</Typography>
+                    </Stack>
                     <CardMedia
                         component="img"
-                        height="50%"
-                        image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/Logo-white.png"
-                        alt="generalizing-logo"
-                        sx={{p:2}}
+                        image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/relations.png"
+                        alt="generalizing"
                     />
                     <CardContent>
                         <Stack 
