@@ -1,6 +1,6 @@
 import { Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
-import ReactLinkify from "react-linkify";
+import Linkify from "react-linkify";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import RelationListDialog from "../relation/RelationList";
 
@@ -15,6 +15,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
     if( !lesson ){
         return <></>;
     }
+    console.log(lesson)
 
     return(
         <div>
@@ -29,7 +30,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                         <CardMedia
                             component="img"
                             height="50%"
-                            image={lesson.files[0].file.split("?")[0]}
+                            image={lesson.files[lesson.files.length - 1].file.split("?")[0]}
                             alt="lesson_file"
                         />
                     }
@@ -37,9 +38,15 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                         <Typography variant="h4">{lesson.name}</Typography>
                         <Toolbar  />
                         <Typography variant="body">
-                            <ReactLinkify>
-                                {lesson.description}
-                            </ReactLinkify>
+                        <Linkify
+                            componentDecorator={(decoratedHref, decoratedText, key) => (
+                                <a target="blank" href={decoratedHref} key={key}>
+                                    {decoratedText}
+                                </a>
+                            )}
+                        >
+                            {lesson.description}
+                        </Linkify>
                         </Typography>
                         <br />
                             <Stack 

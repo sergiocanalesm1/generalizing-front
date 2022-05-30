@@ -8,6 +8,8 @@ import App from './App';
 import * as serviceWorker from './serviceWorker';
 import theme from './common/theme';
 
+import 'babel-polyfill';
+
 ReactDOM.render(
   <React.StrictMode>
     <BrowserRouter>

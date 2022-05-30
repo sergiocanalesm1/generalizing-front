@@ -10,6 +10,7 @@ import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
 import { getAllTags } from "../../services/tags_services";
+import MyEditor from "../home/components/Editor";
 
 const styles = {
   lessonPaper: {
@@ -21,6 +22,21 @@ const styles = {
   lessonBox:{
     maxWidth: '100%',
     '& button': { m: 1 }
+  },
+  root: {
+
+  },
+  editor: {
+    '&:hover': {
+      outline:"solid 0.5px"
+    },
+    '&:focus-within': {
+      outline:"#00B7EB solid"
+    },
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    cursor: 'text',
+    p:1,
   },
 }
 
@@ -35,6 +51,8 @@ function Lesson() {
     "domain": domains[ domains.length - 1 ],
     "user": ""
   });
+
+  const [editorText, setEditorText] = useState(null);
 
   const [files, setFiles] = useState({});
 
@@ -100,6 +118,7 @@ function Lesson() {
       setDbTags( fetchedTags.map( t => (capitalizeFirstLetter(t.tag)) ) )
     })
   },[navigate,state])
+
 
 
   return (
@@ -187,7 +206,14 @@ function Lesson() {
               <strong>Explain</strong> the lesson as simple as you can
             </Typography>
           </Stack>
-          <TextField
+          <Box sx={styles.root}>
+              <Box sx={styles.editor}>
+                  <MyEditor
+                    setText={setEditorText}
+                  />
+              </Box>
+          </Box>
+          {/*<TextField
             value={lesson.description}
             fullWidth
             name="description"
@@ -195,7 +221,8 @@ function Lesson() {
             onChange={handleChange}
             minRows={3}
             required
-          />
+            autoComplete={false}
+          />*/}
 
           <Toolbar />
           <Grid container justifyContent="center" alignItems="center">

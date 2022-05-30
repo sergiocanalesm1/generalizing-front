@@ -155,7 +155,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                     <ListItemAvatar>
                                         {
                                             l.files.length > 0
-                                            ? <Avatar src={l.files[0].file.split("?")[0]} />
+                                            ? <Avatar src={l.files[ l.files.length - 1 ].file.split("?")[0]} />
                                             : <Avatar {...stringAvatar(l.name)} />
                                         }
                                         

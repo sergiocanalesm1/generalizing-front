@@ -183,7 +183,7 @@ function Relation() {
                 { chosenLessons[0]
                   ?                                         
                     chosenLessons[0].files?.length > 0
-                    ? <Avatar src={chosenLessons[0].files[0].file.split("?")[0]} sx={styles.relationAvatar}/>
+                    ? <Avatar src={chosenLessons[0].files[ chosenLessons[0].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
                     : <Avatar {...stringAvatar(chosenLessons[0].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
                       <Add fontSize="large"/>
@@ -194,7 +194,7 @@ function Relation() {
                 { chosenLessons[1]
                   ?                                         
                     chosenLessons[1].files?.length > 0
-                    ? <Avatar src={chosenLessons[1].files[0].file.split("?")[0]} sx={styles.relationAvatar}/>
+                    ? <Avatar src={chosenLessons[1].files[ chosenLessons[1].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
                     : <Avatar {...stringAvatar(chosenLessons[1].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
                       <Add fontSize="large"/>
@@ -222,6 +222,7 @@ function Relation() {
               required
               minRows={3}
               disabled={chosenLessons.length < 2}
+              autcomplete={false}
             />
           </Grid>
 

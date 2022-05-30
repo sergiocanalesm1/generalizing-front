@@ -77,7 +77,6 @@ function Home() {
         if( !getFirstTimer() ){
             setOpenWelcomingDialog(true);
         }
-        
         getAllRelations().then( r => {
             getAllLessons().then( l => {
                 setLessons( combineLessonsWithRelations(r, l) );
@@ -160,9 +159,10 @@ function Home() {
                             />
                             <Toolbar />
                           </Box>
-                        : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
+                        : <>{<Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>}</>
                     }
                 </Box>
+                <Toolbar />
             </Box>
             <AuthModal
                 open={openAuthModal}
@@ -233,6 +233,7 @@ function Home() {
                 lessons={lessons}
                 relations={relations}
             />
+
         </div>       
     );
 }
