@@ -1,6 +1,6 @@
 //https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/generalizing.png
 
-import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
+import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { lessonPath } from "../../utils/paths";
