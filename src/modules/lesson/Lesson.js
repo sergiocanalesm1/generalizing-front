@@ -10,7 +10,10 @@ import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
 import { getAllTags } from "../../services/tags_services";
+<<<<<<< HEAD
 import MyEditor from "../home/components/Editor";
+=======
+>>>>>>> d2f281ec7cc35d3c56c63159461df27ad4b2cae8
 
 const styles = {
   lessonPaper: {
@@ -119,7 +122,10 @@ function Lesson() {
     })
   },[navigate,state])
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> d2f281ec7cc35d3c56c63159461df27ad4b2cae8
 
   return (
     <div>
