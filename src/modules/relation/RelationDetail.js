@@ -1,4 +1,5 @@
 import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
+import { Box } from "@mui/system";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { relationPath } from "../../utils/paths";
@@ -6,8 +7,17 @@ import { stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
 import AuthModal from "../components/AuthModal";
 import FeedbackDialog from "../components/FeedbackDialog";
+import MyEditor from "../home/components/MyEditor";
 import LessonDetailDialog from "../lesson/LessonDetail";
 
+const styles = {
+    root: {
+  
+    },
+    editor: {
+      p:1,
+    },
+}
 
 function RelationDetailDialog({open, relation, setOpen, onClose}) {
 
@@ -97,7 +107,18 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                             </div>
                         }
                         <Toolbar  />
-                        <Typography variant="body">{relation.explanation}</Typography>
+                        
+                        {   relation.isExplanationRaw
+                            ?   <Box sx={styles.root}>
+                                    <Box sx={styles.editor}>
+                                        <MyEditor
+                                            readOnly
+                                            rawText={relation.explanation}
+                                        />
+                                    </Box>
+                                </Box>
+                            :   <Typography variant="body">{relation.explanation}</Typography>
+                        }
                         <br />
                     </CardContent>
                     <Grid container>

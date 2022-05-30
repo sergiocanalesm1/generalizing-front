@@ -53,7 +53,7 @@ function Lesson() {
     "isDescriptionRaw": true
   });
 
-  const [rawText, setRawText] = useState(null);
+  const [rawText, setRawText] = useState();
 
   const [files, setFiles] = useState({});
 

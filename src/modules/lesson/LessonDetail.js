@@ -12,7 +12,7 @@ const styles = {
     editor: {
       p:1,
     },
-  }
+}
 
 
 function LessonDetailDialog({ lesson, open, onClose }) {
