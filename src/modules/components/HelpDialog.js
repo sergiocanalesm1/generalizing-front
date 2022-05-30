@@ -49,7 +49,12 @@ function HelpDialog( {open, lessons, relations, onClose} ){
                 fullWidth
                 maxWidth="md"
             >
-                <Card sx={{overflow: 'auto'}}>
+                <Card sx={{
+                    overflow: 'auto',
+                    'a:hover':{
+                        cursor: 'pointer'
+                    }
+                }}>
                     <CardMedia
                         component="img"
                         height="50%"
