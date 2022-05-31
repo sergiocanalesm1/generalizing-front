@@ -103,7 +103,13 @@ function Home() {
                         container
                         justifyContent="center"
                         alignItems="center"
-                        sx={{marginTop:2}}
+                        sx={{
+                            '@media only screen and (max-width: 600px)': {
+                                p:1,
+                                mt:0
+                            },
+                            mt:2
+                        }}
                         spacing={1}
                     >
                         <Grid item xs={12} md={1}>

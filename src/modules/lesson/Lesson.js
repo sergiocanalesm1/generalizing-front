@@ -14,6 +14,10 @@ import MyEditor from "../home/components/MyEditor";
 
 const styles = {
   lessonPaper: {
+    '@media only screen and (max-width: 600px)': {
+      m:0,
+      p:1
+    },
     m: 2,
     p: 2,
     paddingLeft: 8,
@@ -266,7 +270,7 @@ function Lesson() {
                 </Grid>
               </Grid>
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} sx={{pt:1}}>
               <Stack direction="row" justifyContent="center">
                 <Typography variant="body">
                   Create <strong>tags</strong> for your lesson
@@ -291,7 +295,7 @@ function Lesson() {
                       renderInput={(params) => <TextField {...params}/>}
                     />}
                 </Grid>
-                <Grid item xs={12} md={2}>
+                <Grid item xs={4} md={2}>
                   <Button
                     onClick={createTag}
                     variant="contained"

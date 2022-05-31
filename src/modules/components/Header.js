@@ -103,9 +103,6 @@ function Header() {
             <Button 
               onClick={()=>navigate(homePath)}
               sx={{
-                '@media only screen and (max-width: 600px)': {
-                  pl:3
-                },
                 pr:5,
                 maxWidth:450
                 
@@ -170,7 +167,7 @@ function Header() {
           {isLogged 
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
-                <Grid item>
+                <Grid item xs={8} md={1}>
                   <IconButton
                     ref={refUserSettings}
                     size="large"
@@ -200,7 +197,7 @@ function Header() {
                     <MenuItem onClick={handleLogout}>Log Out</MenuItem>
                   </Menu>
                 </Grid>
-                <Grid item>
+                <Grid item xs={4} md={1}>
                 <IconButton
                     size="large"
                     aria-label="account of current user"

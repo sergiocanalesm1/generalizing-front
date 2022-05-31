@@ -62,7 +62,12 @@ function HelpDialog( {open, lessons, relations, onClose} ){
                         alt="generalizing-logo"
                         sx={{p:2}}
                     />
-                    <CardContent sx={{p:5}}>
+                    <CardContent sx={{
+                        '@media only screen and (max-width: 600px)': {
+                            p:2
+                        },
+                        p:5
+                    }}>
 
                         <Typography variant="h4">The Driving Force</Typography>
                         <br />

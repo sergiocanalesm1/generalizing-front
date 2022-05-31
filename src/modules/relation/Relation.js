@@ -17,6 +17,10 @@ import LessonListDialog from "../lesson/LessonList";
 
 const  styles = {
   relationPaper: {
+    '@media only screen and (max-width: 600px)': {
+      m:0,
+      p:1
+    },
     m: 2,
     p: 2,
     paddingLeft: 8,
@@ -267,6 +271,11 @@ function Relation() {
               justifyContent="center"
               alignItems="center"
               spacing={1}
+              sx={{
+                '@media only screen and (max-width: 600px)': {
+                  pt:3
+                },
+              }}
             >
               <Typography variant="body" align="center">
                 Provide an optional file showing your product
