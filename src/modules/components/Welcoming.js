@@ -84,10 +84,7 @@ function WelcomingDialog( {open, lessons, relations} ){
                 }}
 
             />
-            <HelpDialog
-                open={openHelpDialog}
-                onClose={()=>setOpenHelpDialog(false)}
-            />
+
             <AuthModal
                 open={openAuthModal}
                 onClose={()=>{
