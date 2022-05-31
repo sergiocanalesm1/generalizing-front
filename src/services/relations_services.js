@@ -55,3 +55,15 @@ export async function getRelation( uuid ){
     const relations = await getAllRelations();
     return relations.filter( r => (r.uuid === uuid ))[0];
 }
+
+export async function deleteRelation( uuid ){
+    const response = await fetch(
+        `${url}relations/${uuid}`,
+        {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.ok;
+}

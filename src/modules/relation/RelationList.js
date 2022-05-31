@@ -1,11 +1,14 @@
-import { Edit } from "@mui/icons-material";
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+import { Delete, Edit } from "@mui/icons-material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
+import ConfirmModal from "../components/ConfirmModal";
+import FeedbackDialog from "../components/FeedbackDialog";
 import RelationDetailDialog from "./RelationDetail";
 //import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
 
@@ -40,6 +43,11 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
     //const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
     //const [proxyRelations, setProxyRelations] = useState([]);
 
+    const [success, setSuccess] = useState(true);
+    const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+    const [openConfirmModal, setOpenConfirmModal] = useState(false);
+    const [confirmCallback, setConfirmCallback] = useState(()=>{});
+
 
     const handleOpenDetail = useCallback(( relation )=>{
         setOpen(false);
@@ -58,6 +66,21 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
             state:{ relation }
         })
     },[navigate,setOpen])
+
+    const handleDelete = useCallback(( uuid ) =>  {
+        setOpenConfirmModal(true);
+        setConfirmCallback( ( prevState ) => () => {
+            deleteRelation( uuid )
+                .then( ok => {
+                    if( !ok ){
+                        setSuccess(false);
+                    }
+                    setOpenConfirmModal(false);
+                    setOpenFeedbackDialog(true);
+                }
+            )}
+        );
+    },[])
 
     /*
     const handleRelationsSortClick = useCallback((criteria) => {
@@ -128,35 +151,51 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
                         { relations?.map((r)=>(
-                            <Stack direction="row" justifyContent="flex-start" key={r.id}>
-                                <ListItemButton
-                                    disableGutters
-                                    key={r.id}
-                                    sx={styles.relationListItem}
-                                    onClick={()=>handleOpenDetail(r)}
-                                >
-                                    <ListItemAvatar>
-                                        {/* TODO validate if file is img */}
-                                        {
-                                            r.files?.length > 0
-                                            ? <Avatar src={r.files[0].file.split("?")[0]} />
-                                            : <Avatar {...stringAvatar(r.name)} />
-                                        }
-                                        
-                                    </ListItemAvatar>
-                                    <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
-                                </ListItemButton>
+                            <Grid
+                                key={r.id}
+                                container
+                                spacing={3}
+                                alignItems="center"
+                            >
+                                <Grid item xs={10}>
+                                    <ListItemButton
+                                        disableGutters
+                                        key={r.id}
+                                        sx={styles.relationListItem}
+                                        onClick={()=>handleOpenDetail(r)}
+                                    >
+                                        <ListItemAvatar>
+                                            {/* TODO validate if file is img */}
+                                            {
+                                                r.files?.length > 0
+                                                ? <Avatar src={r.files[0].file.split("?")[0]} />
+                                                : <Avatar {...stringAvatar(r.name)} />
+                                            }
+                                            
+                                        </ListItemAvatar>
+                                        <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
+                                    </ListItemButton>
+                                </Grid>
                                 {
                                     r.user === getUserId() &&
-                                    <IconButton
-                                        edge="end" 
-                                        sx={{ color: 'gray' }}
-                                        onClick={() => handleEdit(r)}
-                                    >
-                                        <Edit />
-                                    </IconButton>
+                                        <Grid item xs={2}>
+                                            <IconButton
+                                                edge="end" 
+                                                sx={{ color: 'gray' }}
+                                                onClick={() => handleEdit(r)}
+                                            >
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton
+                                                edge="end" 
+                                                sx={{ color: 'gray' }}
+                                                onClick={() => handleDelete(r.uuid)}
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        </Grid>
                                 }
-                            </Stack>
+                            </Grid>
                         ))
                         }
                         
@@ -171,6 +210,22 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                 relation={selectedRelation}
                 setOpen={setOpenDetail}
                 onClose={handleDetailClose}
+            />
+            <ConfirmModal
+                open={openConfirmModal}
+                setOpen={setOpenConfirmModal}
+                callback={confirmCallback}
+            />
+
+            <FeedbackDialog
+                success={success}
+                open={openFeedbackDialog}
+                onClose={()=>{
+                    setOpenFeedbackDialog(false)
+                    if( success ){
+                        setOpen(false);
+                    }
+                }}
             />
         </div>
     )

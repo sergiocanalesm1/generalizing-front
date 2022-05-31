@@ -1,7 +1,8 @@
-import { Button, Card, CardActions, CardContent, Dialog, Grid, Stack } from "@mui/material";
+import { Button, Card, CardActions, CardContent, Dialog, Grid, Stack, Typography } from "@mui/material";
 
 function ConfirmModal( {open, setOpen, callback} ){
-
+    //This is currently only being used for deleting
+    
     return(
         <div>
             <Dialog
@@ -16,7 +17,9 @@ function ConfirmModal( {open, setOpen, callback} ){
 
                     
                     <CardContent>
-
+                        <Typography variant="body">
+                            Are you sure you want to delete this permanently?
+                        </Typography>
 
                     </CardContent>
                     <Grid container justifyContent="center" alignItems="center">

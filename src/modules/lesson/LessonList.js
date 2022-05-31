@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
-import { lessonPath } from "../../utils/paths";
+import { homePath, lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
 import ConfirmModal from "../components/ConfirmModal";
@@ -45,7 +45,8 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openConfirmModal, setOpenConfirmModal] = useState(false);
-    const [confirmCallback, setConfirmCallback] = useState();
+    const [confirmCallback, setConfirmCallback] = useState(()=>{});
+
 
     const handleOpenDetail = useCallback(( lesson )=>{
         if( canChoose ) {
@@ -72,17 +73,23 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
     },[navigate,setOpen])
 
 
-    const handleDelete = useCallback(( lesson ) =>  {
+    const handleDelete = useCallback(( uuid ) =>  {
         setOpenConfirmModal(true);
-        setConfirmCallback( () => {
-            deleteLesson( lesson.uuid ).then( ok => {
-                if( !ok ){
-                    setSuccess(false);
+        setConfirmCallback( ( prevState ) => () => {
+            deleteLesson( uuid )
+                .then( ok => {
+                    if( !ok ){
+                        setSuccess(false);
+                    }
+                    setOpenConfirmModal(false);
+                    setOpenFeedbackDialog(true);
+                    if( ok ){
+                        navigate( homePath );
+                    }
                 }
-                setOpenConfirmModal(false);
-                setOpenFeedbackDialog(true);
-            })});
-    },[])
+            )}
+        );
+    },[navigate])
 
     const handlelessonsSortClick = useCallback((criteria) => {
 
@@ -209,7 +216,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                             <IconButton
                                                 edge="end" 
                                                 sx={{ color: 'gray' }}
-                                                onClick={() => handleDelete(l)}
+                                                onClick={() => handleDelete(l.uuid)}
                                             >
                                                 <Delete />
                                             </IconButton>
@@ -245,7 +252,6 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                         setOpen(false);
                     }
                 }}
-
             />
         </div>
         
