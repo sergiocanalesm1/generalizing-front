@@ -167,7 +167,7 @@ function Header() {
           {isLogged 
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
-                <Grid item xs={8} md={1}>
+                <Grid item container xs={8} md={1} justifyContent="flex-end">
                   <IconButton
                     ref={refUserSettings}
                     size="large"
@@ -197,7 +197,7 @@ function Header() {
                     <MenuItem onClick={handleLogout}>Log Out</MenuItem>
                   </Menu>
                 </Grid>
-                <Grid item xs={4} md={1}>
+                <Grid item xs={4} md={1} justifyContent="flex-start">
                 <IconButton
                     size="large"
                     aria-label="account of current user"

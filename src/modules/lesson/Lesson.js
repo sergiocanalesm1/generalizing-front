@@ -70,6 +70,8 @@ function Lesson() {
 
   const [dbTags, setDbTags] = useState([]);
 
+  const [fetching, setFetching] = useState(false);
+
   const handleChange = useCallback((e)=>{
     setLesson({
       ...lesson,
@@ -91,6 +93,7 @@ function Lesson() {
   }, [tags,currentChip])
 
   const createOrUpdate = useCallback( async()=> {
+    setFetching(true);
     lesson.tags = tags.map((t)=>t.label);
     lesson.user = getUserId();
 
@@ -110,6 +113,7 @@ function Lesson() {
         setOpenFeedbackDialog(true);
       }
     )
+    setFetching(false);
   },[ files, lesson, tags, isUpdate, rawText ])
 
   useEffect(()=>{
@@ -176,18 +180,22 @@ function Lesson() {
                 justifyContent="space-evenly"
                 alignItems="center"
               >
-                <Grid item>
-                  <Select
-                    name="domain"
-                    value={lesson.domain}
-                    label="Domain"
-                    onChange={handleChange}
-                    required
-                  >
-                    {domains.map(d => (
-                      <MenuItem value={d} key={d}> {d} </MenuItem>
-                    ))}
-                  </Select>
+                <Grid item xs={5}>
+                  <Autocomplete
+                      clearOnEscape
+                      options={domains}
+                      name="domain"
+                      value={lesson.domain}
+                      onInputChange={(event, newInputValue) => {
+                        if( domains.indexOf(newInputValue) > -1 ){
+                          setLesson( prevState => ({
+                            ...prevState,
+                            domain: newInputValue
+                          }))
+                        }
+                      }}
+                      renderInput={(params) => <TextField {...params}/>}
+                    />
                   <FormHelperText>Domain</FormHelperText>
                 </Grid>
                 <Grid item>
@@ -293,7 +301,8 @@ function Lesson() {
                         setCurrentChip(newInputValue)
                       }}
                       renderInput={(params) => <TextField {...params}/>}
-                    />}
+                    />
+                  }
                 </Grid>
                 <Grid item xs={4} md={2}>
                   <Button
@@ -337,7 +346,7 @@ function Lesson() {
                   variant="contained"
                   endIcon={<Send color="secondary" />}
                   onClick={createOrUpdate}
-                  disabled={ !lesson.name || !(lesson.description || rawText) }
+                  disabled={ (!lesson.name || !(lesson.description || rawText)) || fetching }
                 >
                   { isUpdate ? "Update" : "Create!" }
                 </Button>

@@ -92,6 +92,8 @@ function Relation() {
     isExplanationRaw : true,
   });
 
+  const [fetching, setFetching] = useState(false);
+
   const handleChange = useCallback((e)=>{
     setRelation({
       ...relation,
@@ -118,6 +120,7 @@ function Relation() {
   },[chosenLessons]);
 
   const createOrUpdate = useCallback(async()=>{
+    setFetching(true);
     relation.user = getUserId();
     relation.lessons = chosenLessons.map((l)=>l.id);
     if( state?.challengeId ){
@@ -139,6 +142,7 @@ function Relation() {
         setOpenFeedbackDialog(true);
       }
     )
+    setFetching(false);
   },[chosenLessons, files, relation, state, isUpdate, rawText]);
 
   useEffect(()=>{
@@ -335,7 +339,7 @@ function Relation() {
               variant="contained"
               endIcon={<Send color="secondary" />}
               onClick={createOrUpdate}
-              disabled={!relation.name  || !(relation.explanation || rawText) }
+              disabled={ (!relation.name  || !(relation.explanation || rawText)) || fetching }
             >
               { isUpdate ? "Update" : "Relate!" }
             </Button>
