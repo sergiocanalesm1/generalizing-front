@@ -4,7 +4,9 @@ import { createTheme } from "@mui/material";
 const theme = createTheme({
     typography : {
       fontFamily : 'HomepageBaukasten, Arial',
-  
+      button:{
+        //fontSize:10
+      },
       h1 : {
         fontSize   : '1.8em',
         fontWeight : 700
@@ -52,6 +54,11 @@ const theme = createTheme({
         //main: '#9CFFD9' //ACUAMARINE
         main: '#FFF'
       },
+      neutral:{
+        main: '#000000',
+        contrastText:'#FFF'
+      },
+
     },
     background : {
       

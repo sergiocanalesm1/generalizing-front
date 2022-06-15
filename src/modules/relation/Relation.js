@@ -1,20 +1,26 @@
 import { Add, ArrowBack, Send } from "@mui/icons-material";
-import { Avatar, Box, Button, Dialog, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { getAllLessons } from "../../services/lessons_services";
-import { createOrUpdateRelation } from "../../services/relations_services";
+import { createOrUpdateRelation, getAllRelations } from "../../services/relations_services";
 import { methods } from "../../services/urls";
+import { combineLessonsWithRelations } from "../../utils/filters";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
-import LessonDetailCard from "../lesson/LessonDetail";
+import MyEditor from "../home/components/MyEditor";
+import LessonDetailDialog from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 
 
 const  styles = {
   relationPaper: {
+    '@media only screen and (max-width: 600px)': {
+      m:0,
+      p:1
+    },
     m: 2,
     p: 2,
     paddingLeft: 8,
@@ -32,6 +38,21 @@ const  styles = {
     width: 100,
     height: 100,
     bgcolor: "#808080"
+  },
+  root: {
+
+  },
+  editor: {
+    '&:hover': {
+      outline:"solid 0.5px"
+    },
+    '&:focus-within': {
+      outline:"#00B7EB solid 1px"
+    },
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    cursor: 'text',
+    p:1,
   },
 }
 
@@ -61,12 +82,17 @@ function Relation() {
 
   const [isUpdate,setIsUpdate] = useState(false);
 
+  const [rawText, setRawText] = useState();
+
   const [relation, setRelation] = useState({
     name : "",
     user : "",
     lessons : "",
     explanation : "",
+    isExplanationRaw : true,
   });
+
+  const [fetching, setFetching] = useState(false);
 
   const handleChange = useCallback((e)=>{
     setRelation({
@@ -76,7 +102,9 @@ function Relation() {
   }, [relation] );
 
   const detailOrListLesson = useCallback(async(index)=>{
+    const fetchedRelations = await getAllRelations();
     const fetchedLessons = await getAllLessons();
+    combineLessonsWithRelations(fetchedRelations, fetchedLessons);
     setLessons(fetchedLessons);
 
     if( !chosenLessons[index] ){
@@ -92,11 +120,17 @@ function Relation() {
   },[chosenLessons]);
 
   const createOrUpdate = useCallback(async()=>{
+    setFetching(true);
     relation.user = getUserId();
     relation.lessons = chosenLessons.map((l)=>l.id);
     if( state?.challengeId ){
       relation.challenge = state.challengeId;
     }
+
+    if( relation.isExplanationRaw ){
+      relation.explanation = JSON.stringify( rawText );
+    }
+
     const method = isUpdate ? methods.UPDATE : methods.CREATE;
     await createOrUpdateRelation( relation, files, method,
       ()=>{
@@ -108,7 +142,8 @@ function Relation() {
         setOpenFeedbackDialog(true);
       }
     )
-  },[chosenLessons, files, relation, state, isUpdate]);
+    setFetching(false);
+  },[chosenLessons, files, relation, state, isUpdate, rawText]);
 
   useEffect(()=>{
     if( lessonToChoose ){
@@ -127,6 +162,9 @@ function Relation() {
         setIsUpdate(true);
         setChosenLessons( state.relation.lessons );
         setRelation( state.relation );
+      }
+      if( state.newRelation ){
+        setChosenLessons( state.newRelation.lessons );
       }
     }
   },[ lessonToChoose, chosenIndex, chosenLessons, forceUpdate, state ])
@@ -151,9 +189,9 @@ function Relation() {
         >
 
           <Stack justifyContent="center" direction="row">
-            <Typography variant="h2">
+            <Typography variant="h2" align="center">
               {
-                state
+                state?.challengeId
                 ? <>Relating Challenge {state.challengeId}</>
                 : <>Create a Relation</>
               }
@@ -177,7 +215,7 @@ function Relation() {
                 { chosenLessons[0]
                   ?                                         
                     chosenLessons[0].files?.length > 0
-                    ? <Avatar src={chosenLessons[0].files[0].file.split("?")[0]} sx={styles.relationAvatar}/>
+                    ? <Avatar src={chosenLessons[0].files[ chosenLessons[0].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
                     : <Avatar {...stringAvatar(chosenLessons[0].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
                       <Add fontSize="large"/>
@@ -188,8 +226,8 @@ function Relation() {
                 { chosenLessons[1]
                   ?                                         
                     chosenLessons[1].files?.length > 0
-                    ? <Avatar src={chosenLessons[1].files[0].file.split("?")[0]} sx={styles.relationAvatar}/>
-                    : <Avatar {...stringAvatar(chosenLessons[0].name, styles.relationAvatar)} />
+                    ? <Avatar src={chosenLessons[1].files[ chosenLessons[1].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
+                    : <Avatar {...stringAvatar(chosenLessons[1].name, styles.relationAvatar)} />
                   : <Avatar sx={styles.relationAvatar}>
                       <Add fontSize="large"/>
                     </Avatar>
@@ -197,72 +235,92 @@ function Relation() {
             </Button>
           </Stack>
 
-          <Toolbar />
-            
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              <strong>Explain</strong> how you relate these concepts
-            </Typography>
-          </Stack>
-          <TextField
-            value={relation.explanation}
-            fullWidth
-            name="explanation"
-            multiline
-            onChange={handleChange}
-            required
-            minRows={3}
-            disabled={chosenLessons.length < 2}
-          />
 
           <Toolbar />
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              Give it a <strong>name</strong>
-            </Typography>
-          </Stack>
-          <TextField
-            value={relation.name}
-            fullWidth
-            name="name"
-            onChange={handleChange}
-            required
-            disabled={chosenLessons.length < 2}
-          />
+          
+          <Grid container direction="row" justifyContent="space-between">
+          <Grid item xs={12} md={9}>
+            <Stack justifyContent="center" direction="row">
+              <Typography variant="body" align="center">
+                <strong>Explain</strong> how you relate these concepts
+              </Typography>
+            </Stack>
 
-          <Toolbar />
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              Provide an optional file showing your product
-            </Typography>
-          </Stack>
-          <Grid
-            container
-            direction="column"
-            justifyContent="center"
-            alignItems="center"
-          >
-            <Grid item>
-              <Button
-                variant="contained"
-                component="label"
-                disabled={chosenLessons.length < 2}
-              >
-                Upload
-                <input
-                  type="file"
-                  hidden
-                  onChange={(e) => setFiles(e.target.files[0])}
+            { relation.isExplanationRaw
+              ? <Box sx={styles.root}>
+                  <Box sx={styles.editor}>
+                      <MyEditor
+                        setText={setRawText}
+                        rawText={ isUpdate ? relation.explanation : undefined}
+                      />
+                  </Box>
+                </Box>
+              : <TextField
+                  value={relation.explanation}
+                  fullWidth
+                  name="explanation"
+                  multiline
+                  onChange={handleChange}
+                  required
+                  minRows={3}
+                  disabled={chosenLessons.length < 2}
+                  autcomplete={false}
                 />
-              </Button>
-            </Grid>
-            <Grid item>
-            <Typography variant="small">
-              {files.name}
-            </Typography>
+            }
+          </Grid>
+
+          <Grid item xs={12} md={3}>
+            <Stack
+              direction="column"
+              justifyContent="center"
+              alignItems="center"
+              spacing={1}
+              sx={{
+                '@media only screen and (max-width: 600px)': {
+                  pt:3
+                },
+              }}
+            >
+              <Typography variant="body" align="center">
+                Provide an optional file showing your product
+              </Typography>
+                <Button
+                  variant="contained"
+                  component="label"
+                  disabled={chosenLessons.length < 2}
+                >
+                  Upload
+                  <input
+                    type="file"
+                    hidden
+                    onChange={(e) => setFiles(e.target.files[0])}
+                  />
+                </Button>
+              <Typography variant="small">
+                {files.name}
+              </Typography>
+            </Stack>
             </Grid>
           </Grid>
 
+          <Toolbar />
+          <Grid container justifyContent="center" alignItems="center" >
+            <Grid item container justifyContent="center">
+              <Typography variant="body">
+                Give it a <strong>name</strong>
+              </Typography>
+            </Grid>
+            <Grid item container justifyContent="center" xs={12} md={7}>
+              <TextField
+                fullWidth
+                value={relation.name}
+                name="name"
+                onChange={handleChange}
+                required
+                disabled={chosenLessons.length < 2}
+              />
+            </Grid>
+          </Grid>
           <Toolbar />
           <Stack
             direction="row"
@@ -281,7 +339,7 @@ function Relation() {
               variant="contained"
               endIcon={<Send color="secondary" />}
               onClick={createOrUpdate}
-              disabled={!relation.name}
+              disabled={ (!relation.name  || !(relation.explanation || rawText)) || fetching }
             >
               { isUpdate ? "Update" : "Relate!" }
             </Button>
@@ -298,17 +356,11 @@ function Relation() {
         canChoose
         setChosenLesson={setLessonToChoose}
       />
-      <Dialog
-        scroll="paper"
+      <LessonDetailDialog
         open={openDetail}
-        onClose={()=>setOpenDetail(false)}
-        fullWidth
-      > 
-        <LessonDetailCard
             lesson={selectedLessonDetail}
             onClose={()=>setOpenDetail(false)}
-        />
-      </Dialog>
+      />
       <FeedbackDialog
         success={success}
         open={openFeedbackDialog}

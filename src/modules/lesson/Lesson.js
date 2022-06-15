@@ -1,5 +1,5 @@
 import { ArrowBack, Send } from "@mui/icons-material";
-import { Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createOrUpdateLesson } from "../../services/lessons_services";
@@ -9,9 +9,15 @@ import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
+import { getAllTags } from "../../services/tags_services";
+import MyEditor from "../home/components/MyEditor";
 
 const styles = {
   lessonPaper: {
+    '@media only screen and (max-width: 600px)': {
+      m:0,
+      p:1
+    },
     m: 2,
     p: 2,
     paddingLeft: 8,
@@ -20,6 +26,21 @@ const styles = {
   lessonBox:{
     maxWidth: '100%',
     '& button': { m: 1 }
+  },
+  root: {
+
+  },
+  editor: {
+    '&:hover': {
+      outline:"solid 0.5px"
+    },
+    '&:focus-within': {
+      outline:"#00B7EB solid 1px"
+    },
+    border: '1px solid #ccc',
+    borderRadius: '5px',
+    cursor: 'text',
+    p:1,
   },
 }
 
@@ -32,8 +53,11 @@ function Lesson() {
     "description": "",
     "origin": origins[ origins.length - 1 ],
     "domain": domains[ domains.length - 1 ],
-    "user": ""
+    "user": "",
+    "isDescriptionRaw": true
   });
+
+  const [rawText, setRawText] = useState();
 
   const [files, setFiles] = useState({});
 
@@ -43,6 +67,10 @@ function Lesson() {
   const [openFeedbackDialog,setOpenFeedbackDialog] = useState( false );
 
   const [isUpdate,setIsUpdate] = useState(false);
+
+  const [dbTags, setDbTags] = useState([]);
+
+  const [fetching, setFetching] = useState(false);
 
   const handleChange = useCallback((e)=>{
     setLesson({
@@ -65,10 +93,16 @@ function Lesson() {
   }, [tags,currentChip])
 
   const createOrUpdate = useCallback( async()=> {
+    setFetching(true);
     lesson.tags = tags.map((t)=>t.label);
     lesson.user = getUserId();
 
+    if( lesson.isDescriptionRaw ){
+      lesson.description = JSON.stringify( rawText );
+    }
+
     const method = isUpdate ? methods.UPDATE : methods.CREATE
+    
     await createOrUpdateLesson( lesson, files, method, 
       ()=>{
         setSuccess(true);
@@ -79,7 +113,8 @@ function Lesson() {
         setOpenFeedbackDialog(true);
       }
     )
-  },[ files, lesson, tags, isUpdate ])
+    setFetching(false);
+  },[ files, lesson, tags, isUpdate, rawText ])
 
   useEffect(()=>{
     if( !Boolean(getUserUuid()) ) {
@@ -93,9 +128,11 @@ function Lesson() {
         color:stringToColor(t)
       })) );
     }
+    getAllTags().then( fetchedTags => {
+      setDbTags( fetchedTags.map( t => (capitalizeFirstLetter(t.tag)) ) )
+    })
   },[navigate,state])
 
-  
 
   return (
     <div>
@@ -116,95 +153,49 @@ function Lesson() {
           </Stack>
 
           <Toolbar />
-
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              <strong>Name</strong> what you learned
-            </Typography>
-          </Stack>
-
-          <TextField
-            value={lesson.name}
-            fullWidth
-            name="name"
-            onChange={handleChange}
-            required
-          />
-
-          <Toolbar />
-            
-          <Stack justifyContent="center" direction="row">
-            <Typography variant="body">
-              <strong>Explain</strong> what you learned the simpler you can. Include links to references if helpful
-            </Typography>
-          </Stack>
-          <TextField
-            value={lesson.description}
-            fullWidth
-            name="description"
-            multiline
-            onChange={handleChange}
-            minRows={3}
-            required
-          />
-
-          <Toolbar />
-          <Grid container justifyContent="space-evenly" alignItems="center">
-            <Grid item>
-              <Typography variant="body">
-                Provide photos if helpful
-              </Typography>
-              <br />
-              <Grid
-                container
-                direction="column"
-                justifyContent="center"
-                alignItems="center"
-              >
-                <Grid item>
-                  <Button
-                    variant="contained"
-                    component="label"
-                  >
-                    Upload
-                    <input
-                      type="file"
-                      hidden
-                      onChange={(e) => setFiles(e.target.files[0])}
-                    />
-                  </Button>
-                </Grid>
-                <Grid item>
-                <Typography variant="small">
-                  { files.name }
+          <Grid container>
+            <Grid item xs={12} md={7}>
+            <Stack justifyContent="center" direction="column">
+                <Typography variant="body" align="center">
+                  <strong>Name</strong> what you learned
                 </Typography>
-                </Grid>
-              </Grid>
+
+                <TextField
+                  value={lesson.name}
+                  fullWidth
+                  name="name"
+                  onChange={handleChange}
+                  required
+                />
+              </Stack>
             </Grid>
-
-            <Grid item>
-              <Typography variant="body">
-                Select domain and where you learned it from
-              </Typography>
-
-              <br />
+            <Grid item xs={12} md={5}>
+              <Stack justifyContent="center" direction="column">
+                <Typography variant="body" align="center">
+                  Select domain and where you learned it from
+                </Typography>
+              </Stack>
               <Grid 
                 container
                 justifyContent="space-evenly"
                 alignItems="center"
               >
-                <Grid item>
-                  <Select
-                    name="domain"
-                    value={lesson.domain}
-                    label="Domain"
-                    onChange={handleChange}
-                    required
-                  >
-                    {domains.map(d => (
-                      <MenuItem value={d} key={d}> {d} </MenuItem>
-                    ))}
-                  </Select>
+                <Grid item xs={5}>
+                  <Autocomplete
+                      clearOnEscape
+                      options={domains}
+                      name="domain"
+                      value={lesson.domain}
+                      onInputChange={(event, newInputValue) => {
+                        if( domains.indexOf(newInputValue) > -1 ){
+                          setLesson( prevState => ({
+                            ...prevState,
+                            domain: newInputValue
+                          }))
+                        }
+                      }}
+                      renderInput={(params) => <TextField {...params}/>}
+                    />
                   <FormHelperText>Domain</FormHelperText>
                 </Grid>
                 <Grid item>
@@ -227,52 +218,139 @@ function Lesson() {
 
           <Toolbar />
             
-          <Typography variant="body">
-            Create <strong>tags</strong> for your lesson
-          </Typography>
-          <Stack direction="row" justifyContent="flex-start">
-              <TextField
-                value={currentChip}
-                name="chip"
-                onChange={(e)=>{setCurrentChip(e.target.value)}}
+          <Stack justifyContent="center" direction="row">
+            <Typography variant="body" align="center">
+              <strong>Explain</strong> the lesson as simple as you can
+            </Typography>
+          </Stack>
+          { lesson.isDescriptionRaw
+            ? <Box sx={styles.root}>
+                <Box sx={styles.editor}>
+                    <MyEditor
+                      setText={setRawText}
+                      rawText={ isUpdate ? lesson.description : undefined}
+                    />
+                </Box>
+              </Box>
+            : <TextField
+                value={lesson.description}
+                fullWidth
+                name="description"
+                multiline
+                onChange={handleChange}
+                minRows={3}
+                required
+                autoComplete={false}
               />
-              <Button
-                onClick={createTag}
-                variant="contained"
-              >
-                Tag it
-              </Button>
-              <Stack direction="row" spacing={2}>
-                {tags.map( t =>(
-                    <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
-                ))}
-              </Stack>
-            </Stack>
-          
+          }
 
           <Toolbar />
-          <Stack
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-            spacing={2}
-          >
-            <Button 
-              variant="outlined"
-              startIcon={<ArrowBack />}
-              onClick={() => navigate(homePath)}
-            >
-              Go Back
-            </Button>
-            <Button 
-              variant="contained"
-              endIcon={<Send color="secondary" />}
-              onClick={createOrUpdate}
-              disabled={!lesson.name}
-            >
-              { isUpdate ? "Update" : "Create!" }
-            </Button>
-          </Stack>
+          <Grid container justifyContent="center" alignItems="center">
+            <Grid item xs={12} md={6}>
+              <Stack direction="row" justifyContent="center">
+                <Typography variant="body">
+                  Provide photos if helpful
+                </Typography>
+              </Stack>
+              <Grid
+                container
+                direction="column"
+                justifyContent="center"
+                alignItems="center"
+              >
+                <Grid item>
+                  <Button
+                    variant="contained"
+                    component="label"
+                  >
+                    Upload
+                    <input
+                      type="file"
+                      hidden
+                      onChange={(e) => setFiles(e.target.files[0])}
+                    />
+                  </Button>
+                </Grid>
+                <Grid item >
+                <Typography variant="small">
+                  { files.name }
+                </Typography>
+                </Grid>
+              </Grid>
+            </Grid>
+            <Grid item xs={12} md={6} sx={{pt:1}}>
+              <Stack direction="row" justifyContent="center">
+                <Typography variant="body">
+                  Create <strong>tags</strong> for your lesson
+                </Typography>
+              </Stack>
+              <Grid
+                item
+                container
+                justifyContent="center"
+                alignItems="center"
+              >
+                
+                <Grid item xs={12} md={6}>
+                  { dbTags.length > 0 &&
+                    <Autocomplete 
+                      options={dbTags}
+                      value={currentChip}
+                      name="chip"
+                      onInputChange={(event, newInputValue) => {
+                        setCurrentChip(newInputValue)
+                      }}
+                      renderInput={(params) => <TextField {...params}/>}
+                    />
+                  }
+                </Grid>
+                <Grid item xs={4} md={2}>
+                  <Button
+                    onClick={createTag}
+                    variant="contained"
+                    fullWidth
+                  >
+                    Tag it
+                  </Button>
+                </Grid>
+              </Grid>
+            </Grid>          
+              </Grid>
+              
+              {tags.length > 0 && <Toolbar /> }
+                
+              <Stack direction="row" justifyContent="center">
+                  <Stack direction="row" spacing={2}>
+                    {tags.map( t =>(
+                      <Chip key={t.label} label={ capitalizeFirstLetter(t.label) } onDelete={()=>handleChipDelete(t)} sx={{bgcolor:t.color, color:"#FFF"}}/>
+                      ))}
+                  </Stack>
+                </Stack>
+              
+
+              <Toolbar />
+              <Stack
+                direction="row"
+                justifyContent="center"
+                alignItems="center"
+                spacing={2}
+              >
+                <Button 
+                  variant="outlined"
+                  startIcon={<ArrowBack />}
+                  onClick={() => navigate(homePath)}
+                >
+                  Go Back
+                </Button>
+                <Button 
+                  variant="contained"
+                  endIcon={<Send color="secondary" />}
+                  onClick={createOrUpdate}
+                  disabled={ (!lesson.name || !(lesson.description || rawText)) || fetching }
+                >
+                  { isUpdate ? "Update" : "Create!" }
+                </Button>
+            </Stack>
           
         </Box>
       </Paper>

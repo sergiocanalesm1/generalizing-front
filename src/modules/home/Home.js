@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useCallback, useEffect, useState } from "react";
 
-import { Box, Button, CircularProgress, Stack, Toolbar } from "@mui/material";
+import { Box, Button, CircularProgress, Grid, Stack, Toolbar } from "@mui/material";
 import { AddCircleOutline, Attractions } from '@mui/icons-material';
 
 import { lessonPath, relationPath } from "../../utils/paths";
@@ -10,13 +10,15 @@ import AuthModal from "../components/AuthModal";
 import LessonListDialog from "../lesson/LessonList";
 import RelationGraph from "./components/RelationGraph";
 import RelationListDialog from "../relation/RelationList";
-import { getFirstTimer, getUserId, setFirstTimer } from "../../utils/user";
+import { getFirstTimer, getUserId } from "../../utils/user";
 import ChallengeDetailDialog from "../challenge/ChallengeDetail";
 import FeedbackDialog from "../components/FeedbackDialog";
 import { getAllRelations } from "../../services/relations_services";
 import { getAllLessons } from "../../services/lessons_services";
 import { getLastChallenge } from "../../services/challenges_services";
 import WelcomingDialog from "../components/Welcoming";
+import HelpDialog from "../components/HelpDialog";
+import { combineLessonsWithRelations } from "../../utils/filters";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -25,12 +27,13 @@ function Home() {
     
     const navigate = useNavigate();
 
-    const [openAuthModal, setOpenAuthModal] = useState( false );
     const [success, setSuccess] = useState( false );
+    const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
     const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
+    const [openHelpDialog, setOpenHelpDialog] = useState( false );
 
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
 
@@ -75,15 +78,20 @@ function Home() {
             setOpenWelcomingDialog(true);
         }
         getAllRelations().then( r => {
-            setRelations(r)
-            setRelationsToShow(r)
-        } );
-        getAllLessons().then( l => {
-            setLessons(l)
+            getAllLessons().then( l => {
+                setLessons( combineLessonsWithRelations(r, l) );
+                setRelations(r)
+                setRelationsToShow(r)
+            } );
+            getLastChallenge().then( c => {
+                const updatedLessons = combineLessonsWithRelations(r, [c.lesson_1, c.lesson_2]);
+                c.lesson_1 = updatedLessons[0];
+                c.lesson_2 = updatedLessons[1];
+                setLastChallenge(c);
+                
+            });
         });
-        getLastChallenge().then( c => {
-            setLastChallenge(c)
-        });
+        
     },[]);
 
     return (
@@ -91,41 +99,64 @@ function Home() {
             <Box>
                 <Box>
                     <Toolbar />
-                    <Stack
-                        direction="row"
+                    <Grid
+                        container
                         justifyContent="center"
                         alignItems="center"
-                        spacing={2}
-                        sx={{m:2}}
+                        sx={{
+                            '@media only screen and (max-width: 600px)': {
+                                p:1,
+                                mt:0
+                            },
+                            mt:2
+                        }}
+                        spacing={1}
                     >
-                        <Button 
-                            variant="contained"
-                            startIcon={<AddCircleOutline />}
-                            onClick={handleCreateLesson}
-                        >
-                            Add Lesson
-                        </Button>
-                        <Button 
-                            variant="contained"
-                            startIcon={<AddCircleOutline />}
-                            onClick={handleCreateRelation}
-                        >
-                            Create Relation
-                        </Button>
-                        {
-                            lastChallenge &&
-                            <Button 
+                        <Grid item xs={12} md={1}>
+                            <Button
+                                fullWidth
                                 variant="contained"
-                                startIcon={<Attractions />}
-                                onClick={handleViewChallenge}
+                                onClick={() => setOpenHelpDialog(true)}
                             >
-                                Challenge
+                                WTF
                             </Button>
-                        }
-  
-                    </Stack>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Button
+                                fullWidth
+                                variant="contained"
+                                startIcon={<AddCircleOutline />}
+                                onClick={handleCreateLesson}
+                            >
+                                Add Lesson
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            <Button 
+                                fullWidth
+                                variant="contained"
+                                startIcon={<AddCircleOutline />}
+                                onClick={handleCreateRelation}
+                            >
+                                Create Relation
+                            </Button>
+                        </Grid>
+                        <Grid item xs={12} md={3}>
+                            {
+                                lastChallenge &&
+                                <Button
+                                fullWidth
+                                    variant="contained"
+                                    startIcon={<Attractions />}
+                                    onClick={handleViewChallenge}
+                                >
+                                    Challenge of the Week
+                                </Button>
+                            }
+                        </Grid>
+                    </Grid>
                     {   relations.length > 0 & lessons.length > 0
-                        ? <div>
+                        ? <Box>
                             <RelationGraph 
                                 relations={relations} 
                                 setOpenList={setOpenRelationListDialog}
@@ -133,10 +164,11 @@ function Home() {
                                 setFilters={setRelationsFilters}
                             />
                             <Toolbar />
-                          </div>
-                        : <Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>
+                          </Box>
+                        : <>{<Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>}</>
                     }
                 </Box>
+                <Toolbar />
             </Box>
             <AuthModal
                 open={openAuthModal}
@@ -173,6 +205,7 @@ function Home() {
                 onClose={()=>setOpenRelationListDialog(false)}
                 relations={relationsToShow}
                 filters={relationsFilters}
+                filterType={'Domains'}
             />
             {   lastChallenge &&
                 <ChallengeDetailDialog
@@ -189,10 +222,24 @@ function Home() {
             <WelcomingDialog
                 open={openWelcomingDialog}
                 onClose={()=>{
-                    setFirstTimer();
                     setOpenWelcomingDialog(false)
                 }}
+                lessons={lessons}
+                relations={relations}
             />
+            <HelpDialog
+                open={openHelpDialog}
+                onClose={()=>setOpenHelpDialog(false)}
+                lessons={lessons}
+                relations={relations}
+            />
+            <HelpDialog
+                open={openHelpDialog}
+                onClose={()=>setOpenHelpDialog(false)}
+                lessons={lessons}
+                relations={relations}
+            />
+
         </div>       
     );
 }

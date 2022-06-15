@@ -1,5 +1,3 @@
-import { sortByOwned } from "../utils/filters";
-import { getUserId } from "../utils/user";
 import { methods, url } from "./urls";
 
 export async function getAllRelations(){
@@ -14,9 +12,7 @@ export async function getAllRelations(){
     });
     if( response.ok ) {
         const fetchedRelations = await response.json();
-        if( Boolean(getUserId()) ){
-            fetchedRelations.sort(sortByOwned);
-        }
+        fetchedRelations.reverse();//latest first
         return fetchedRelations;
     }
 }
@@ -36,7 +32,7 @@ export async function createOrUpdateRelation( relation, files, method, onSuccess
 
         if( files.name ) {
           let formData = new FormData();
-          formData.append( 'relation', parseInt(createdRelation.id) )
+          formData.append( 'relation', createdRelation.id )
           formData.append( 'file', files );
 
           response = await fetch(`${url}rfiles/`,{
@@ -53,4 +49,21 @@ export async function createOrUpdateRelation( relation, files, method, onSuccess
     else{
         onError()
     }
+}
+
+export async function getRelation( uuid ){
+    const relations = await getAllRelations();
+    return relations.filter( r => (r.uuid === uuid ))[0];
+}
+
+export async function deleteRelation( uuid ){
+    const response = await fetch(
+        `${url}relations/${uuid}`,
+        {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.ok;
 }

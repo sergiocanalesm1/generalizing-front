@@ -4,6 +4,10 @@ import  { domains } from '../../../utils/enums';
 import { filterByDomain } from '../../../utils/filters';
 
 
+function getId(sI,tI){
+  return `p${sI}-${tI}`; //p is neccesary because ids must begin with letter
+}
+
 function getData(fetchedRelations){
 
   return fetchedRelations.map( (r,i) => {
@@ -26,12 +30,11 @@ function getMatrix(dom,data){
   return matrix;
 
 }
-
+const heightConstant = window.innerWidth < 700 ? 1.2 : 0.5;
 const width = 945;
-const height=width*0.5;
+const height=width*heightConstant;
 const innerRadius = Math.min(width, height) * 0.3;
 const outerRadius = innerRadius + 10;
-
 
 const chord = d3.chord()
   .padAngle(10 / innerRadius)
@@ -46,11 +49,13 @@ const ribbon = d3.ribbonArrow()
   
 
 function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters }) {
+  
   const data = useMemo(()=>getData(relations),[relations])
   const names = domains;
   const matrix = useMemo(()=>getMatrix(names,data),[names,data])
+  
+  const d3Ref = useRef();
 
-  const d3Ref = useRef()
 
   useEffect(()=>{
       const color = d3.scaleOrdinal(names, d3.quantize(d3.interpolateRainbow, names.length));
@@ -63,7 +68,7 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
 
       const group = svg.append("g")
           .attr("font-family", "HomepageBaukasten, Arial")
-          .attr("font-size", 6)
+          .attr("font-size", window.innerWidth > 700 ? 6 : 12)
           .selectAll("g")
           .data(chords.groups)
           .join("g");
@@ -83,19 +88,11 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
           `)
           .attr("text-anchor", d => d.angle > Math.PI ? "end" : null)
           .text(d => names[d.index])
-          .on("mouseover",(e,d)=>{
-            //console.log("event",e)
-            //console.log("data",d)
-            //console.log(d3.selectAll(d.index))
-            //.attr("font-weight", "bold").attr("stroke","blue");
-            
-          })
           ;
     
       group.append("title")
           .text(d => {
 const total_relations = d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value);
-console.log(total_relations)
 return `${names[d.index]}
 ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
 })
@@ -108,13 +105,7 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
           .style("mix-blend-mode", "multiply")
           .attr("fill", d => color(names[d.target.index]))
           .attr("d", ribbon)
-          .append("title")
-            .text(d => 
-`${names[d.source.index]} ⇔ ${names[d.target.index]} 
-${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`);
-
-      svg.selectAll("path")
-          //.attr("opacity",1)
+          .attr("id", d => getId(d.source.index,d.target.index))
           .on("click",(e,d)=>{
             const d1 = domains[d.source.index];
             const d2 = domains[d.target.index];
@@ -122,6 +113,18 @@ ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`);
             setFilters(`${d1} and ${d2}`)
             setOpenList(true)
           })
+          .on("mouseover",(e,d)=>{
+            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 1)
+          })
+          .on("mouseout",(e,d)=>{
+            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 0.75)
+          })
+          .append("title")
+            .text(d => 
+`${names[d.source.index]} ⇔ ${names[d.target.index]} 
+${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
+;
+
     },[ relations, matrix, names, setFilters, setOpenList, setRelationsToShow ]
   );
 

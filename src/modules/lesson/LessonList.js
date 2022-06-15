@@ -1,12 +1,16 @@
-import { Edit } from "@mui/icons-material";
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import { Fragment, useCallback, useState } from "react";
+import { Delete, Edit } from "@mui/icons-material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
-import { lessonPath } from "../../utils/paths";
+import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
+import { homePath, lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
-import LessonDetailCard from "./LessonDetail";
+import ConfirmModal from "../components/ConfirmModal";
+import FeedbackDialog from "../components/FeedbackDialog";
+import LessonDetailDialog from "./LessonDetail";
 
 const styles = {
     lessonList:{ 
@@ -20,6 +24,12 @@ const styles = {
     }
 };
 
+const lessonsSortObj = {
+    random: "RANDOM",
+    mine: "MINE",
+    latest: "LATEST"
+}
+
 
 function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosenLesson}) {
 
@@ -27,6 +37,16 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
+    const [lessonsSort, setlessonsSort] = useState( lessonsSortObj.random );
+    const [proxyLessons, setProxyLessons] = useState([]);
+    const [latestLessons, setLatestLessons] = useState([]);
+    const [ownedLessons, setOwnedLessons] = useState([]);
+
+    const [success, setSuccess] = useState(true);
+    const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+    const [openConfirmModal, setOpenConfirmModal] = useState(false);
+    const [confirmCallback, setConfirmCallback] = useState(()=>{});
+
 
     const handleOpenDetail = useCallback(( lesson )=>{
         if( canChoose ) {
@@ -52,12 +72,75 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
         })
     },[navigate,setOpen])
 
+
+    const handleDelete = useCallback(( uuid ) =>  {
+        setOpenConfirmModal(true);
+        setConfirmCallback( ( prevState ) => () => {
+            deleteLesson( uuid )
+                .then( ok => {
+                    if( !ok ){
+                        setSuccess(false);
+                    }
+                    setOpenConfirmModal(false);
+                    setOpenFeedbackDialog(true);
+                    if( ok ){
+                        navigate( homePath );
+                    }
+                }
+            )}
+        );
+    },[navigate])
+
+    const handlelessonsSortClick = useCallback((criteria) => {
+
+        setlessonsSort(lessonsSortObj[criteria]);
+        if( lessonsSortObj[criteria] === lessonsSortObj.random ){
+            shuffle(lessons);
+            setProxyLessons(lessons);
+        }
+        if( lessonsSortObj[criteria] === lessonsSortObj.mine ){
+            if( ownedLessons.length === 0 ){
+                const temp = filterByOwned(lessons);
+                setOwnedLessons(temp);
+                setProxyLessons(temp);
+            }
+            else{
+                setProxyLessons(ownedLessons)
+            }
+        }
+        if( lessonsSortObj[criteria] === lessonsSortObj.latest ){
+            if( latestLessons.length === 0 ){
+                const temp = lessons;
+                temp.sort(sortByLatest);
+                setLatestLessons(temp);
+                setProxyLessons(temp);
+            }
+            else{
+                setProxyLessons(latestLessons);
+            }
+        }
+    },[lessons, latestLessons, ownedLessons])
+
+    const handleClose = useCallback(()=>{
+        setlessonsSort(lessonsSortObj.random);//random?
+        setLatestLessons([]);
+        setOwnedLessons([]);
+        onClose()
+    },[onClose])
+
+    useEffect(()=>{
+        if(open){
+            setProxyLessons(lessons);
+        }
+    },[open,lessons])
+
+
     return(
         <div>
             <Dialog
                 scroll="paper"
                 open={open}
-                onClose={onClose}
+                onClose={handleClose}
                 fullWidth
             >
                 <DialogTitle>
@@ -65,63 +148,111 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                         <Typography variant="h3">
                             View Lessons
                         </Typography>
+                        <Stack direction="row" justifyContent="flex-end" spacing={1}>
+                            {
+                                Object.keys(lessonsSortObj).map( ls => (
+                                    lessonsSortObj[ls] === lessonsSortObj.mine & !Boolean(getUserId())
+                                    ? <></>
+                                    :
+                                    <Button
+                                        key={ls}
+                                        sx={{ borderRadius: 28 }}
+                                        size="small"
+                                        color="neutral"
+                                        variant={ lessonsSortObj[ls] === lessonsSort ? "contained" :"outlined" }
+                                        disableElevation
+                                        onClick={() => handlelessonsSortClick(ls) }
+                                    >
+                                        {lessonsSortObj[ls]}    
+                                    </Button>
+                                ))
+                            }
+                        </Stack>
                     </div>
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.lessonList}>
-                        { lessons.map((l)=>(
-                            <Stack direction="row" justifyContent="flex-start" key={l.id}>
-                                <ListItemButton
-                                    disableGutters
-                                    onClick={()=>handleOpenDetail(l)}
-                                    sx={styles.lessonListItem}
-                                >
-                                    <ListItemAvatar>
-                                        {
-                                            l.files.length > 0
-                                            ? <Avatar src={l.files[0].file.split("?")[0]} />
-                                            : <Avatar {...stringAvatar(l.name)} />
-                                        }
-                                        
-                                    </ListItemAvatar>
-                                    <ListItemText  primary={l.name} secondary={ 
-                                        <Fragment>
-                                            {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
-                                            {l.tags && <br />}
-                                            {toDate(l.creation_date)}
-                                        </Fragment>
-                                    }/>
-                                </ListItemButton>
+                        { proxyLessons.map((l)=>(
+                            <Grid
+                                key={l.id}
+                                container
+                                spacing={3}
+                                alignItems="center"
+                            >
+                                <Grid item xs={10}>
+                                    <ListItemButton
+                                        disableGutters
+                                        onClick={()=>handleOpenDetail(l)}
+                                        sx={styles.lessonListItem}
+                                    >
+                                        <ListItemAvatar>
+                                            {
+                                                l.files.length > 0
+                                                ? <Avatar src={l.files[ l.files.length - 1 ].file.split("?")[0]} />
+                                                : <Avatar {...stringAvatar(l.name)} />
+                                            }
+                                            
+                                        </ListItemAvatar>
+                                        <ListItemText  primary={l.name} secondary={ 
+                                            <Fragment>
+                                                {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
+                                                {l.tags.length > 0 && <br />}
+                                                {toDate(l.creation_date)}
+                                            </Fragment>
+                                        }/>
+                                    </ListItemButton>
+
+                                </Grid>
                                 {
                                     l.user === getUserId() &&
-                                    <IconButton
-                                        edge="end" 
-                                        sx={{ color: 'gray' }}
-                                        onClick={() => handleEdit(l)}
-                                    >
-                                        <Edit />
-                                    </IconButton>
+                                        <Grid item xs={2}>
+                                            <IconButton
+                                                edge="end" 
+                                                sx={{ color: 'gray' }}
+                                                onClick={() => handleEdit(l)}
+                                            >
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton
+                                                edge="end" 
+                                                sx={{ color: 'gray' }}
+                                                onClick={() => handleDelete(l.uuid)}
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        </Grid>
                                 }
-                            </Stack>
+                            </Grid>
                         ))
                         }
                     </List>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={onClose}>Close</Button>
+                    <Button onClick={handleClose}>Close</Button>
                 </DialogActions>
             </Dialog>
-            <Dialog
-                fullWidth
+
+            <LessonDetailDialog
                 open={openDetail}
+                lesson={selectedLesson}
                 onClose={handleDetailClose}
-                scroll="paper"
-            >
-                <LessonDetailCard
-                    lesson={selectedLesson}
-                    onClose={handleDetailClose}
-                />
-            </Dialog>
+            />
+            <ConfirmModal
+                open={openConfirmModal}
+                setOpen={setOpenConfirmModal}
+                callback={confirmCallback}
+            />
+
+            <FeedbackDialog
+                success={success}
+                open={openFeedbackDialog}
+                onClose={()=>{
+                    setOpenFeedbackDialog(false)
+                    if( success ){
+                        setOpen(false);
+                    }
+                }}
+            />
         </div>
         
     )
