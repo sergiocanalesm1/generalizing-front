@@ -157,7 +157,7 @@ function Lesson() {
             <Grid item xs={12} md={7}>
             <Stack justifyContent="center" direction="column">
                 <Typography variant="body" align="center">
-                  <strong>Name</strong> what you learned
+                  <strong>Title</strong> of your lesson
                 </Typography>
 
                 <TextField

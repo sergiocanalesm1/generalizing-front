@@ -165,7 +165,14 @@ function Home() {
                             />
                             <Toolbar />
                           </Box>
-                        : <>{<Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>}</>
+                        : 
+                            <>
+                            {   <Stack direction="row" justifyContent="center">
+                                    <Toolbar />
+                                    <CircularProgress />
+                                </Stack>
+                            }
+                            </>
                     }
                 </Box>
                 <Toolbar />
