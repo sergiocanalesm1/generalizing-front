@@ -45,11 +45,12 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                     }
                     <CardContent>
                         <Typography variant="h4">{lesson.name}</Typography>
-                        <Toolbar  />
+                        
 
                         { lesson.isDescriptionRaw
                           ? 
                             <Box sx={styles.root}>
+                                <br />
                                 <Box sx={styles.editor}>
                                     <MyEditor
                                         readOnly
@@ -57,17 +58,20 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                                     />
                                 </Box>
                             </Box>
-                          : <Typography variant="body">
-                                <Linkify
-                                    componentDecorator={(decoratedHref, decoratedText, key) => (
-                                        <a target="blank" href={decoratedHref} key={key}>
-                                            {decoratedText}
-                                        </a>
-                                    )}
-                                >
-                                    {lesson.description}
-                                </Linkify>
-                            </Typography>
+                          : <div>
+                                <Toolbar  />
+                                <Typography variant="body">
+                                    <Linkify
+                                        componentDecorator={(decoratedHref, decoratedText, key) => (
+                                            <a target="blank" href={decoratedHref} key={key}>
+                                                {decoratedText}
+                                            </a>
+                                        )}
+                                    >
+                                        {lesson.description}
+                                    </Linkify>
+                                </Typography>
+                            </div>
                         }
                         <br />
                             <Stack 
