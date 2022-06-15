@@ -1,12 +1,15 @@
-import { Edit } from "@mui/icons-material";
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+import { Delete, Edit } from "@mui/icons-material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
-import { lessonPath } from "../../utils/paths";
+import { homePath, lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
 import { getUserId } from "../../utils/user";
+import ConfirmModal from "../components/ConfirmModal";
+import FeedbackDialog from "../components/FeedbackDialog";
 import LessonDetailDialog from "./LessonDetail";
 
 const styles = {
@@ -39,6 +42,12 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
     const [latestLessons, setLatestLessons] = useState([]);
     const [ownedLessons, setOwnedLessons] = useState([]);
 
+    const [success, setSuccess] = useState(true);
+    const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+    const [openConfirmModal, setOpenConfirmModal] = useState(false);
+    const [confirmCallback, setConfirmCallback] = useState(()=>{});
+
+
     const handleOpenDetail = useCallback(( lesson )=>{
         if( canChoose ) {
             setChosenLesson(lesson);
@@ -62,6 +71,25 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
             state:{ lesson }
         })
     },[navigate,setOpen])
+
+
+    const handleDelete = useCallback(( uuid ) =>  {
+        setOpenConfirmModal(true);
+        setConfirmCallback( ( prevState ) => () => {
+            deleteLesson( uuid )
+                .then( ok => {
+                    if( !ok ){
+                        setSuccess(false);
+                    }
+                    setOpenConfirmModal(false);
+                    setOpenFeedbackDialog(true);
+                    if( ok ){
+                        navigate( homePath );
+                    }
+                }
+            )}
+        );
+    },[navigate])
 
     const handlelessonsSortClick = useCallback((criteria) => {
 
@@ -144,42 +172,58 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.lessonList}>
-                        { proxyLessons.map((l)=>{
-                            return(
-                            <Stack direction="row" justifyContent="flex-start" key={l.id}>
-                                <ListItemButton
-                                    disableGutters
-                                    onClick={()=>handleOpenDetail(l)}
-                                    sx={styles.lessonListItem}
-                                >
-                                    <ListItemAvatar>
-                                        {
-                                            l.files.length > 0
-                                            ? <Avatar src={l.files[ l.files.length - 1 ].file.split("?")[0]} />
-                                            : <Avatar {...stringAvatar(l.name)} />
-                                        }
-                                        
-                                    </ListItemAvatar>
-                                    <ListItemText  primary={l.name} secondary={ 
-                                        <Fragment>
-                                            {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
-                                            {l.tags.length > 0 && <br />}
-                                            {toDate(l.creation_date)}
-                                        </Fragment>
-                                    }/>
-                                </ListItemButton>
+                        { proxyLessons.map((l)=>(
+                            <Grid
+                                key={l.id}
+                                container
+                                spacing={3}
+                                alignItems="center"
+                            >
+                                <Grid item xs={10}>
+                                    <ListItemButton
+                                        disableGutters
+                                        onClick={()=>handleOpenDetail(l)}
+                                        sx={styles.lessonListItem}
+                                    >
+                                        <ListItemAvatar>
+                                            {
+                                                l.files.length > 0
+                                                ? <Avatar src={l.files[ l.files.length - 1 ].file.split("?")[0]} />
+                                                : <Avatar {...stringAvatar(l.name)} />
+                                            }
+                                            
+                                        </ListItemAvatar>
+                                        <ListItemText  primary={l.name} secondary={ 
+                                            <Fragment>
+                                                {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
+                                                {l.tags.length > 0 && <br />}
+                                                {toDate(l.creation_date)}
+                                            </Fragment>
+                                        }/>
+                                    </ListItemButton>
+
+                                </Grid>
                                 {
                                     l.user === getUserId() &&
-                                    <IconButton
-                                        edge="end" 
-                                        sx={{ color: 'gray' }}
-                                        onClick={() => handleEdit(l)}
-                                    >
-                                        <Edit />
-                                    </IconButton>
+                                        <Grid item xs={2}>
+                                            <IconButton
+                                                edge="end" 
+                                                sx={{ color: 'gray' }}
+                                                onClick={() => handleEdit(l)}
+                                            >
+                                                <Edit />
+                                            </IconButton>
+                                            <IconButton
+                                                edge="end" 
+                                                sx={{ color: 'gray' }}
+                                                onClick={() => handleDelete(l.uuid)}
+                                            >
+                                                <Delete />
+                                            </IconButton>
+                                        </Grid>
                                 }
-                            </Stack>
-                        )})
+                            </Grid>
+                        ))
                         }
                     </List>
                 </DialogContent>
@@ -193,7 +237,22 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 lesson={selectedLesson}
                 onClose={handleDetailClose}
             />
+            <ConfirmModal
+                open={openConfirmModal}
+                setOpen={setOpenConfirmModal}
+                callback={confirmCallback}
+            />
 
+            <FeedbackDialog
+                success={success}
+                open={openFeedbackDialog}
+                onClose={()=>{
+                    setOpenFeedbackDialog(false)
+                    if( success ){
+                        setOpen(false);
+                    }
+                }}
+            />
         </div>
         
     )

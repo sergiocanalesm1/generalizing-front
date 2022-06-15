@@ -54,3 +54,15 @@ export async function getLesson( uuid ){
     const lessons = await getAllLessons();
     return lessons.filter( l => (l.uuid === uuid) )[0];
 }
+
+export async function deleteLesson( uuid ){
+    const response = await fetch(
+        `${url}lessons/${uuid}`,
+        {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+    });
+    return response.ok;
+}

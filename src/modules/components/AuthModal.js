@@ -32,6 +32,8 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     const [signupOrSignText,setSignupOrSignText] = useState('');
     const [footText, setFootText] = useState('');
 
+    const [fetching, setFetching] = useState(false);
+
     useEffect(()=>{
         if( isLogin ) {
             setSignupOrSignText('Log in');
@@ -46,13 +48,14 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     },[isLogin]);
 
     const handleSubmit = useCallback( async() => {
-        
+        setFetching(true);
         if( isLogin ) {
             await login(email,password,onSuccess,onError)
         }
         else {
             await signin(email,username,password,onSuccess,onError);
         }
+        setFetching(false);
       }, [email, password, isLogin, username, onError, onSuccess]);
     
 
@@ -117,7 +120,10 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                                 onClick={()=>{
                                     setIsLogin(!isLogin)
                                 }}
-                            >{footText}</Button>
+                                disabled={fetching}
+                            >
+                                {footText}
+                            </Button>
                         </Typography>
                     </Grid>
                 </Grid>

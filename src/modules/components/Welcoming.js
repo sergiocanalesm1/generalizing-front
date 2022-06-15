@@ -28,30 +28,31 @@ function WelcomingDialog( {open, lessons, relations} ){
                 <Card sx={{
                     overflow: 'auto',
                     p:3,
-                    pr:4
                 }}>
 
                     <Stack 
                         direction="row"
                         justifyContent="center"
+                        alignItems="center"
                     >
-                            <Typography variant="h3">Welcome to Generalizing!</Typography>
+                            <Typography variant="h3" align="center">Welcome to Generalizing!</Typography>
                     </Stack>
                     <CardMedia
                         component="img"
                         image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/relations.png"
                         alt="generalizing"
+                        sx={{pr:2}}
                     />
                     <CardContent>
                         <Stack 
                             direction="row"
                             justifyContent="center"
                         >
-                            <Typography variant="body">Add <em>Lessons</em> and create <em>Relations</em> to get more creative</Typography>
+                            <Typography variant="body" align="center">Add <em>Lessons</em> and create <em>Relations</em> to get more creative</Typography>
                         </Stack>
 
                     </CardContent>
-                        <Grid container>
+                        <Grid container justifyContent="center" alignItems="center">
                         <Grid item xs={12} md={6}>
                             <CardActions>
                                 <Button onClick={()=>setOpenHelpDialog(true)} color="primary">
@@ -83,10 +84,7 @@ function WelcomingDialog( {open, lessons, relations} ){
                 }}
 
             />
-            <HelpDialog
-                open={openHelpDialog}
-                onClose={()=>setOpenHelpDialog(false)}
-            />
+
             <AuthModal
                 open={openAuthModal}
                 onClose={()=>{
