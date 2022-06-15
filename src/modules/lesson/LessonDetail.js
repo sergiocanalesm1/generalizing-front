@@ -58,6 +58,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                                     />
                                 </Box>
                             </Box>
+<<<<<<< HEAD
                           : <div>
                                 <Toolbar  />
                                 <Typography variant="body">
@@ -72,6 +73,19 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                                     </Linkify>
                                 </Typography>
                             </div>
+=======
+                          : <Typography variant="body">
+                                <Linkify
+                                    componentDecorator={(decoratedHref, decoratedText, key) => (
+                                        <a target="blank" href={decoratedHref} key={key}>
+                                            {decoratedText}
+                                        </a>
+                                    )}
+                                >
+                                    {lesson.description}
+                                </Linkify>
+                            </Typography>
+>>>>>>> c6b66b7a71b459a8fa4d2f204c42252a41486abf
                         }
                         <br />
                             <Stack 
