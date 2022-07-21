@@ -1,2 +1,2 @@
 # Generalizing
-Undergraduate Project for boosting creativity developed using React.js. [generalizing.com.co](https://generalizing.com.co)
+Undergraduate final project (Thesis) for boosting creativity developed using React.js. [generalizing.com.co](https://generalizing.com.co)
