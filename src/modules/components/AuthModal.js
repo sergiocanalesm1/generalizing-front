@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Box, Button, Grid, Modal, TextField, Typography } from '@mui/material';
 import { login, signin } from '../../services/user_services';
+import { useHookstate } from '@hookstate/core';
+import { userState } from '../../globalState/globalState';
 
 const style = {
     modal :{
@@ -23,6 +25,8 @@ const style = {
 function AuthModal( { open, onClose, onSuccess, onError } ) {
     
     //TODO implement errors
+
+    const user = useHookstate(userState);
 
     const [email,setEmail] = useState('');
     const [username,setUsername] = useState('');
@@ -48,13 +52,18 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     },[isLogin]);
 
     const handleSubmit = useCallback( async() => {
+        //TODO check userUid or user
         setFetching(true);
+        let userUid;
         if( isLogin ) {
-            await login(email,password,onSuccess,onError)
+            userUid = await login(email,password,onSuccess,onError)
         }
         else {
-            await signin(email,username,password,onSuccess,onError);
+            userUid = await signin(email,username,password,onSuccess,onError);
         }
+        user.set({
+            userUid: userUid
+        })
         setFetching(false);
       }, [email, password, isLogin, username, onError, onSuccess]);
     

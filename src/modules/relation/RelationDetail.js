@@ -65,7 +65,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                 <Card sx={{overflow: 'auto'}}>
                     <CardContent>
                         <Stack direction="row" justifyContent="center">
-                            <Typography variant="h4">{relation.name}</Typography>
+                            <Typography variant="h4">{relation.title}</Typography>
                         </Stack>
                         
                         <br />
@@ -78,16 +78,16 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                             direction="row"
                         >
                             {
-                                relation.lessons.map( (l) =>(
-                                    <Stack direction="column" alignContent="center" key={l.id}>
+                                relation.lessons.map( l =>(
+                                    <Stack direction="column" alignContent="center" key={l.title}>
                                         <Stack direction="row" justifyContent="center">
                                             <Typography variant="small">{l.domain}</Typography>
                                         </Stack>
                                         <Button onClick={()=>showLessonDetail(l)}>
                                             {   
-                                                l.files.length > 0
-                                                ? <Avatar src={l.files[0].file.split("?")[0]} />
-                                                : <Avatar {...stringAvatar(l.name)} />
+                                                l.fileName
+                                                ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${l.fileName}`} />
+                                                : <Avatar {...stringAvatar(l.title)} />
                                             }
                                         </Button>
                                     </Stack>
@@ -95,13 +95,13 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                             }
                         </Stack>
                         
-                        {relation.files && relation.files.length > 0 &&
+                        {relation.fileName &&
                             <div>
                                 <br />
                                 <CardMedia
                                     component="img"
                                     height="50%"
-                                    image={relation.files[0].file.split("?")[0]}
+                                    image={`${process.env.REACT_APP_BUCKET}/${relation.fileName}`}
                                     alt="relation_file"
                                 />
                             </div>

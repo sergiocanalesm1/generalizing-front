@@ -3,25 +3,22 @@ import { useNavigate } from 'react-router-dom';
 
 import { AccountCircle, HelpOutline } from '@mui/icons-material';
 import { AppBar, Button, ButtonGroup, CardMedia, Container, Grid, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
+import { useHookstate } from '@hookstate/core';
 
 import { homePath, lessonPath, relationPath } from '../../utils/paths';
 import AuthModal from './AuthModal';
 import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
-import { clearUser, getUserUuid } from '../../utils/user';
+import { clearUser } from '../../utils/user';
 import FeedbackDialog from './FeedbackDialog';
-import { getAllRelations } from '../../services/relations_services';
-import { getAllLessons } from '../../services/lessons_services';
 import HelpDialog from './HelpDialog';
-import { combineLessonsWithRelations } from '../../utils/filters';
+import { lessonsState, relationsState, userState } from '../../globalState/globalState';
 //import { tempRelations } from '../../utils/enums';
 
 
 function Header() {
 
   const navigate = useNavigate();
-
-  const [isLogged, setIsLogged] = useState( false );
  
   const [openAuthModal, setOpenAuthModal] = useState( false );
   const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
@@ -39,21 +36,21 @@ function Header() {
   const [anchorElLessons, setAnchorElLessons] = useState();
   const refLessons = useRef();
 
-  const [lessons, setLessons] = useState([]);
-  const [relations, setRelations] = useState([]);
+  const relations = useHookstate(relationsState);
+  const user = useHookstate(userState);
 
   const [path,setPath] = useState("");
 
 
   const handleLogout = useCallback(()=> {
-    clearUser();
-    setIsLogged(false);
+    user.set({});
     navigate( homePath );
   },[navigate])
 
   const handleCreateLesson = useCallback(()=>{
     setAnchorElLessons();
-    if( Boolean(getUserUuid()) ) {
+    console.log(user.get().userUid)
+    if( user.get().userUid ) {
       navigate(lessonPath);
     }
     else  {
@@ -65,16 +62,12 @@ function Header() {
 
   const handleViewLessons = useCallback(async()=>{
     setAnchorElLessons();
-    const fetchedRelations = await getAllRelations();
-    const fetchedLessons = await getAllLessons();
-    combineLessonsWithRelations(fetchedRelations, fetchedLessons) 
-    setLessons(fetchedLessons);
     setOpenLessonListDialog(true);
   },[]);
 
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
-    if( Boolean(getUserUuid()) ) {
+    if( user.get().userUid ) {
         navigate(relationPath);
     }
     else  {
@@ -85,13 +78,11 @@ function Header() {
 
   const handleViewRelations = useCallback(async()=>{
     setAnchorElRelations();
-    const fetchedRelations = await getAllRelations();
-    setRelations(fetchedRelations);
     setOpenRelationListDialog(true);
   },[])
 
   useEffect(() => {
-    setIsLogged( Boolean(getUserUuid()) );
+
     setAnchorElUser();
   }, [openAuthModal,navigate]);
 
@@ -164,7 +155,7 @@ function Header() {
               <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
             </Menu>
           </Stack>
-          {isLogged 
+          {user.get().userUid 
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
                 <Grid item container xs={8} md={1} justifyContent="flex-end">
@@ -252,7 +243,6 @@ function Header() {
           open={openLessonListDialog}
           setOpen={setOpenLessonListDialog}
           onClose={()=>setOpenLessonListDialog(false)}
-          lessons={lessons}
       />
 
       <RelationListDialog
@@ -264,7 +254,6 @@ function Header() {
       <HelpDialog
         open={openHelpDialog}
         onClose={()=>setOpenHelpDialog(false)}
-        lessons={lessons}
         relations={relations}
       />
       <FeedbackDialog

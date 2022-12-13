@@ -1,14 +1,15 @@
+import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
-
 import { ThemeProvider, CssBaseline } from "@mui/material";
 
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import { initFirebase } from './helpers/firebase_helper';
 import theme from './common/theme';
+import * as serviceWorker from './serviceWorker';
+import App from './App';
 
-import 'babel-polyfill';
+initFirebase();
 
 ReactDOM.render(
   <React.StrictMode>

@@ -1,7 +1,11 @@
-import { Delete, Edit } from "@mui/icons-material";
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useHookstate } from "@hookstate/core";
+import { Delete, Edit } from "@mui/icons-material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+
+import { lessonsState } from "../../globalState/globalState";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
@@ -31,9 +35,12 @@ const lessonsSortObj = {
 }
 
 
-function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosenLesson}) {
+//TODO fix sort
+function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) {
 
     const navigate = useNavigate();
+
+    const lessons = useHookstate(lessonsState); //TODO change?
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
@@ -75,7 +82,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
 
     const handleDelete = useCallback(( uuid ) =>  {
         setOpenConfirmModal(true);
-        setConfirmCallback( ( prevState ) => () => {
+        setConfirmCallback( () => () => {
             deleteLesson( uuid )
                 .then( ok => {
                     if( !ok ){
@@ -95,7 +102,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
 
         setlessonsSort(lessonsSortObj[criteria]);
         if( lessonsSortObj[criteria] === lessonsSortObj.random ){
-            shuffle(lessons);
+            //shuffle(lessons);
             setProxyLessons(lessons);
         }
         if( lessonsSortObj[criteria] === lessonsSortObj.mine ){
@@ -149,7 +156,7 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                             View Lessons
                         </Typography>
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                            {
+                            {   lessons &&
                                 Object.keys(lessonsSortObj).map( ls => (
                                     lessonsSortObj[ls] === lessonsSortObj.mine & !Boolean(getUserId())
                                     ? <></>
@@ -172,9 +179,11 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.lessonList}>
-                        { proxyLessons.map((l)=>(
+                        {/* proxyLessons.map(l=>( */}
+                        
+                        { Object.keys(lessons).map( l => (
                             <Grid
-                                key={l.id}
+                                key={l.title}
                                 container
                                 spacing={3}
                                 alignItems="center"
@@ -187,17 +196,17 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                                     >
                                         <ListItemAvatar>
                                             {
-                                                l.files.length > 0
-                                                ? <Avatar src={l.files[ l.files.length - 1 ].file.split("?")[0]} />
-                                                : <Avatar {...stringAvatar(l.name)} />
+                                                l.fileName
+                                                ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${l.fileName}`} />
+                                                : <Avatar {...stringAvatar(l.title)} />
                                             }
                                             
                                         </ListItemAvatar>
-                                        <ListItemText  primary={l.name} secondary={ 
+                                        <ListItemText  primary={l.title} secondary={ 
                                             <Fragment>
-                                                {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
-                                                {l.tags.length > 0 && <br />}
-                                                {toDate(l.creation_date)}
+                                                {l.tags?.map(t => capitalizeFirstLetter(t) ).join(', ')}
+                                                {l.tags && <br />}
+                                                {toDate(l.creationDate)}
                                             </Fragment>
                                         }/>
                                     </ListItemButton>

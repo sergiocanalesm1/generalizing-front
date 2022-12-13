@@ -1,6 +1,8 @@
-import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import Linkify from "react-linkify";
+
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
+
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import MyEditor from "../home/components/MyEditor";
 import RelationListDialog from "../relation/RelationList";
@@ -35,16 +37,16 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                 scroll="paper"
             >
                 <Card sx={{overflow: 'auto'}}>
-                    {lesson.files && lesson.files.length > 0 &&
+                    {lesson.fileName &&
                         <CardMedia
                             component="img"
                             height="50%"
-                            image={lesson.files[lesson.files.length - 1].file.split("?")[0]}
+                            image={`${process.env.REACT_APP_BUCKET}/${lesson.fileName}`}
                             alt="lesson_file"
                         />
                     }
                     <CardContent>
-                        <Typography variant="h4">{lesson.name}</Typography>
+                        <Typography variant="h4">{lesson.title}</Typography>
                         <Toolbar  />
 
                         { lesson.isDescriptionRaw
@@ -133,7 +135,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                 onClose={()=>setOpenRelationListDialog(false)}
                 relations={lesson.relations}
                 filterType={"Lesson"}
-                filters={lesson.name}
+                filters={lesson.title}
             />
         </div>
     );

@@ -1,21 +1,26 @@
 import { shuffle } from "../utils/filters";
 import { methods, url } from "./urls";
 
-export async function getAllLessons(){
+import { collection, getDocs } from "firebase/firestore";
 
-    const response = await fetch(
-        `${url}lessons/`,
-        {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+
+const lessonsCollection = "lessons";
+
+export async function getAllLessons(db){
+
+    const lessons = {};
+    let data, tags;
+    const querySnapshot = await getDocs(collection(db, lessonsCollection));
+    querySnapshot.forEach((doc) => {
+        data = doc.data();
+        if( data.tags ){
+            tags = data.tags.split(",");
+            data.tags = tags;
+        }
+        lessons[doc.id] = data;
+        //lessons.push({[doc.id]:data})
     });
-    if( response.ok ) {
-        const fetchedLessons = await response.json();
-        shuffle(fetchedLessons);
-        return fetchedLessons;
-    }
+    return lessons;
 }
 
 export async function createOrUpdateLesson( lesson, files, method, onSuccess, onError ){

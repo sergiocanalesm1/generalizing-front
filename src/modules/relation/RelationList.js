@@ -1,7 +1,9 @@
+import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
@@ -34,7 +36,7 @@ const relationsSortObj = {
 */
 
 
-function RelationListDialog({open, setOpen, onClose, relations, filterType, filters}) {
+function RelationListDialog({open, setOpen, onClose,relations, filterType, filters}) {
 
     const navigate = useNavigate();
 
@@ -42,6 +44,8 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
     const [selectedRelation, setSelectedRelation] = useState();
     //const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
     //const [proxyRelations, setProxyRelations] = useState([]);
+
+    const user = useHookstate(userState);
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -67,10 +71,10 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
         })
     },[navigate,setOpen])
 
-    const handleDelete = useCallback(( uuid ) =>  {
+    const handleDelete = useCallback(( id ) =>  {
         setOpenConfirmModal(true);
         setConfirmCallback( ( prevState ) => () => {
-            deleteRelation( uuid )
+            deleteRelation( id )
                 .then( ok => {
                     if( !ok ){
                         setSuccess(false);
@@ -107,7 +111,7 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
         //setProxyRelations(relations);
     },[relations])
 
-    if( !relations ){
+    if( !relations.get() ){
         return <></>;
     }
 
@@ -150,9 +154,10 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        { relations?.map((r)=>(
+                        {  Object.keys(relations).map( id => (
+                            relations.get()[id] && 
                             <Grid
-                                key={r.id}
+                                key={id}
                                 container
                                 spacing={3}
                                 alignItems="center"
@@ -160,36 +165,36 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                                 <Grid item xs={10}>
                                     <ListItemButton
                                         disableGutters
-                                        key={r.id}
+                                        key={id}
                                         sx={styles.relationListItem}
-                                        onClick={()=>handleOpenDetail(r)}
+                                        onClick={()=>handleOpenDetail(relations.get()[id])}
                                     >
                                         <ListItemAvatar>
                                             {/* TODO validate if file is img */}
                                             {
-                                                r.files?.length > 0
-                                                ? <Avatar src={r.files[0].file.split("?")[0]} />
-                                                : <Avatar {...stringAvatar(r.name)} />
+                                                relations.get()[id].fileName
+                                                ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${relations.get()[id].fileName}`} />
+                                                : <Avatar {...stringAvatar(relations.get()[id].title)} />
                                             }
                                             
                                         </ListItemAvatar>
-                                        <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
+                                        <ListItemText  primary={relations.get()[id].title} secondary={toDate(relations.get()[id].creationDate)}/>
                                     </ListItemButton>
                                 </Grid>
                                 {
-                                    r.user === getUserId() &&
+                                    relations.get()[id].userId === user.get().userId &&
                                         <Grid item xs={2}>
                                             <IconButton
                                                 edge="end" 
                                                 sx={{ color: 'gray' }}
-                                                onClick={() => handleEdit(r)}
+                                                onClick={() => handleEdit(relations.get()[id])}
                                             >
                                                 <Edit />
                                             </IconButton>
                                             <IconButton
                                                 edge="end" 
                                                 sx={{ color: 'gray' }}
-                                                onClick={() => handleDelete(r.uuid)}
+                                                onClick={() => handleDelete(id)}
                                             >
                                                 <Delete />
                                             </IconButton>

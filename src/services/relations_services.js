@@ -1,20 +1,22 @@
+import { collection, getDocs } from "firebase/firestore";
+
 import { methods, url } from "./urls";
 
-export async function getAllRelations(){
 
-    const response = await fetch(
-        `${url}relations/`,
-        {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-        },
+const relationsCollection = "relations";
+
+export async function getAllRelations(db){
+    const relations = {}
+    let data, lessons;
+    const querySnapshot = await getDocs(collection(db, relationsCollection));
+    querySnapshot.forEach((doc) => {
+        data = doc.data();
+        lessons = data.lessons.split(",")
+        data.lessons = lessons
+        relations[doc.id] = data;
+        //relations.push({[doc.id]:data})
     });
-    if( response.ok ) {
-        const fetchedRelations = await response.json();
-        fetchedRelations.reverse();//latest first
-        return fetchedRelations;
-    }
+    return relations;
 }
 
 export async function createOrUpdateRelation( relation, files, method, onSuccess, onError ){

@@ -1,24 +1,29 @@
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useCallback, useEffect, useState } from "react";
-
 import { Box, Button, CircularProgress, Grid, Stack, Toolbar } from "@mui/material";
-import { AddCircleOutline, Attractions } from '@mui/icons-material';
+import { AddCircleOutline } from '@mui/icons-material';
+import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
+import { getFirstTimer } from "../../utils/user";
+import { db, lessonsState, relationsState, domainsState, tagsState, originsState, userState } from "../../globalState/globalState";
+import { fetchData } from "../../helpers/data_helper";
 import AuthModal from "../components/AuthModal";
-import LessonListDialog from "../lesson/LessonList";
+import HelpDialog from "../components/HelpDialog";
 import RelationGraph from "./components/RelationGraph";
-import RelationListDialog from "../relation/RelationList";
-import { getFirstTimer, getUserId } from "../../utils/user";
-import ChallengeDetailDialog from "../challenge/ChallengeDetail";
 import FeedbackDialog from "../components/FeedbackDialog";
+import WelcomingDialog from "../components/Welcoming";
+import LessonListDialog from "../lesson/LessonList";
+import RelationListDialog from "../relation/RelationList";
 import { getAllRelations } from "../../services/relations_services";
 import { getAllLessons } from "../../services/lessons_services";
-import { getLastChallenge } from "../../services/challenges_services";
-import WelcomingDialog from "../components/Welcoming";
-import HelpDialog from "../components/HelpDialog";
-import { combineLessonsWithRelations } from "../../utils/filters";
+import { getAllDomains } from "../../services/domains_services";
+import { getAllTags } from "../../services/tags_services";
+import { getAllOrigins } from "../../services/origins_services";
+import { combineLessonsWithRelations, setupLessons } from "../../helpers/lessons_helper";
+//import ChallengeDetailDialog from "../challenge/ChallengeDetail";
+// import { getLastChallenge } from "../../services/challenges_services";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
 //const t_relations =  tempRelations()
 
@@ -27,19 +32,29 @@ function Home() {
     
     const navigate = useNavigate();
 
+    //const state = useHookstate(globalState);
+    const lessons = useHookstate(lessonsState);
+    const relations = useHookstate(relationsState);
+    const domains = useHookstate(domainsState);
+    const tags = useHookstate(tagsState);
+    const origins = useHookstate(originsState);
+    const user = useHookstate(userState);
+    const fbDB = useHookstate(db);
+
     const [success, setSuccess] = useState( false );
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
-    const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
+    //const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
     const [openHelpDialog, setOpenHelpDialog] = useState( false );
 
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
 
-    const [lessons, setLessons] = useState([]);
-    const [relations, setRelations] = useState([]);
-    const [lastChallenge, setLastChallenge] = useState({});
+    const [fetching, setFetching] = useState(true);
+
+
+    //const [lastChallenge, setLastChallenge] = useState({});
 
     //this temp variable is used so that the d3 graph does not get rendered constantly
     const [relationsToShow, setRelationsToShow] = useState([]);
@@ -50,7 +65,7 @@ function Home() {
 
 
     const handleCreateLesson = useCallback(()=>{
-        if( Boolean( getUserId() ) ) {
+        if( Boolean( user.get().userId ) ) {
             navigate(lessonPath);
         }
         else  {
@@ -60,7 +75,7 @@ function Home() {
     },[navigate])
 
     const handleCreateRelation = useCallback(()=>{
-        if( Boolean( getUserId() ) ) {
+        if( Boolean( user.get().userId ) ) {
             navigate(relationPath);
         }
         else  {
@@ -69,20 +84,39 @@ function Home() {
         }
     },[navigate]);
 
+
+    /*
     const handleViewChallenge = useCallback(()=>{
         setOpenChallengeDetailDialog(true);
     },[])
-
+    */
     useEffect(()=>{
         if( !getFirstTimer() ){
             setOpenWelcomingDialog(true);
         }
-        getAllRelations().then( r => {
-            getAllLessons().then( l => {
-                setLessons( combineLessonsWithRelations(r, l) );
-                setRelations(r)
-                setRelationsToShow(r)
-            } );
+        
+        const db = fbDB.get();
+        
+        getAllRelations(db).then( fetchedRelations => {         
+            getAllLessons(db).then( fetchedLessons => {
+                getAllDomains(db).then( fetchedDomains => {
+                    getAllTags(db).then( fetchedTags => {
+                        getAllOrigins(db).then( fetchedOrigins => {
+                            fetchedLessons = combineLessonsWithRelations(fetchedRelations, fetchedLessons, fetchedDomains, fetchedOrigins, fetchedTags);
+                            relations.set(fetchedRelations)
+                            domains.set(fetchedDomains)
+                            tags.set(fetchedTags)
+                            origins.set(fetchedOrigins) 
+                            lessons.set(fetchedLessons)
+                            setRelationsToShow(relations)
+                            setFetching(false)
+                        })
+                    })
+                })
+            })
+        })
+        
+            /*
             getLastChallenge().then( c => {
                 const updatedLessons = combineLessonsWithRelations(r, [c.lesson_1, c.lesson_2]);
                 c.lesson_1 = updatedLessons[0];
@@ -90,12 +124,10 @@ function Home() {
                 setLastChallenge(c);
                 
             });
-        });
-        
+            */
     },[]);
-
     return (
-        <div>
+        <Fragment>
             <Box>
                 <Box>
                     <Toolbar />
@@ -106,13 +138,13 @@ function Home() {
                         sx={{
                             '@media only screen and (max-width: 600px)': {
                                 p:1,
-                                mt:0
+                                mt:0,
                             },
                             mt:2
                         }}
                         spacing={1}
                     >
-                        <Grid item xs={12} md={1}>
+                        <Grid item xs={12} md={2}>
                             <Button
                                 fullWidth
                                 variant="contained"
@@ -141,21 +173,23 @@ function Home() {
                                 Create Relation
                             </Button>
                         </Grid>
-                        <Grid item xs={12} md={3}>
-                            {
-                                lastChallenge &&
-                                <Button
-                                fullWidth
-                                    variant="contained"
-                                    startIcon={<Attractions />}
-                                    onClick={handleViewChallenge}
-                                >
-                                    Challenge of the Week
-                                </Button>
-                            }
-                        </Grid>
+                        {/*
+                            <Grid item xs={12} md={3}>
+                                {
+                                    lastChallenge &&
+                                    <Button
+                                    fullWidth
+                                        variant="contained"
+                                        startIcon={<Attractions />}
+                                        onClick={handleViewChallenge}
+                                    >
+                                        Challenge of the Week
+                                    </Button>
+                                }
+                            </Grid>
+                        */}
                     </Grid>
-                    {   relations.length > 0 & lessons.length > 0
+                    {   !fetching
                         ? <Box>
                             <RelationGraph 
                                 relations={relations} 
@@ -164,8 +198,13 @@ function Home() {
                                 setFilters={setRelationsFilters}
                             />
                             <Toolbar />
-                          </Box>
-                        : <>{<Stack direction="row" justifyContent="center"> <CircularProgress /> </Stack>}</>
+                        </Box>
+                        : <>{
+                            <div>
+                                <Toolbar />
+                                <Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
+                            </div>
+                            }</>
                     }
                 </Box>
                 <Toolbar />
@@ -193,21 +232,36 @@ function Home() {
                     setOpenFeedbackDialog(false)
                 }}
             />
-            <LessonListDialog
-                open={openLessonListDialog}
-                setOpen={setOpenLessonListDialog}
-                onClose={()=>setOpenLessonListDialog(false)}
-                lessons={lessons}
+            <WelcomingDialog
+                open={openWelcomingDialog}
+                onClose={()=>{
+                    setOpenWelcomingDialog(false)
+                }}
             />
-            <RelationListDialog
-                open={openRelationListDialog}
-                setOpen={setOpenRelationListDialog}
-                onClose={()=>setOpenRelationListDialog(false)}
-                relations={relationsToShow}
-                filters={relationsFilters}
-                filterType={'Domains'}
+            <HelpDialog
+                open={openHelpDialog}
+                onClose={()=>setOpenHelpDialog(false)}
             />
-            {   lastChallenge &&
+            {
+                !fetching &&
+                <Fragment>
+                    <LessonListDialog
+                        open={openLessonListDialog}
+                        setOpen={setOpenLessonListDialog}
+                        onClose={()=>setOpenLessonListDialog(false)}
+                    />
+                    <RelationListDialog
+                        open={openRelationListDialog}
+                        setOpen={setOpenRelationListDialog}
+                        onClose={()=>setOpenRelationListDialog(false)}
+                        relations={relationsToShow}
+                        filters={relationsFilters}
+                        filterType={'Domains'}
+                    />
+                </Fragment>
+
+            }
+            {/*   lastChallenge &&
                 <ChallengeDetailDialog
                     open={openChallengeDetailDialog}
                     setOpen={setOpenChallengeDetailDialog}
@@ -218,29 +272,8 @@ function Home() {
                     setRelationsToShow={setRelationsToShow}
                     setFilters={setRelationsFilters}
                 />
-            }
-            <WelcomingDialog
-                open={openWelcomingDialog}
-                onClose={()=>{
-                    setOpenWelcomingDialog(false)
-                }}
-                lessons={lessons}
-                relations={relations}
-            />
-            <HelpDialog
-                open={openHelpDialog}
-                onClose={()=>setOpenHelpDialog(false)}
-                lessons={lessons}
-                relations={relations}
-            />
-            <HelpDialog
-                open={openHelpDialog}
-                onClose={()=>setOpenHelpDialog(false)}
-                lessons={lessons}
-                relations={relations}
-            />
-
-        </div>       
+            */}
+        </Fragment>       
     );
 }
   

@@ -1,8 +1,22 @@
-import { setUser } from "../utils/user";
-import { url } from "./urls";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+
 
 export async function signin(email,username,password,onSuccess,onError){
+    
+    const auth = getAuth();
+    createUserWithEmailAndPassword(auth, email, password)
+      .then((userCredential) => {
+        // Signed in 
+        onSuccess();
+        return userCredential.user
 
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        onError()
+      });
+      /*
     const response = await fetch(`${url}users/`,{
         method: 'POST',
         headers: {
@@ -27,9 +41,25 @@ export async function signin(email,username,password,onSuccess,onError){
     else{
         onError()
     }
+    */
 }
 
 export async function login(email, password,onSuccess,onError){
+
+    const auth = getAuth();
+        signInWithEmailAndPassword(auth, email, password)
+            .then((userCredential) => {
+                // Signed in 
+                onSuccess();
+                return userCredential.user
+            })
+            .catch((error) => {
+                const errorCode = error.code;
+                const errorMessage = error.message;
+                onError()
+    });
+
+    /*
     const response = await fetch(`${url}login/`,{
         method: 'POST',
         headers: {
@@ -52,4 +82,5 @@ export async function login(email, password,onSuccess,onError){
     else{
         onError()
     }
+    */
 }

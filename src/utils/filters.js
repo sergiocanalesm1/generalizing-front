@@ -33,10 +33,10 @@ export function sortByOwned( o1, o2 ){
 }
 
 export function sortByLatest( o1, o2 ){
-  if( o1.creation_date > o2.creation_date ){
+  if( o1.creationDate > o2.creationDate ){
     return -1
   }
-  if( o1.creation_date < o2.creation_date ){
+  if( o1.creationDate < o2.creationDate ){
     return 1
   }
   return 0
@@ -62,30 +62,4 @@ export function shuffle(array) {
   }
 
   return array;
-}
-
-export function combineLessonsWithRelations( relations, lessons ){
-
-  const cached_lesson_obj = {};
-  for( let i=0 ; i < lessons.length ; i++){
-    cached_lesson_obj[ lessons[i].id ] = lessons[i]; 
-  }
-  for( let i=0 ; i<relations.length ; i++){
-    const lesson1 = cached_lesson_obj[ relations[i].lessons[0].id ];
-    if(lesson1){
-      lesson1.relations ? lesson1.relations.push( relations[i] ) : lesson1.relations = [ relations[i] ];
-      cached_lesson_obj[ relations[i].lessons[0].id ] = lesson1;
-
-    }
-    const lesson2 = cached_lesson_obj[ relations[i].lessons[1].id ];
-    
-    if(lesson2){
-      lesson2.relations ? lesson2.relations.push( relations[i] ) : lesson2.relations = [ relations[i] ];
-      cached_lesson_obj[ relations[i].lessons[1].id ] = lesson2;
-
-    }
-
-  }
-
-  return Object.keys(cached_lesson_obj).map( id => (cached_lesson_obj[id]));
 }

@@ -1,20 +1,24 @@
+import { useHookstate } from '@hookstate/core';
 import * as d3 from 'd3';
 import { useEffect, useMemo, useRef } from 'react';
-import  { domains } from '../../../utils/enums';
+
+
 import { filterByDomain } from '../../../utils/filters';
+import { domainsState, lessonsState,relationsState } from '../../../globalState/globalState'
 
 
 function getId(sI,tI){
   return `p${sI}-${tI}`; //p is neccesary because ids must begin with letter
 }
 
-function getData(fetchedRelations){
+function getData(lessons,relations,domains){ 
+  //this gets sorted because it simplifies the filtering by domain
+  let d1,d2,sortedDomains = [];
+  return Object.keys(relations).map( id => {
+    d1 = domains[ lessons[relations[id].lessons[0]].domain ].domain; //TODO check if domain is like this
+    d2 = domains[ lessons[relations[id].lessons[1]].domain ].domain;
+    sortedDomains =  [d1,d2].sort();
 
-  return fetchedRelations.map( (r,i) => {
-    //this gets sorted because it simplifies the filtering by domain
-    const d1 = r.lessons[0].domain;
-    const d2 = r.lessons[1].domain;
-    const sortedDomains =  [d1,d2].sort();
     return {
       source: sortedDomains[0],
       target: sortedDomains[1],
@@ -23,9 +27,10 @@ function getData(fetchedRelations){
   })
 }
 
-function getMatrix(dom,data){
-  const index = new Map(dom.map((d, i) => [d, i]));
-  const matrix  = Array.from(index, () => new Array(dom.length).fill(0));
+function getMatrix(names,data){
+
+  const index = new Map(names.map((d, i) => [d, i]));
+  const matrix  = Array.from(index, () => new Array(names.length).fill(0));
   for (const {source, target, value} of data) matrix[index.get(source)][index.get(target)] += value;
   return matrix;
 
@@ -48,11 +53,19 @@ const ribbon = d3.ribbonArrow()
   .padAngle(1 / innerRadius);
   
 
-function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters }) {
-  
-  const data = useMemo(()=>getData(relations),[relations])
-  const names = domains;
-  const matrix = useMemo(()=>getMatrix(names,data),[names,data])
+function RelationGraph({ setOpenList, setRelationsToShow, setFilters }) {
+
+  const relations = useHookstate(relationsState);
+  const lessons = useHookstate(lessonsState);
+  const domains = useHookstate(domainsState);
+
+  const data = useMemo(() => getData(lessons.get(),relations.get(),domains.get()),[relations] );
+  const names = useMemo(() => {
+    return Object.keys(domains.get()).map( id => {
+      return domains.get()[id].domain
+    } )
+  },[domains])
+  const matrix = useMemo(()=> getMatrix(names,data),[names,data])
   
   const d3Ref = useRef();
 
@@ -92,13 +105,15 @@ function RelationGraph({ relations, setOpenList, setRelationsToShow, setFilters 
     
       group.append("title")
           .text(d => {
-const total_relations = d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value);
-return `${names[d.index]}
+            
+      const total_relations = d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value);
+
+      return `${names[d.index]}
 ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
-})
+  })
 
       svg.append("g")
-          .attr("fill-opacity", 0.75)
+          .attr("fill-opacity", 0.7)
           .selectAll("path")
           .data(chords)
           .join("path")
@@ -114,10 +129,10 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
             setOpenList(true)
           })
           .on("mouseover",(e,d)=>{
-            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 1)
+            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 0.9)
           })
           .on("mouseout",(e,d)=>{
-            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 0.75)
+            d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 0.7)
           })
           .append("title")
             .text(d => 
