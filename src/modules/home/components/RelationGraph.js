@@ -4,35 +4,16 @@ import { useEffect, useMemo, useRef } from 'react';
 
 
 import { filterByDomain } from '../../../utils/filters';
-import { domainsState, lessonsState,relationsState } from '../../../globalState/globalState'
+import { domainsState, lessonsState,relationsState, relationsToListState } from '../../../globalState/globalState'
 
 
 function getId(sI,tI){
   return `p${sI}-${tI}`; //p is neccesary because ids must begin with letter
 }
 
-function getData(lessons,relations,domains){ 
-  //this gets sorted because it simplifies the filtering by domain
-  let d1,d2,sortedDomains = [];
-  return Object.keys(relations).map( id => {
-    d1 = domains[ lessons[relations[id].lessons[0]].domain ].domain; //TODO check if domain is like this
-    d2 = domains[ lessons[relations[id].lessons[1]].domain ].domain;
-    sortedDomains =  [d1,d2].sort();
-
-    return {
-      source: sortedDomains[0],
-      target: sortedDomains[1],
-      value: 1
-    }
-  })
-}
-
 function getMatrix(names,data){
 
-  const index = new Map(names.map((d, i) => [d, i]));
-  const matrix  = Array.from(index, () => new Array(names.length).fill(0));
-  for (const {source, target, value} of data) matrix[index.get(source)][index.get(target)] += value;
-  return matrix;
+
 
 }
 const heightConstant = window.innerWidth < 700 ? 1.2 : 0.5;
@@ -53,19 +34,42 @@ const ribbon = d3.ribbonArrow()
   .padAngle(1 / innerRadius);
   
 
-function RelationGraph({ setOpenList, setRelationsToShow, setFilters }) {
+function RelationGraph({ setOpenList, setFilters }) {
 
   const relations = useHookstate(relationsState);
   const lessons = useHookstate(lessonsState);
   const domains = useHookstate(domainsState);
+  const relationsToList = useHookstate(relationsToListState);
 
-  const data = useMemo(() => getData(lessons.get(),relations.get(),domains.get()),[relations] );
+  const data = useMemo(() => {
+    let d1,d2,sortedDomains = [];
+    return Object.keys(relations).map( id => {
+      d1 = domains.get()[ lessons.get()[relations.get()[id].lessons[0]].domain ].domain;
+      d2 = domains.get()[ lessons.get()[relations.get()[id].lessons[1]].domain ].domain;
+    //this gets sorted because it simplifies the filtering by domain
+      sortedDomains =  [d1,d2].sort();
+  
+      return {
+        source: sortedDomains[0],
+        target: sortedDomains[1],
+        value: 1
+      }
+    })
+  },[relations, lessons, domains] )
+
   const names = useMemo(() => {
     return Object.keys(domains.get()).map( id => {
       return domains.get()[id].domain
     } )
   },[domains])
-  const matrix = useMemo(()=> getMatrix(names,data),[names,data])
+
+  const matrix = useMemo(()=> {
+    const index = new Map(names.map((d, i) => [d, i]));
+    const matrix  = Array.from(index, () => new Array(names.length).fill(0));
+    for (const {source, target, value} of data) 
+      matrix[index.get(source)][index.get(target)] += value;
+    return matrix;
+  },[names,data])
   
   const d3Ref = useRef();
 
@@ -122,9 +126,10 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
           .attr("d", ribbon)
           .attr("id", d => getId(d.source.index,d.target.index))
           .on("click",(e,d)=>{
-            const d1 = domains[d.source.index];
-            const d2 = domains[d.target.index];
-            setRelationsToShow(filterByDomain(relations,[d1,d2]))
+            debugger;
+            const d1 = names[d.source.index];
+            const d2 = names[d.target.index];
+            relationsToList.set( filterByDomain( relations.get(), lessons.get(), [d1,d2], domains.get() ) ) 
             setFilters(`${d1} and ${d2}`)
             setOpenList(true)
           })
@@ -140,7 +145,7 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
 ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
 ;
 
-    },[ relations, matrix, names, setFilters, setOpenList, setRelationsToShow ]
+    },[ relations, lessons, domains, matrix, names, setFilters, setOpenList ]
   );
 
   return (

@@ -1,14 +1,13 @@
 import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { userState } from "../../globalState/globalState";
+import { relationsToListState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
-import { getUserId } from "../../utils/user";
 import ConfirmModal from "../components/ConfirmModal";
 import FeedbackDialog from "../components/FeedbackDialog";
 import RelationDetailDialog from "./RelationDetail";
@@ -36,7 +35,7 @@ const relationsSortObj = {
 */
 
 
-function RelationListDialog({open, setOpen, onClose,relations, filterType, filters}) {
+function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//check if filters should be at globalstate
 
     const navigate = useNavigate();
 
@@ -46,6 +45,7 @@ function RelationListDialog({open, setOpen, onClose,relations, filterType, filte
     //const [proxyRelations, setProxyRelations] = useState([]);
 
     const user = useHookstate(userState);
+    const relationsToList = useHookstate(relationsToListState)
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -90,16 +90,16 @@ function RelationListDialog({open, setOpen, onClose,relations, filterType, filte
     const handleRelationsSortClick = useCallback((criteria) => {
         setRelationsSort(relationsSortObj[criteria]);
         if( relationsSortObj[criteria] === relationsSortObj.random ){
-            shuffle(relations);
+            shuffle(relationsToList);
         }
         if( relationsSortObj[criteria] === relationsSortObj.mine ){
-            relations.sort(sortByOwned);//cache
+            relationsToList.sort(sortByOwned);//cache
         }
         if( relationsSortObj[criteria] === relationsSortObj.latest ){
-            relations.sort(sortByLatest);//cache
+            relationsToList.sort(sortByLatest);//cache
         }
-        setProxyRelations(relations);
-    },[relations])
+        setProxyRelations(relationsToList);
+    },[relationsToList])
     */
 
     const handleClose = useCallback(()=>{
@@ -107,13 +107,9 @@ function RelationListDialog({open, setOpen, onClose,relations, filterType, filte
         onClose()
     },[onClose])
 
-    useEffect(()=>{
-        //setProxyRelations(relations);
-    },[relations])
+    //useEffect(()=>{setProxyRelations(relationsToList);},[relationsToList])
 
-    if( !relations.get() ){
-        return <></>;
-    }
+    //if( !relationsToList.get() ){return <></>;}
 
     return(
         <div>
@@ -154,8 +150,7 @@ function RelationListDialog({open, setOpen, onClose,relations, filterType, filte
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        {  Object.keys(relations).map( id => (
-                            relations.get()[id] && 
+                        {  Object.keys(relationsToList.get()).map( id => (
                             <Grid
                                 key={id}
                                 container
@@ -167,27 +162,27 @@ function RelationListDialog({open, setOpen, onClose,relations, filterType, filte
                                         disableGutters
                                         key={id}
                                         sx={styles.relationListItem}
-                                        onClick={()=>handleOpenDetail(relations.get()[id])}
+                                        onClick={()=>handleOpenDetail(relationsToList.get()[id])}
                                     >
                                         <ListItemAvatar>
                                             {/* TODO validate if file is img */}
                                             {
-                                                relations.get()[id].fileName
-                                                ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${relations.get()[id].fileName}`} />
-                                                : <Avatar {...stringAvatar(relations.get()[id].title)} />
+                                                relationsToList.get()[id].fileName
+                                                ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${relationsToList.get()[id].fileName}`} />
+                                                : <Avatar {...stringAvatar(relationsToList.get()[id].title)} />
                                             }
                                             
                                         </ListItemAvatar>
-                                        <ListItemText  primary={relations.get()[id].title} secondary={toDate(relations.get()[id].creationDate)}/>
+                                        <ListItemText  primary={relationsToList.get()[id].title} secondary={toDate(relationsToList.get()[id].creationDate)}/>
                                     </ListItemButton>
                                 </Grid>
                                 {
-                                    relations.get()[id].userId === user.get().userId &&
+                                    relationsToList.get()[id].userId === user.get().userId &&
                                         <Grid item xs={2}>
                                             <IconButton
                                                 edge="end" 
                                                 sx={{ color: 'gray' }}
-                                                onClick={() => handleEdit(relations.get()[id])}
+                                                onClick={() => handleEdit(relationsToList.get()[id])}
                                             >
                                                 <Edit />
                                             </IconButton>

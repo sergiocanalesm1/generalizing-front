@@ -7,7 +7,7 @@ import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
-import { db, lessonsState, relationsState, domainsState, tagsState, originsState, userState } from "../../globalState/globalState";
+import { db, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState } from "../../globalState/globalState";
 import { fetchData } from "../../helpers/data_helper";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
@@ -41,6 +41,8 @@ function Home() {
     const user = useHookstate(userState);
     const fbDB = useHookstate(db);
 
+    const relationsToList = useHookstate(relationsToListState);
+
     const [success, setSuccess] = useState( false );
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -55,9 +57,6 @@ function Home() {
 
 
     //const [lastChallenge, setLastChallenge] = useState({});
-
-    //this temp variable is used so that the d3 graph does not get rendered constantly
-    const [relationsToShow, setRelationsToShow] = useState([]);
     const [relationsFilters, setRelationsFilters] = useState("");
 
     const [path,setPath] = useState("");
@@ -108,7 +107,7 @@ function Home() {
                             tags.set(fetchedTags)
                             origins.set(fetchedOrigins) 
                             lessons.set(fetchedLessons)
-                            setRelationsToShow(relations)
+                            relationsToList.set(Object.keys(relations))
                             setFetching(false)
                         })
                     })
@@ -192,9 +191,7 @@ function Home() {
                     {   !fetching
                         ? <Box>
                             <RelationGraph 
-                                relations={relations} 
                                 setOpenList={setOpenRelationListDialog}
-                                setRelationsToShow={setRelationsToShow}
                                 setFilters={setRelationsFilters}
                             />
                             <Toolbar />
@@ -254,7 +251,6 @@ function Home() {
                         open={openRelationListDialog}
                         setOpen={setOpenRelationListDialog}
                         onClose={()=>setOpenRelationListDialog(false)}
-                        relations={relationsToShow}
                         filters={relationsFilters}
                         filterType={'Domains'}
                     />

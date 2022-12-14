@@ -1,12 +1,26 @@
 import { getUserId } from "./user";
 
-export function filterByDomain( relations, sortedDomains ){
+export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
+    let d1, d2, set2;
+    const filteredRelations = {};
+    Object.keys(relations).forEach( id => {
+      d1 = allDomains[ lessons[relations[id].lessons[0]].domain ].domain;
+      d2 = allDomains[ lessons[relations[id].lessons[1]].domain ].domain;
+      set2 = [d1,d2].sort()
+      if(sortedDomains[0] === set2[0]  && sortedDomains[1] === set2[1]){
+        filteredRelations[id] = relations[id];
+      }
+    })
+    return filteredRelations;
+    /*
+    
     return relations.filter( r => {
-        const newD1 = r.lessons[0].domain;
-        const newD2 = r.lessons[1].domain;
-        const set2 = [newD1,newD2].sort()
+        newD1 = r.lessons[0].domain;
+        newD2 = r.lessons[1].domain;
+        set2 = [newD1,newD2].sort()
         return sortedDomains[0]=== set2[0]  && sortedDomains[1]=== set2[1]
       })
+    */
 }
 
 export function filterByChallenge( relations, challengeId ){
