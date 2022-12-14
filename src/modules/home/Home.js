@@ -8,7 +8,6 @@ import { useHookstate } from '@hookstate/core';
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
 import { db, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState } from "../../globalState/globalState";
-import { fetchData } from "../../helpers/data_helper";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
 import RelationGraph from "./components/RelationGraph";
@@ -21,7 +20,7 @@ import { getAllLessons } from "../../services/lessons_services";
 import { getAllDomains } from "../../services/domains_services";
 import { getAllTags } from "../../services/tags_services";
 import { getAllOrigins } from "../../services/origins_services";
-import { combineLessonsWithRelations, setupLessons } from "../../helpers/lessons_helper";
+import { combineLessonsWithRelations } from "../../helpers/lessons_helper";
 //import ChallengeDetailDialog from "../challenge/ChallengeDetail";
 // import { getLastChallenge } from "../../services/challenges_services";
 //import { tempLasChallenge, tempRelations } from "../../utils/enums";
@@ -40,48 +39,46 @@ function Home() {
     const origins = useHookstate(originsState);
     const user = useHookstate(userState);
     const fbDB = useHookstate(db);
-
     const relationsToList = useHookstate(relationsToListState);
 
+
     const [success, setSuccess] = useState( false );
+    const [fetching, setFetching] = useState( true );
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
     //const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
     const [openHelpDialog, setOpenHelpDialog] = useState( false );
-
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
-
-    const [fetching, setFetching] = useState(true);
 
 
     //const [lastChallenge, setLastChallenge] = useState({});
     const [relationsFilters, setRelationsFilters] = useState("");
-
     const [path,setPath] = useState("");
 
 
 
+
     const handleCreateLesson = useCallback(()=>{
-        if( Boolean( user.get().userId ) ) {
+        if( user.get().uid ) {
             navigate(lessonPath);
         }
         else  {
             setOpenAuthModal(true);
             setPath(lessonPath);
         }
-    },[navigate])
+    },[navigate, user])
 
     const handleCreateRelation = useCallback(()=>{
-        if( Boolean( user.get().userId ) ) {
+        if( user.get().uid ) {
             navigate(relationPath);
         }
         else  {
             setOpenAuthModal(true);
             setPath(relationPath);
         }
-    },[navigate]);
+    },[navigate, user]);
 
 
     /*
@@ -90,6 +87,8 @@ function Home() {
     },[])
     */
     useEffect(()=>{
+        setFetching(true);
+
         if( !getFirstTimer() ){
             setOpenWelcomingDialog(true);
         }
@@ -107,8 +106,8 @@ function Home() {
                             tags.set(fetchedTags)
                             origins.set(fetchedOrigins) 
                             lessons.set(fetchedLessons)
-                            relationsToList.set(Object.keys(relations))
-                            setFetching(false)
+                            relationsToList.set(Object.keys(relations));
+                            setFetching(false);
                         })
                     })
                 })
@@ -125,6 +124,7 @@ function Home() {
             });
             */
     },[]);
+
     return (
         <Fragment>
             <Box>

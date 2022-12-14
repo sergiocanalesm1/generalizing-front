@@ -1,4 +1,3 @@
-import { shuffle } from "../utils/filters";
 import { methods, url } from "./urls";
 
 import { collection, getDocs } from "firebase/firestore";
@@ -9,7 +8,7 @@ const lessonsCollection = "lessons";
 export async function getAllLessons(db){
 
     const lessons = {};
-    let data, tags;
+    let data, tags = [];
     const querySnapshot = await getDocs(collection(db, lessonsCollection));
     querySnapshot.forEach((doc) => {
         data = doc.data();

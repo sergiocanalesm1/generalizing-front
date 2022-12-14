@@ -1,13 +1,14 @@
+import { useHookstate } from "@hookstate/core";
 import { Add, ArrowBack, Send } from "@mui/icons-material";
 import { Avatar, Box, Button, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { userState } from "../../globalState/globalState";
 import { getAllLessons } from "../../services/lessons_services";
 import { createOrUpdateRelation, getAllRelations } from "../../services/relations_services";
 import { methods } from "../../services/urls";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
-import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
 import MyEditor from "../home/components/MyEditor";
 import LessonDetailDialog from "../lesson/LessonDetail";
@@ -59,6 +60,8 @@ function Relation() {
 
   const navigate = useNavigate();
   const { state } = useLocation();
+
+  const user = useHookstate(userState);
 
   //TODO fix force update
   const [,updateState] = useState();
@@ -120,7 +123,7 @@ function Relation() {
 
   const createOrUpdate = useCallback(async()=>{
     setFetching(true);
-    relation.user = getUserId();
+    relation.userUid = user.get().uid;
     relation.lessons = chosenLessons.map((l)=>l.id);
     if( state?.challengeId ){
       relation.challenge = state.challengeId;
@@ -169,7 +172,7 @@ function Relation() {
   },[ lessonToChoose, chosenIndex, chosenLessons, forceUpdate, state ])
 
   useEffect(()=>{
-    if( !Boolean(getUserUuid()) ) {
+    if( !user.get().uid ) {
       navigate( homePath );
     }
   },[navigate])

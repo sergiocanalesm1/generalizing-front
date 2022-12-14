@@ -1,10 +1,11 @@
+import { useHookstate } from "@hookstate/core";
 import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { domainsState, lessonsState, userState } from "../../globalState/globalState";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
-import { getUserId } from "../../utils/user";
 import AuthModal from "../components/AuthModal";
 import FeedbackDialog from "../components/FeedbackDialog";
 import MyEditor from "../home/components/MyEditor";
@@ -23,6 +24,10 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
 
     const navigate = useNavigate();
 
+    const user = useHookstate(userState);
+    const lessons = useHookstate(lessonsState);
+    const domains = useHookstate(domainsState);
+
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
     const [openAuthModal, setOpenAuthModal] = useState(false);
@@ -35,7 +40,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
     },[])
 
     const newRelation = useCallback(()=>{
-        if(Boolean(getUserId())){
+        if( user.get().uid ){
             navigate( relationPath, {
                 state:{
                     newRelation: {
@@ -47,7 +52,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
         else{
             setOpenAuthModal(true);
         }
-    },[navigate, relation])
+    },[navigate, relation, user])
 
     if( !relation ){
         return<></>;
@@ -78,20 +83,24 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                             direction="row"
                         >
                             {
-                                relation.lessons.map( l =>(
-                                    <Stack direction="column" alignContent="center" key={l.title}>
-                                        <Stack direction="row" justifyContent="center">
-                                            <Typography variant="small">{l.domain}</Typography>
+                                relation.lessons.map( lessonId =>{
+                                    const lesson = lessons.get()[lessonId];
+                                    return(
+                                        <Stack direction="column" alignContent="center" key={lesson.title}>
+                                            <Stack direction="row" justifyContent="center">
+                                                <Typography variant="small">
+                                                    { domains.get()[ lesson.domain ].domain }
+                                                </Typography>
+                                            </Stack>
+                                            <Button onClick={()=>showLessonDetail(lesson)}>
+                                                {   
+                                                    lesson.fileName
+                                                    ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${lesson.fileName}`} />
+                                                    : <Avatar {...stringAvatar(lesson.title)} />
+                                                }
+                                            </Button>
                                         </Stack>
-                                        <Button onClick={()=>showLessonDetail(l)}>
-                                            {   
-                                                l.fileName
-                                                ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${l.fileName}`} />
-                                                : <Avatar {...stringAvatar(l.title)} />
-                                            }
-                                        </Button>
-                                    </Stack>
-                                ))
+                                )})
                             }
                         </Stack>
                         

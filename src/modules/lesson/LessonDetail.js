@@ -6,6 +6,8 @@ import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, G
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import MyEditor from "../home/components/MyEditor";
 import RelationListDialog from "../relation/RelationList";
+import { useHookstate } from "@hookstate/core";
+import { domainsState, originsState, tagsState, relationsToListState } from "../../globalState/globalState";
 
 const styles = {
     root: {
@@ -20,10 +22,15 @@ const styles = {
 function LessonDetailDialog({ lesson, open, onClose }) {
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
 
+    const tags = useHookstate(tagsState);
+    const domains = useHookstate(domainsState);
+    const origins = useHookstate(originsState);
+    const relationsToList = useHookstate(relationsToListState);
+
     const handleOpenExistingRelations = useCallback(() => {
+        relationsToList.set(lesson.relations);
         setOpenRelationListDialog(true)
-    },[])
-    //TODO fix file url
+    },[relationsToList, lesson])
     if( !lesson ){
         return <></>;
     }
@@ -80,26 +87,33 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                                     display: 'flex',
                                     flexWrap: 'wrap'
                                 }}>
-                            { lesson.tags?.map( t =>(
-                                <Chip 
-                                    key={t}
-                                    label={capitalizeFirstLetter(t)}
-                                    sx={{
-                                        bgcolor:stringToColor(t),
-                                        color:"#FFF",
-                                        m:1}}
-                                    />
-                            ))}
+                            { lesson.tags && 
+                                lesson.tags.map( tagId => {
+                                    const tag = tags.get()[ tagId ].tag
+                                    return (
+                                        <Chip 
+                                            key={tag}
+                                            label={capitalizeFirstLetter(tag)}
+                                            sx={{
+                                                bgcolor:stringToColor(tag),
+                                                color:"#FFF",
+                                                m:1}}
+                                        />
+                                    )
+                                })
+                            }
                             </Stack>
                         <Stack 
                             direction="row"
                             justifyContent="flex-end"
                             alignItems="center"
                         >
-                            <Typography variant="small">{lesson.domain}, {lesson.origin}</Typography>
+                            <Typography variant="small">
+                                { domains.get()[ lesson.domain ].domain }, { origins.get()[ lesson.origin ].origin }
+                            </Typography>
                         </Stack>
                     </CardContent>
-                        { lesson.relations && lesson.relations.length > 0 
+                        { lesson.relations
                             ?
                             <Grid container>
                                 <Grid item xs={12} md={10}>

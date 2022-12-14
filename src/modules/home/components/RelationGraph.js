@@ -11,11 +11,6 @@ function getId(sI,tI){
   return `p${sI}-${tI}`; //p is neccesary because ids must begin with letter
 }
 
-function getMatrix(names,data){
-
-
-
-}
 const heightConstant = window.innerWidth < 700 ? 1.2 : 0.5;
 const width = 945;
 const height=width*heightConstant;
@@ -34,7 +29,7 @@ const ribbon = d3.ribbonArrow()
   .padAngle(1 / innerRadius);
   
 
-function RelationGraph({ setOpenList, setFilters }) {
+function RelationGraph({ setOpenList, setFilters }) { //domain blending but, origin blending?
 
   const relations = useHookstate(relationsState);
   const lessons = useHookstate(lessonsState);
@@ -126,7 +121,6 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
           .attr("d", ribbon)
           .attr("id", d => getId(d.source.index,d.target.index))
           .on("click",(e,d)=>{
-            debugger;
             const d1 = names[d.source.index];
             const d2 = names[d.target.index];
             relationsToList.set( filterByDomain( relations.get(), lessons.get(), [d1,d2], domains.get() ) ) 
@@ -145,7 +139,7 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
 ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
 ;
 
-    },[ relations, lessons, domains, matrix, names, setFilters, setOpenList ]
+    },[ relations, lessons, domains, matrix, names, relationsToList, setFilters, setOpenList ]
   );
 
   return (

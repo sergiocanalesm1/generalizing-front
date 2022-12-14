@@ -9,10 +9,10 @@ import { homePath, lessonPath, relationPath } from '../../utils/paths';
 import AuthModal from './AuthModal';
 import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
-import { clearUser } from '../../utils/user';
 import FeedbackDialog from './FeedbackDialog';
 import HelpDialog from './HelpDialog';
-import { lessonsState, relationsState, userState } from '../../globalState/globalState';
+import { relationsState, relationsToListState, userState } from '../../globalState/globalState';
+import { logout } from '../../services/user_services';
 //import { tempRelations } from '../../utils/enums';
 
 
@@ -36,21 +36,21 @@ function Header() {
   const [anchorElLessons, setAnchorElLessons] = useState();
   const refLessons = useRef();
 
-  const relations = useHookstate(relationsState);
   const user = useHookstate(userState);
+  const relations = useHookstate(relationsState);
+  const relationsToList = useHookstate(relationsToListState);
 
   const [path,setPath] = useState("");
 
 
   const handleLogout = useCallback(()=> {
-    user.set({});
+    logout(); // state is cleared in the observer
     navigate( homePath );
   },[navigate])
 
   const handleCreateLesson = useCallback(()=>{
     setAnchorElLessons();
-    console.log(user.get().userUid)
-    if( user.get().userUid ) {
+    if( user.get().uid ) {
       navigate(lessonPath);
     }
     else  {
@@ -58,31 +58,31 @@ function Header() {
         setOpenAuthModal(true);
     }
 
-  },[navigate])
+  },[navigate, user])
 
-  const handleViewLessons = useCallback(async()=>{
+  const handleViewLessons = useCallback(()=>{
     setAnchorElLessons();
     setOpenLessonListDialog(true);
   },[]);
 
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
-    if( user.get().userUid ) {
+    if( user.get().uid ) {
         navigate(relationPath);
     }
     else  {
         setPath(relationPath);
         setOpenAuthModal(true);
     }
-  },[navigate]);
+  },[navigate, user]);
 
-  const handleViewRelations = useCallback(async()=>{
+  const handleViewRelations = useCallback(()=>{
+    relationsToList.set(Object.keys(relations));
     setAnchorElRelations();
     setOpenRelationListDialog(true);
-  },[])
+  },[relationsToList, relations])
 
   useEffect(() => {
-
     setAnchorElUser();
   }, [openAuthModal,navigate]);
 
@@ -155,7 +155,7 @@ function Header() {
               <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
             </Menu>
           </Stack>
-          {user.get().userUid 
+          {user.get().uid
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
                 <Grid item container xs={8} md={1} justifyContent="flex-end">
@@ -249,12 +249,10 @@ function Header() {
           open={openRelationListDialog}
           setOpen={setOpenRelationListDialog}
           onClose={()=>setOpenRelationListDialog(false)}
-          relations={relations}
       />
       <HelpDialog
         open={openHelpDialog}
         onClose={()=>setOpenHelpDialog(false)}
-        relations={relations}
       />
       <FeedbackDialog
         success={success}

@@ -1,17 +1,17 @@
-import { getUserId } from "./user";
-
 export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
+  //should return array of keys
     let d1, d2, set2;
-    const filteredRelations = {};
+    const filteredRelationsIds = [];
     Object.keys(relations).forEach( id => {
       d1 = allDomains[ lessons[relations[id].lessons[0]].domain ].domain;
       d2 = allDomains[ lessons[relations[id].lessons[1]].domain ].domain;
       set2 = [d1,d2].sort()
       if(sortedDomains[0] === set2[0]  && sortedDomains[1] === set2[1]){
-        filteredRelations[id] = relations[id];
+        filteredRelationsIds.push(id);
       }
     })
-    return filteredRelations;
+    debugger;
+    return filteredRelationsIds;
     /*
     
     return relations.filter( r => {
@@ -27,20 +27,24 @@ export function filterByChallenge( relations, challengeId ){
   return relations.filter( r => (r.challenge === challengeId ))
 }
 
-export function filterByOwned( relations ){
-  const id = getUserId();
-  if( !Boolean(id) ){
+export function filterByOwned( objects, uid ){
+  if( !uid ){
     return [];
   }
-  return relations.filter( r => (r.user === id));
+  const owned = {}
+  Object.keys( objects ).forEach( id => {
+    if( objects[id].userUid === uid ){
+      owned[id] = objects[id]
+    }
+  })
+  return owned;
 }
 
-export function sortByOwned( o1, o2 ){
-  const id = getUserId();
-  if( o1.user === id ){
+export function sortByOwned( o1, o2, uid ){
+  if( o1.userUid === uid ){
     return -1
   }
-  if( o2.user === id ){
+  if( o2.userUid === uid ){
       return 1
   }
   sortByLatest( o1, o2 );
@@ -74,6 +78,5 @@ export function shuffle(array) {
     [array[currentIndex], array[randomIndex]] = [
       array[randomIndex], array[currentIndex]];
   }
-
   return array;
 }

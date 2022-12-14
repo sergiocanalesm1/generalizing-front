@@ -7,10 +7,11 @@ import { methods } from "../../services/urls";
 import { domains, origins } from "../../utils/enums";
 import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
-import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
 import { getAllTags } from "../../services/tags_services";
 import MyEditor from "../home/components/MyEditor";
+import { useHookstate } from "@hookstate/core";
+import { userState } from "../../globalState/globalState";
 
 const styles = {
   lessonPaper: {
@@ -47,6 +48,8 @@ const styles = {
 function Lesson() {
   const navigate = useNavigate();
   const { state } = useLocation();
+
+  const user = useHookstate(userState);
 
   const [lesson, setLesson] = useState({
     "name" : "",
@@ -95,7 +98,7 @@ function Lesson() {
   const createOrUpdate = useCallback( async()=> {
     setFetching(true);
     lesson.tags = tags.map((t)=>t.label);
-    lesson.user = getUserId();
+    lesson.userUid = user.get().uid;
 
     if( lesson.isDescriptionRaw ){
       lesson.description = JSON.stringify( rawText );
@@ -117,7 +120,7 @@ function Lesson() {
   },[ files, lesson, tags, isUpdate, rawText ])
 
   useEffect(()=>{
-    if( !Boolean(getUserUuid()) ) {
+    if( !user.get().uid ) {
       navigate( homePath );
     }
     if( state ){

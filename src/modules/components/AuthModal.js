@@ -52,20 +52,17 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     },[isLogin]);
 
     const handleSubmit = useCallback( async() => {
-        //TODO check userUid or user
         setFetching(true);
-        let userUid;
+        let fbUser;
         if( isLogin ) {
-            userUid = await login(email,password,onSuccess,onError)
+            fbUser = await login(email,password,onSuccess,onError)
         }
         else {
-            userUid = await signin(email,username,password,onSuccess,onError);
+            fbUser = await signin(email,username,password,onSuccess,onError);
         }
-        user.set({
-            userUid: userUid
-        })
+        user.set(fbUser); //uid gets stored in user.get().uid
         setFetching(false);
-      }, [email, password, isLogin, username, onError, onSuccess]);
+      }, [email, password, isLogin, username, onError, onSuccess, user]);
     
 
     return(

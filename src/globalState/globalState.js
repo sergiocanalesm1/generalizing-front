@@ -1,13 +1,6 @@
 import { hookstate } from '@hookstate/core';
 
-export const db = hookstate({})
-
-export const globalState = hookstate({
-    relations: {},
-    lessons: {},
-    domains: {},
-    tags: {}
-}); // relations to show? lo averiguaremos
+export const db = hookstate({});
 
 export const relationsState = hookstate({});
 export const lessonsState = hookstate({});

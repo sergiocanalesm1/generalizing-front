@@ -1,7 +1,8 @@
 import { initializeApp } from "firebase/app";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 //import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
-import { db } from "../globalState/globalState";
+import { db, userState } from "../globalState/globalState";
 
 export function initFirebase(){
 
@@ -20,4 +21,14 @@ export function initFirebase(){
     // const analytics = getAnalytics(app);
     const firestoreDB = getFirestore(app);
     db.set(firestoreDB);
+
+    const auth = getAuth()
+    onAuthStateChanged( auth, (user) =>{
+      if( user ){
+        userState.set(user)
+      }
+      else{
+        userState.set({})
+      }
+    })
 }

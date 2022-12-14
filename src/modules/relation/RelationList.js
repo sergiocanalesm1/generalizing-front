@@ -3,7 +3,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { relationsToListState, userState } from "../../globalState/globalState";
+import { relationsState, relationsToListState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
@@ -45,7 +45,8 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
     //const [proxyRelations, setProxyRelations] = useState([]);
 
     const user = useHookstate(userState);
-    const relationsToList = useHookstate(relationsToListState)
+    const relationsToList = useHookstate(relationsToListState);
+    const relations = useHookstate(relationsState);
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -150,53 +151,55 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        {  Object.keys(relationsToList.get()).map( id => (
-                            <Grid
-                                key={id}
-                                container
-                                spacing={3}
-                                alignItems="center"
-                            >
-                                <Grid item xs={10}>
-                                    <ListItemButton
-                                        disableGutters
-                                        key={id}
-                                        sx={styles.relationListItem}
-                                        onClick={()=>handleOpenDetail(relationsToList.get()[id])}
-                                    >
-                                        <ListItemAvatar>
-                                            {/* TODO validate if file is img */}
-                                            {
-                                                relationsToList.get()[id].fileName
-                                                ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${relationsToList.get()[id].fileName}`} />
-                                                : <Avatar {...stringAvatar(relationsToList.get()[id].title)} />
-                                            }
-                                            
-                                        </ListItemAvatar>
-                                        <ListItemText  primary={relationsToList.get()[id].title} secondary={toDate(relationsToList.get()[id].creationDate)}/>
-                                    </ListItemButton>
+                        {  relationsToList.get().map( id => {
+                            const relation = relations.get()[id];
+                            return (
+                                <Grid
+                                    key={id}
+                                    container
+                                    spacing={3}
+                                    alignItems="center"
+                                >
+                                    <Grid item xs={10}>
+                                        <ListItemButton
+                                            disableGutters
+                                            key={id}
+                                            sx={styles.relationListItem}
+                                            onClick={()=>handleOpenDetail(relation)}
+                                        >
+                                            <ListItemAvatar>
+                                                {/* TODO validate if file is img */}
+                                                {
+                                                    relation.fileName
+                                                    ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${relation.fileName}`} />
+                                                    : <Avatar {...stringAvatar(relation.title)} />
+                                                }
+                                                
+                                            </ListItemAvatar>
+                                            <ListItemText  primary={relation.title} secondary={toDate(relation.creationDate)}/>
+                                        </ListItemButton>
+                                    </Grid>
+                                    {
+                                        relation.userUid === user.get().uid &&
+                                            <Grid item xs={2}>
+                                                <IconButton
+                                                    edge="end" 
+                                                    sx={{ color: 'gray' }}
+                                                    onClick={() => handleEdit(relation)}
+                                                >
+                                                    <Edit />
+                                                </IconButton>
+                                                <IconButton
+                                                    edge="end" 
+                                                    sx={{ color: 'gray' }}
+                                                    onClick={() => handleDelete(id)}
+                                                >
+                                                    <Delete />
+                                                </IconButton>
+                                            </Grid>
+                                    }
                                 </Grid>
-                                {
-                                    relationsToList.get()[id].userId === user.get().userId &&
-                                        <Grid item xs={2}>
-                                            <IconButton
-                                                edge="end" 
-                                                sx={{ color: 'gray' }}
-                                                onClick={() => handleEdit(relationsToList.get()[id])}
-                                            >
-                                                <Edit />
-                                            </IconButton>
-                                            <IconButton
-                                                edge="end" 
-                                                sx={{ color: 'gray' }}
-                                                onClick={() => handleDelete(id)}
-                                            >
-                                                <Delete />
-                                            </IconButton>
-                                        </Grid>
-                                }
-                            </Grid>
-                        ))
+                        )})
                         }
                         
                     </List>

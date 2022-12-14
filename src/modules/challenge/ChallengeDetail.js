@@ -4,15 +4,18 @@ import { useCallback, useMemo, useState } from "react";
 import { relationPath } from "../../utils/paths";
 import { filterByChallenge } from "../../utils/filters";
 import { stringAvatar } from "../../utils/strings";
-import { getUserId } from "../../utils/user";
 import AuthModal from "../components/AuthModal";
 import FeedbackDialog from "../components/FeedbackDialog";
 import LessonDetailDialog from "../lesson/LessonDetail";
+import { useHookstate } from "@hookstate/core";
+import { userState } from "../../globalState/globalState";
 
 
 function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, setRelationsToShow, setFilters, relations }) {
 
-    const navigate = useNavigate()
+    const navigate = useNavigate();
+
+    const user = useHookstate(userState);
 
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [success, setSuccess] = useState( false );
@@ -34,7 +37,7 @@ function ChallengeDetailDialog({open, setOpen, onClose, challenge, setOpenList, 
     },[challenge, relations, setFilters, setOpenList, setRelationsToShow])
 
     const acceptChallenge = useCallback(()=>{
-        if(Boolean(getUserId())){
+        if( user.get().uid ){
             navigate( relationPath, {
                 state:{
                     challengeId: challenge.id,
