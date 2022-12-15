@@ -1,17 +1,17 @@
-import { ArrowBack, Send } from "@mui/icons-material";
-import { Autocomplete, Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createOrUpdateLesson } from "../../services/lessons_services";
-import { methods } from "../../services/urls";
-import { domains, origins } from "../../utils/enums";
+import { ArrowBack, Send } from "@mui/icons-material";
+import { Autocomplete, Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { useHookstate } from "@hookstate/core";
+
 import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import FeedbackDialog from "../components/FeedbackDialog";
-import { getAllTags } from "../../services/tags_services";
 import MyEditor from "../home/components/MyEditor";
-import { useHookstate } from "@hookstate/core";
-import { userState } from "../../globalState/globalState";
+import { db, domainsState, originsState, tagsState, userState } from "../../globalState/globalState";
+import { createOrUpdateLesson } from "../../services/lessons_services";
+import { createDBTag } from "../../services/tags_services";
+
 
 const styles = {
   lessonPaper: {
@@ -46,23 +46,29 @@ const styles = {
 }
 
 function Lesson() {
+  //quitar files por ahora
   const navigate = useNavigate();
   const { state } = useLocation();
 
   const user = useHookstate(userState);
+  const domains = useHookstate(domainsState);
+  const origins = useHookstate(originsState);
+  const Alltags = useHookstate(tagsState);
+  const fbDB = useHookstate(db);
 
   const [lesson, setLesson] = useState({
-    "name" : "",
+    "title" : "",
     "description": "",
-    "origin": origins[ origins.length - 1 ],
-    "domain": domains[ domains.length - 1 ],
-    "user": "",
+    "origin": "Book", //book, fix
+    "domain": "Other",//other, fix
+    "userUid": "",
     "isDescriptionRaw": true
+    //tags y files
   });
 
   const [rawText, setRawText] = useState();
 
-  const [files, setFiles] = useState({});
+  //const [files, setFiles] = useState({});
 
   const [tags, setTags] = useState([]);
   const [currentChip, setCurrentChip] = useState("");
@@ -82,14 +88,14 @@ function Lesson() {
     })
   }, [lesson] );
 
-  const handleChipDelete = useCallback( (tagToDelete) => {
+  const handleChipDelete = useCallback( tagToDelete => {
     setTags((tags) => tags.filter((t) => t.label !== tagToDelete.label));
   },[])
 
   const createTag  = useCallback(() => {
     const newTag = {
       label: currentChip,
-      color: stringToColor(currentChip)
+      color: stringToColor(currentChip),
     }
     setCurrentChip("");
     setTags([ ...tags, newTag ])
@@ -97,16 +103,54 @@ function Lesson() {
 
   const createOrUpdate = useCallback( async()=> {
     setFetching(true);
-    lesson.tags = tags.map((t)=>t.label);
-    lesson.userUid = user.get().uid;
 
-    if( lesson.isDescriptionRaw ){
-      lesson.description = JSON.stringify( rawText );
+
+    const lessonToCreateOrUpdate = {};
+
+    let originToId = {}
+    Object.keys( origins.get() ).forEach( id => {
+      originToId = {
+        ...originToId,
+        [origins.get()[id].origin] : id 
+    }})
+
+    let domainsToId = {}
+    Object.keys( domains.get() ).forEach( id => {
+      domainsToId = {
+        ...domainsToId,
+        [domains.get()[id].domain] : id 
+    }})
+
+    let tagsToId = {};
+    Object.keys( Alltags.get() ).forEach( id => {
+      tagsToId = {
+        ...tagsToId,
+        [capitalizeFirstLetter(Alltags.get()[id].tag)] : id 
+    }})
+
+    let tagIds = [];
+    let existingTagId, label, docId; 
+    for( let i=0; i < tags.length; i++ ){
+      label = tags[i].label.toLowerCase();
+      existingTagId = tagsToId[ label ];
+      if( !existingTagId ){
+        existingTagId = await createDBTag(fbDB.get(), { tag: label } )
+      }
+      tagIds.push(existingTagId);
     }
 
-    const method = isUpdate ? methods.UPDATE : methods.CREATE
-    
-    await createOrUpdateLesson( lesson, files, method, 
+    lessonToCreateOrUpdate.title = lesson.title;
+    lessonToCreateOrUpdate.origin = originToId[ lesson.origin ];
+    lessonToCreateOrUpdate.domain = domainsToId[ lesson.domain ];
+    lessonToCreateOrUpdate.userUid = user.get().uid;
+    lessonToCreateOrUpdate.creationDate = Date.now();
+    lessonToCreateOrUpdate.isDescriptionRaw = lesson.isDescriptionRaw ? 1 : 0;
+
+    if( lesson.isDescriptionRaw ){
+      lessonToCreateOrUpdate.description = JSON.stringify( rawText );
+    }
+
+    await createOrUpdateLesson( fbDB.get(), lessonToCreateOrUpdate,
       ()=>{
         setSuccess(true);
         setOpenFeedbackDialog(true);
@@ -116,14 +160,16 @@ function Lesson() {
         setOpenFeedbackDialog(true);
       }
     )
+  
     setFetching(false);
-  },[ files, lesson, tags, isUpdate, rawText ])
+  },[ lesson, tags, isUpdate, rawText ])
+  
 
   useEffect(()=>{
     if( !user.get().uid ) {
       navigate( homePath );
     }
-    if( state ){
+    if( state ){ //TODO remove state
       setIsUpdate(true);
       setLesson( state.lesson );
       setTags( state.lesson.tags.map( t => ({
@@ -131,17 +177,13 @@ function Lesson() {
         color:stringToColor(t)
       })) );
     }
-    getAllTags().then( fetchedTags => {
-      setDbTags( fetchedTags.map( t => (capitalizeFirstLetter(t.tag)) ) )
-    })
-  },[navigate,state])
-
+    setDbTags( Object.keys(Alltags.get()).map( id => ( capitalizeFirstLetter( Alltags.get()[ id ].tag ) ) ) )
+  },[state])
 
   return (
     <div>
       <Toolbar />
-      <Paper 
-        elevation={5}
+      <Box 
         sx={styles.lessonPaper}
       >
         <Box
@@ -160,13 +202,13 @@ function Lesson() {
             <Grid item xs={12} md={7}>
             <Stack justifyContent="center" direction="column">
                 <Typography variant="body" align="center">
-                  <strong>Name</strong> what you learned
+                  <strong>Title</strong> of the Lesson
                 </Typography>
 
                 <TextField
-                  value={lesson.name}
+                  value={lesson.title}
                   fullWidth
-                  name="name"
+                  name="title"
                   onChange={handleChange}
                   required
                 />
@@ -175,7 +217,7 @@ function Lesson() {
             <Grid item xs={12} md={5}>
               <Stack justifyContent="center" direction="column">
                 <Typography variant="body" align="center">
-                  Select domain and where you learned it from
+                  Domain and where you learned it from
                 </Typography>
               </Stack>
               <Grid 
@@ -185,12 +227,13 @@ function Lesson() {
               >
                 <Grid item xs={5}>
                   <Autocomplete
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
                       clearOnEscape
-                      options={domains}
+                      options={ Object.keys( domains.get() ).map( id => domains.get()[ id ].domain ) }
                       name="domain"
-                      value={lesson.domain}
-                      onInputChange={(event, newInputValue) => {
-                        if( domains.indexOf(newInputValue) > -1 ){
+                      value={ lesson.domain }
+                      onInputChange={(event, newInputValue) => {//fix
+                        if( Object.keys( domains.get() ).map( id => domains.get()[ id ].domain ).indexOf(newInputValue) > -1 ){
                           setLesson( prevState => ({
                             ...prevState,
                             domain: newInputValue
@@ -204,13 +247,13 @@ function Lesson() {
                 <Grid item>
                   <Select
                     name="origin"
-                    value={lesson.origin}
                     label="Origin"
+                    value={lesson.origin}
                     onChange={handleChange}
                     required
                   >
-                    {origins.map(o => (
-                      <MenuItem value={o} key={o}> {o} </MenuItem>
+                    { Object.keys(origins.get()).map(oId => (
+                      <MenuItem value={origins.get()[oId].origin} key={oId}> { origins.get()[oId].origin } </MenuItem>
                     ))}
                   </Select>
                   <FormHelperText>Origin</FormHelperText>
@@ -223,7 +266,7 @@ function Lesson() {
             
           <Stack justifyContent="center" direction="row">
             <Typography variant="body" align="center">
-              <strong>Explain</strong> the lesson as simple as you can
+              <strong>Explanation</strong>. The simpler, the better.
             </Typography>
           </Stack>
           { lesson.isDescriptionRaw
@@ -249,6 +292,7 @@ function Lesson() {
 
           <Toolbar />
           <Grid container justifyContent="center" alignItems="center">
+            {/*
             <Grid item xs={12} md={6}>
               <Stack direction="row" justifyContent="center">
                 <Typography variant="body">
@@ -281,10 +325,11 @@ function Lesson() {
                 </Grid>
               </Grid>
             </Grid>
+            */}
             <Grid item xs={12} md={6} sx={{pt:1}}>
               <Stack direction="row" justifyContent="center">
                 <Typography variant="body">
-                  Create <strong>tags</strong> for your lesson
+                  <strong>Tags</strong> for the lesson
                 </Typography>
               </Stack>
               <Grid
@@ -295,8 +340,9 @@ function Lesson() {
               >
                 
                 <Grid item xs={12} md={6}>
-                  { dbTags.length > 0 &&
-                    <Autocomplete 
+                  { 
+                    <Autocomplete
+                      isOptionEqualToValue={(option, value) => option.id === value.id}
                       options={dbTags}
                       value={currentChip}
                       name="chip"
@@ -349,21 +395,21 @@ function Lesson() {
                   variant="contained"
                   endIcon={<Send color="secondary" />}
                   onClick={createOrUpdate}
-                  disabled={ (!lesson.name || !(lesson.description || rawText)) || fetching }
+                  disabled={ (!lesson.title || !(lesson.description || rawText)) || fetching }
                 >
                   { isUpdate ? "Update" : "Create!" }
                 </Button>
             </Stack>
           
         </Box>
-      </Paper>
+      </Box>
       <FeedbackDialog
         success={success}
         open={openFeedbackDialog}
         onClose={()=>{
             setOpenFeedbackDialog(false)
             if(success){
-              navigate( homePath )
+              navigate( 0 )
             }
         }}
       />

@@ -1,6 +1,4 @@
-import { methods, url } from "./urls";
-
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc, doc, deleteDoc } from "firebase/firestore";
 
 
 const lessonsCollection = "lessons";
@@ -22,37 +20,28 @@ export async function getAllLessons(db){
     return lessons;
 }
 
-export async function createOrUpdateLesson( lesson, files, method, onSuccess, onError ){
-    const uuid = method === methods.UPDATE ? `${lesson.uuid}` : ``;
-    let response = await fetch(`${url}lessons/${uuid}`,{
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(lesson)
-    })
-
-    if( response.ok ){
-        const createdLesson = await response.json();
-        if( files.name ) {
-          let formData = new FormData();
-          formData.append( 'lesson', createdLesson.id )
-          formData.append( 'file', files );
-
-          response = await fetch(`${url}lfiles/`,{
-              method: 'POST',
-              body: formData
-          });
-
-          if( response.ok ){
-          }
-        }
+export async function createOrUpdateLesson( db, lesson, onSuccess, onError ){
+    try{
+        await addDoc(collection(db, lessonsCollection), lesson, { merge: true });
         onSuccess();
     }
-    else{
-        onError();
+    catch(error) {
+        onError()
+        console.log(error);
     }
 }
+
+export async function deleteLesson( db, id ){
+    try{
+        await deleteDoc(doc(db, lessonsCollection, id));
+        return true
+    }
+    catch(error){
+        console.log(error)
+        return false
+    }
+}
+/*
 
 export async function getLesson( uuid ){
     const lessons = await getAllLessons();
@@ -70,3 +59,4 @@ export async function deleteLesson( uuid ){
     });
     return response.ok;
 }
+*/

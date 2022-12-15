@@ -3,7 +3,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { relationsState, relationsToListState, userState } from "../../globalState/globalState";
+import { db, relationsState, relationsToListState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
@@ -47,6 +47,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
     const user = useHookstate(userState);
     const relationsToList = useHookstate(relationsToListState);
     const relations = useHookstate(relationsState);
+    const fbDB = useHookstate(db);
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -74,14 +75,17 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
 
     const handleDelete = useCallback(( id ) =>  {
         setOpenConfirmModal(true);
-        setConfirmCallback( ( prevState ) => () => {
-            deleteRelation( id )
+        setConfirmCallback( () => () => {
+            deleteRelation(fbDB.get(), id )
                 .then( ok => {
                     if( !ok ){
                         setSuccess(false);
                     }
                     setOpenConfirmModal(false);
                     setOpenFeedbackDialog(true);
+                    if( ok ){
+                        navigate(0);
+                    }
                 }
             )}
         );

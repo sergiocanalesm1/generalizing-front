@@ -2,6 +2,7 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } f
 
 
 export async function signin(email,username,password,onSuccess,onError){
+    //TODO recuperacion clave, verificacion email
     
     const auth = getAuth();
     try {

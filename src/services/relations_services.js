@@ -1,6 +1,4 @@
-import { collection, getDocs } from "firebase/firestore";
-
-import { methods, url } from "./urls";
+import { collection, getDocs, addDoc, doc, deleteDoc } from "firebase/firestore";
 
 
 const relationsCollection = "relations";
@@ -19,53 +17,24 @@ export async function getAllRelations(db){
     return relations;
 }
 
-export async function createOrUpdateRelation( relation, files, method, onSuccess, onError ){
-    const uuid = method === methods.UPDATE ? `${relation.uuid}` : ``;
-    let response = await fetch(`${url}relations/${uuid}`,{
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(relation)
-    })
-
-    if( response.ok ){
-        const createdRelation = await response.json();
-
-        if( files.name ) {
-          let formData = new FormData();
-          formData.append( 'relation', createdRelation.id )
-          formData.append( 'file', files );
-
-          response = await fetch(`${url}rfiles/`,{
-              method: 'POST',
-              body: formData
-          });
-
-          if( response.ok ){
-
-            }
-        }
+export async function createOrUpdateRelation( db, relation, onSuccess, onError ){
+    try{
+        await addDoc(collection(db, relationsCollection), relation, { merge: true });
         onSuccess();
     }
-    else{
+    catch(error) {
         onError()
+        console.log(error);
     }
 }
 
-export async function getRelation( uuid ){
-    const relations = await getAllRelations();
-    return relations.filter( r => (r.uuid === uuid ))[0];
-}
-
-export async function deleteRelation( uuid ){
-    const response = await fetch(
-        `${url}relations/${uuid}`,
-        {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-    return response.ok;
+export async function deleteRelation( db, id ){
+    try{
+        await deleteDoc(doc(db, relationsCollection, id));
+        return true
+    }
+    catch(error){
+        console.log(error)
+        return false
+    }
 }

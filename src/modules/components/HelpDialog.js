@@ -1,7 +1,7 @@
+import { useHookstate } from "@hookstate/core";
 import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Link, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
-import { getLesson } from "../../services/lessons_services";
-import { getRelation } from "../../services/relations_services";
+import { lessonsState, relationsState } from "../../globalState/globalState";
 import LessonDetailDialog from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 import RelationDetailDialog from "../relation/RelationDetail";
@@ -15,7 +15,7 @@ const lessonsToShow = {
     tough : process.env.REACT_APP_TOUGH_LESSON
 }
 
-function HelpDialog( {open, lessons, relations, onClose} ){
+function HelpDialog( {open, onClose} ){
 
     const [openLessonDetailDialog, setOpenLessonDetailDialog] = useState( false );
     const [openRelationDetailDialog, setOpenRelationDetailDialog] = useState( false );
@@ -24,19 +24,14 @@ function HelpDialog( {open, lessons, relations, onClose} ){
     const [lesson, setLesson] = useState();
     const [relation, setRelation] = useState();
 
+    const lessons = useHookstate(lessonsState);
+    const relations = useHookstate(relationsState);
+
     const showLesson = useCallback( uuid =>{
-        getLesson(uuid).then( fetchedLesson => {
-                setLesson(fetchedLesson);
-                setOpenLessonDetailDialog(true);
-            }
-        )
     },[])
 
     const showRelation = useCallback( () => {
-        getRelation(process.env.REACT_APP_EXAMPLE_RELATION).then( fetchedRelation => {
-            setRelation(fetchedRelation);
-            setOpenRelationDetailDialog(true);
-        } )
+        
     },[])
 
 

@@ -10,7 +10,6 @@ export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
         filteredRelationsIds.push(id);
       }
     })
-    debugger;
     return filteredRelationsIds;
     /*
     

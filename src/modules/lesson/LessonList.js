@@ -5,7 +5,7 @@ import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 
-import { lessonsState, tagsState, userState } from "../../globalState/globalState";
+import { db, lessonsState, tagsState, userState } from "../../globalState/globalState";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
@@ -37,11 +37,12 @@ const lessonsSortObj = {
 
 function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) {
 
-    const navigate = useNavigate();
+    const navigate = useNavigate();//updates while unmounted
 
     const lessons = useHookstate(lessonsState);
     const user = useHookstate(userState);
     const tags = useHookstate(tagsState);
+    const fbDB = useHookstate(db);
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
@@ -56,15 +57,15 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     const [confirmCallback, setConfirmCallback] = useState(()=>{});
 
 
-    const handleOpenDetail = useCallback( lesson => {
+    const handleOpenDetail = useCallback( id => {
         if( canChoose ) {
-            setChosenLesson(lesson);
+            setChosenLesson(id);
             setOpen(false);
         }
         else{
             setOpen(false);
             setOpenDetail(true);
-            setSelectedLesson(lesson);
+            setSelectedLesson( lessons.get()[id] );
         }
     },[setOpen, setChosenLesson, canChoose]);
 
@@ -81,10 +82,10 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     },[navigate,setOpen])
 
 
-    const handleDelete = useCallback(( uuid ) =>  {
+    const handleDelete = useCallback(async( id ) =>  {
         setOpenConfirmModal(true);
         setConfirmCallback( () => () => {
-            deleteLesson( uuid )
+            deleteLesson(fbDB.get(), id )
                 .then( ok => {
                     if( !ok ){
                         setSuccess(false);
@@ -92,11 +93,12 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                     setOpenConfirmModal(false);
                     setOpenFeedbackDialog(true);
                     if( ok ){
-                        navigate( homePath );
+                        navigate(0);
                     }
                 }
             )}
         );
+        
     },[navigate])
 
     const handlelessonsSortClick = useCallback((criteria) => {
@@ -206,7 +208,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                         <ListItemButton
                                             key={id}
                                             disableGutters
-                                            onClick={()=>handleOpenDetail(lesson)}
+                                            onClick={()=>handleOpenDetail(id)}
                                             sx={styles.lessonListItem}
                                         >
                                             <ListItemAvatar>
@@ -219,7 +221,10 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                             </ListItemAvatar>
                                             <ListItemText  primary={lesson.title} secondary={ 
                                                 <Fragment>
-                                                    {lesson.tags && lesson.tags.map( tagId => capitalizeFirstLetter(tags.get()[tagId].tag) ).join(', ')}
+                                                    {lesson.tags && 
+                                                        lesson.tags.map( tagId => capitalizeFirstLetter( tags.get()[ tagId ].tag ))
+                                                            .join(', ')
+                                                    }
                                                     {lesson.tags && <br />}
                                                     {toDate(lesson.creationDate)}
                                                 </Fragment>
@@ -240,7 +245,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                                 <IconButton
                                                     edge="end" 
                                                     sx={{ color: 'gray' }}
-                                                    onClick={() => handleDelete(lesson.uuid)}
+                                                    onClick={() => handleDelete(id)}
                                                 >
                                                     <Delete />
                                                 </IconButton>

@@ -1,4 +1,4 @@
-import { collection, getDocs } from "firebase/firestore";
+import { collection, getDocs, addDoc  } from "firebase/firestore";
 
 const tagsCollection = "tags";
 
@@ -10,4 +10,14 @@ export async function getAllTags(db){
         tags[doc.id] = doc.data();
     });
     return tags;
+}
+
+export async function createDBTag(db, tag){
+    try{
+        const docRef = await addDoc(collection(db, tagsCollection), tag);
+        return docRef.id;
+    }
+    catch( error ){
+        console.log(error)
+    }
 }
