@@ -26,7 +26,6 @@ export async function getAllRelations(db){
 export async function updateRelation( db, id, relation, onSuccess, onError ){
     try{
         const ref = doc(db, relationsCollection, id);
-        debugger;
         await setDoc(ref, relation, { merge: true });
         onSuccess();
     }

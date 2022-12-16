@@ -1,9 +1,9 @@
 import { useHookstate } from "@hookstate/core";
 import { Add, ArrowBack, Send } from "@mui/icons-material";
-import { Avatar, Box, Button, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { db, lessonsState, lessonsToRelateState, relationsState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, lessonsState, lessonsToRelateState, updatingObjectState, userState } from "../../globalState/globalState";
 import { createRelation, updateRelation } from "../../services/relations_services";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
@@ -60,7 +60,7 @@ function Relation() {
 
   const user = useHookstate(userState);
   const lessons = useHookstate(lessonsState);
-  const fbDB = useHookstate(db);
+  const fbDB = useHookstate(dbState);
   const updatingObject = useHookstate(updatingObjectState);
   const lessonsToRelate = useHookstate(lessonsToRelateState);
 
@@ -103,9 +103,19 @@ function Relation() {
     })
   }, [relation] );
 
+
+  const onSuccess = useCallback(()=>{
+    setSuccess(true);
+    setOpenFeedbackDialog(true);
+
+  },[])
+
+  const onError = useCallback(()=>{
+    setSuccess(false);
+    setOpenFeedbackDialog(true);
+  },[])
+
   const detailOrListLesson = useCallback( index => {
-
-
     if( chosenLessons[index] === 0 ){
       //choose lesson, show list
       setChosenIndex(index);
@@ -142,57 +152,53 @@ function Relation() {
       relationToCreateOrUpdate.explanation = relation.explanation;
     }
 
-    
+    const id = relation.id
     updatingObject.set({
       object:{},
       state:false
     })  //if error then what, bug?
     if( isUpdate ){
-      await updateRelation( fbDB.get(), relation.id, relationToCreateOrUpdate, onSuccess, onError ) //TODO fix fkn update
+      await updateRelation( fbDB.get(), id, relationToCreateOrUpdate, onSuccess, onError ) 
+      navigate(0) // TODO fix update
     }
     else{
       await createRelation( fbDB.get(), relationToCreateOrUpdate, onSuccess, onError )
     }
     setFetching(false);
 
-  },[chosenLessons, relation, isUpdate, rawText]);
+  },[chosenLessons, relation, isUpdate, rawText, fbDB, navigate, onError, onSuccess, updatingObject, user]);
 
-  const onSuccess = useCallback(()=>{
-    setSuccess(true);
-    setOpenFeedbackDialog(true);
-  },[])
-
-  const onError = useCallback(()=>{
-    setSuccess(false);
-    setOpenFeedbackDialog(true);
-  },[])
 
   useEffect(()=>{
-    if( lessonToChoose ){
-      //TODO check if same lesson
-      const newChosen = chosenLessons;
-      newChosen[ chosenIndex ] = lessonToChoose;
-      setChosenLessons( newChosen );
-      forceUpdate();
-      setLessonToChoose();
-    }
-    else if( updatingObject.get().state ){
-
-      setIsUpdate(true);
-      const relation = updatingObject.get().object;
-      setChosenLessons( relation.lessons );
-      setRelation( relation );
-      /*
-      if( state.challengeLessons ){
-        setChosenLessons( state.challengeLessons );
+    let isMounted = true;
+    if( isMounted ){
+      if( lessonToChoose ){
+        //TODO check if same lesson
+        const newChosen = chosenLessons;
+        newChosen[ chosenIndex ] = lessonToChoose;
+        setChosenLessons( newChosen );
+        forceUpdate();
+        setLessonToChoose();
       }
-      */
+      else if( updatingObject.get().state ){
+  
+        setIsUpdate(true);
+        const relation = updatingObject.get().object;
+        setChosenLessons( relation.lessons );
+        setRelation( relation );
+        /*
+        if( state.challengeLessons ){
+          setChosenLessons( state.challengeLessons );
+        }
+        */
+      }
+      else if( lessonsToRelate.get().length ){ //quitar estado update en el boton
+        setChosenLessons( lessonsToRelate.get() );
+      }
     }
-    else if( lessonsToRelate.get().length ){ //quitar estado update en el boton
-      setChosenLessons( lessonsToRelate.get() );
-    }
+    return () => { isMounted = false }
 
-  },[ chosenIndex, forceUpdate ])
+  },[ chosenIndex, forceUpdate, lessonToChoose ])
 
   useEffect(()=>{
     if( !user.get().uid ) {
@@ -281,7 +287,7 @@ function Relation() {
                   required
                   minRows={3}
                   disabled={chosenLessons.length < 2}
-                  autcomplete={false}
+                  autcomplete={"off"}
                 />
             }
           </Grid>

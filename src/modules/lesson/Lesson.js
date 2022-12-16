@@ -8,7 +8,7 @@ import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import FeedbackDialog from "../components/FeedbackDialog";
 import MyEditor from "../home/components/MyEditor";
-import { db, domainsState, originsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, domainsState, originsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
 import { createLesson, updateLesson } from "../../services/lessons_services";
 import { createDBTag } from "../../services/tags_services";
 
@@ -53,7 +53,7 @@ function Lesson() {
   const domains = useHookstate(domainsState);
   const origins = useHookstate(originsState);
   const Alltags = useHookstate(tagsState);
-  const fbDB = useHookstate(db);
+  const fbDB = useHookstate(dbState);
   const updatingObject = useHookstate(updatingObjectState);
 
   const [lesson, setLesson] = useState({
@@ -93,13 +93,25 @@ function Lesson() {
   },[])
 
   const createTag  = useCallback(() => {
-    const newTag = {
-      label: currentChip,
-      color: stringToColor(currentChip),
+    if( currentChip.trim().length ){
+      const newTag = {
+        label: currentChip,
+        color: stringToColor(currentChip),
+      }
+      setCurrentChip("");
+      setTags([ ...tags, newTag ])
     }
-    setCurrentChip("");
-    setTags([ ...tags, newTag ])
   }, [tags,currentChip])
+
+  const onSuccess = useCallback(()=>{
+    setSuccess(true);
+    setOpenFeedbackDialog(true);
+  },[])
+
+  const onError = useCallback(()=>{
+    setSuccess(false);
+    setOpenFeedbackDialog(true);
+  },[])
 
   const createOrUpdate = useCallback( async()=> {
     setFetching(true);
@@ -126,7 +138,7 @@ function Lesson() {
     Object.keys( Alltags.get() ).forEach( id => {
       tagsToId = {
         ...tagsToId,
-        [capitalizeFirstLetter(Alltags.get()[id].tag)] : id 
+        [Alltags.get()[id].tag] : id 
     }})
 
     let tagIds = [];
@@ -139,13 +151,14 @@ function Lesson() {
       }
       tagIds.push(existingTagId);
     }
-
+    
     lessonToCreateOrUpdate.title = lesson.title;
     lessonToCreateOrUpdate.origin = originToId[ lesson.origin ];
     lessonToCreateOrUpdate.domain = domainsToId[ lesson.domain ];
     lessonToCreateOrUpdate.userUid = user.get().uid;
     lessonToCreateOrUpdate.creationDate = Date.now();
     lessonToCreateOrUpdate.isDescriptionRaw = lesson.isDescriptionRaw ? 1 : 0;
+    lessonToCreateOrUpdate.tags = tagIds;
 
     
     if( lesson.isDescriptionRaw ){
@@ -168,37 +181,31 @@ function Lesson() {
     }
   
     setFetching(false);
-  },[ lesson, tags, rawText ])
-
-  const onSuccess = useCallback(()=>{
-    setSuccess(true);
-    setOpenFeedbackDialog(true);
-  },[])
-
-  const onError = useCallback(()=>{
-    setSuccess(false);
-    setOpenFeedbackDialog(true);
-  },[])
+  },[ lesson, tags, rawText, Alltags, domains, fbDB, isUpdate, onError, onSuccess, origins, updatingObject, user ])
   
 
   useEffect(()=>{
-    if( !user.get().uid ) {
-      navigate( homePath );
+    let isMounted = true;
+    if( isMounted ){
+      if( !user.get().uid ) {
+        navigate( homePath );
+      }
+      if( updatingObject.get().state ){
+        const lessonToUpdate = { ...updatingObject.get().object };
+        
+        lessonToUpdate.domain = domains.get()[ lessonToUpdate.domain ].domain;
+        lessonToUpdate.origin = origins.get()[ lessonToUpdate.origin ].origin;
+        setLesson( lessonToUpdate );
+        setIsUpdate(true);
+        
+        setTags( lessonToUpdate.tags.map( tId => ({
+          label: Alltags.get()[tId].tag,
+          color:stringToColor(Alltags.get()[tId].tag)
+        })) );
+      }
+      setDbTags( Object.keys(Alltags.get()).map( id => ( capitalizeFirstLetter( Alltags.get()[ id ].tag ) ) ) )
     }
-    if( updatingObject.get().state ){
-      const lessonToUpdate = { ...updatingObject.get().object };
-      
-      lessonToUpdate.domain = domains.get()[ lessonToUpdate.domain ].domain;
-      lessonToUpdate.origin = origins.get()[ lessonToUpdate.origin ].origin;
-      setLesson( lessonToUpdate );
-      setIsUpdate(true);
-      
-      setTags( lessonToUpdate.tags.map( tId => ({
-        label: Alltags.get()[tId].tag,
-        color:stringToColor(Alltags.get()[tId].tag)
-      })) );
-    }
-    setDbTags( Object.keys(Alltags.get()).map( id => ( capitalizeFirstLetter( Alltags.get()[ id ].tag ) ) ) )
+    return () => { isMounted = false };
   },[])
 
   return (
@@ -209,7 +216,7 @@ function Lesson() {
       >
         <Box
           component="form"
-          autoComplete="off"
+          autComplete="off"
           sx={styles.lessonBox}
         >
           <Stack justifyContent="center" direction="row">
@@ -247,36 +254,42 @@ function Lesson() {
                 alignItems="center"
               >
                 <Grid item xs={5}>
-                  <Autocomplete
-                      isOptionEqualToValue={(option, value) => option.id === value.id}
-                      clearOnEscape
-                      options={ Object.keys( domains.get() ).map( id => domains.get()[ id ].domain ) }
-                      name="domain"
-                      value={ lesson.domain }
-                      onInputChange={(event, newInputValue) => {//fix
-                        if( Object.keys( domains.get() ).map( id => domains.get()[ id ].domain ).indexOf(newInputValue) > -1 ){
-                          setLesson( prevState => ({
-                            ...prevState,
-                            domain: newInputValue
-                          }))
-                        }
-                      }}
-                      renderInput={(params) => <TextField {...params}/>}
-                    />
-                  <FormHelperText>Domain</FormHelperText>
+                  {
+                    domains.get() && 
+                    <Autocomplete
+                        isOptionEqualToValue={(option, value) => option.id === value.id}
+                        clearOnEscape
+                        options={ Object.keys( domains.get() ).map( id => domains.get()[ id ].domain ) }
+                        name="domain"
+                        value={ lesson.domain }
+                        onInputChange={(event, newInputValue) => {//fix
+                          if( Object.keys( domains.get() ).map( id => domains.get()[ id ].domain ).indexOf(newInputValue) > -1 ){
+                            setLesson( prevState => ({
+                              ...prevState,
+                              domain: newInputValue
+                            }))
+                          }
+                        }}
+                        renderInput={(params) => <TextField {...params}/>}
+                      />
+                    }
+                    <FormHelperText>Domain</FormHelperText>
                 </Grid>
                 <Grid item>
-                  <Select
-                    name="origin"
-                    label="Origin"
-                    value={lesson.origin}
-                    onChange={handleChange}
-                    required
-                  >
-                    { Object.keys(origins.get()).map(oId => (
-                      <MenuItem value={origins.get()[oId].origin} key={oId}> { origins.get()[oId].origin } </MenuItem>
-                    ))}
-                  </Select>
+                  { 
+                    origins.get() && 
+                    <Select
+                      name="origin"
+                      label="Origin"
+                      value={lesson.origin}
+                      onChange={handleChange}
+                      required
+                    >
+                      { Object.keys(origins.get()).map(oId => (
+                        <MenuItem value={origins.get()[oId].origin} key={oId}> { origins.get()[oId].origin } </MenuItem>
+                      ))}
+                    </Select>
+                  }
                   <FormHelperText>Origin</FormHelperText>
                 </Grid>
               </Grid>
@@ -307,7 +320,7 @@ function Lesson() {
                 onChange={handleChange}
                 minRows={3}
                 required
-                autoComplete={false}
+                autoComplete={"off"}
               />
           }
 
@@ -361,7 +374,7 @@ function Lesson() {
               >
                 
                 <Grid item xs={12} md={6}>
-                  { 
+                  { Alltags.get() &&
                     <Autocomplete
                       isOptionEqualToValue={(option, value) => option.id === value.id}
                       options={dbTags}

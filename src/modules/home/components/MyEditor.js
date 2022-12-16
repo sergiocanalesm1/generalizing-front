@@ -15,10 +15,14 @@ function MyEditor( { setText, readOnly, rawText } ){
     },[editorState, setText])
 
     useEffect(() => {
-        EditorState.createEmpty();
-        if( rawText ){
-            setEditorState(EditorState.createWithContent(convertFromRaw( JSON.parse( rawText ) )))
+        let isMounted = true;
+        if(isMounted){
+            EditorState.createEmpty();
+            if( rawText ){
+                setEditorState(EditorState.createWithContent(convertFromRaw( JSON.parse( rawText ) )))
+            }
         }
+        return () => { isMounted = false }
     },[rawText, readOnly])
 
     return (

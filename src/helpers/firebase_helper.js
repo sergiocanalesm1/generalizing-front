@@ -2,7 +2,7 @@ import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 //import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
-import { db, userState } from "../globalState/globalState";
+import { dbState, userState } from "../globalState/globalState";
 
 export function initFirebase(){
 
@@ -20,7 +20,7 @@ export function initFirebase(){
     const app = initializeApp(firebaseConfig);
     // const analytics = getAnalytics(app);
     const firestoreDB = getFirestore(app);
-    db.set(firestoreDB);
+    dbState.set(firestoreDB);
 
     const auth = getAuth()
     onAuthStateChanged( auth, (user) =>{

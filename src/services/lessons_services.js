@@ -6,14 +6,10 @@ const lessonsCollection = "lessons";
 export async function getAllLessons(db){
 
     const lessons = {};
-    let data, tags = [];
+    let data;
     const querySnapshot = await getDocs(collection(db, lessonsCollection));
     querySnapshot.forEach((doc) => {
         data = doc.data();
-        if( data.tags ){
-            tags = data.tags.split(",");
-            data.tags = tags;
-        }
         lessons[doc.id] = data;
         //lessons.push({[doc.id]:data})
     });

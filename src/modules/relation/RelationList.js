@@ -3,7 +3,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { db, relationsState, relationsToListState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, relationsState, relationsToListState, updatingObjectState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
@@ -47,7 +47,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
     const user = useHookstate(userState);
     const relationsToList = useHookstate(relationsToListState);
     const relations = useHookstate(relationsState);
-    const fbDB = useHookstate(db);
+    const fbDB = useHookstate(dbState);
     const updatingObject = useHookstate(updatingObjectState);
 
     const [success, setSuccess] = useState(true);

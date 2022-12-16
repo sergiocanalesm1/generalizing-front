@@ -5,11 +5,11 @@ import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 
-import { db, lessonsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, lessonsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
-import { homePath, lessonPath } from "../../utils/paths";
+import { lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
 import ConfirmModal from "../components/ConfirmModal";
 import FeedbackDialog from "../components/FeedbackDialog";
@@ -42,7 +42,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     const lessons = useHookstate(lessonsState);
     const user = useHookstate(userState);
     const tags = useHookstate(tagsState);
-    const fbDB = useHookstate(db);
+    const fbDB = useHookstate(dbState);
     const updatingObject = useHookstate(updatingObjectState);
 
     const [openDetail, setOpenDetail] = useState(false);
@@ -68,12 +68,12 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
             setOpenDetail(true);
             setSelectedLesson( lessons.get()[id] );
         }
-    },[setOpen, setChosenLesson, canChoose]);
+    },[setOpen, setChosenLesson, canChoose, lessons]);
 
     const handleDetailClose = useCallback(()=>{
         setOpenDetail(false);
         setOpen(true);
-    },[setOpen])
+    },[setOpen, setOpenDetail])
 
     const handleEdit = useCallback( (lesson, id) =>  {
         setOpen(false);
@@ -86,7 +86,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
             state: true
         });
         navigate( lessonPath );
-    },[navigate,setOpen])
+    },[navigate,setOpen, updatingObject])
 
 
     const handleDelete = useCallback(async( id ) =>  {
@@ -106,7 +106,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
             )}
         );
         
-    },[navigate])
+    },[navigate, setOpenConfirmModal, setConfirmCallback, fbDB])
 
     const handlelessonsSortClick = useCallback( criteria => {
         setLessonsFilterCriteria(criteria);
@@ -151,7 +151,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
             default:
                 break;
         }
-    },[lessons, latestLessons, ownedLessons])
+    },[lessons, latestLessons, ownedLessons, user])
 
     const handleClose = useCallback(()=>{
         setLessonsFilterCriteria(lessonsSortObj.random);//random?
@@ -177,13 +177,13 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                             View Lessons
                         </Typography>
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                            {   lessons.get() &&
-                                Object.keys(lessonsSortObj).map( ls => (
+                            {  lessons.get() &&
+                                Object.keys(lessonsSortObj).map( (ls, i) => (
                                     lessonsSortObj[ls] === lessonsSortObj.mine && !user.get().uid
-                                    ? <></>
+                                    ? <Fragment key={i}></Fragment>
                                     :
                                     <Button
-                                        key={ls}
+                                        key={i}
                                         sx={{ borderRadius: 28 }}
                                         size="small"
                                         color="neutral"
@@ -232,7 +232,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                                         lesson.tags.map( tagId => capitalizeFirstLetter( tags.get()[ tagId ].tag ))
                                                             .join(', ')
                                                     }
-                                                    {lesson.tags && <br />}
+                                                    {lesson.tags.length && <br />}
                                                     {toDate(lesson.creationDate)}
                                                 </Fragment>
                                             }/>

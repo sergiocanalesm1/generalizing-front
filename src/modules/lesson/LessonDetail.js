@@ -28,7 +28,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
     const relationsToList = useHookstate(relationsToListState);
 
     const handleOpenExistingRelations = useCallback(() => {
-        relationsToList.set(lesson.relations);
+        relationsToList.set(JSON.parse(JSON.stringify(lesson.relations)));
         setOpenRelationListDialog(true)
     },[relationsToList, lesson])
     if( !lesson ){

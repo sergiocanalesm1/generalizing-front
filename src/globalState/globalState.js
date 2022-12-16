@@ -1,6 +1,6 @@
 import { hookstate } from '@hookstate/core';
 
-export const db = hookstate({});
+export const dbState = hookstate({});
 
 export const relationsState = hookstate({});
 export const lessonsState = hookstate({});

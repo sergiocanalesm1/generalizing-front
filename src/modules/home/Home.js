@@ -7,7 +7,7 @@ import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
-import { db, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState, updatingObjectState } from "../../globalState/globalState";
+import { dbState, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState, updatingObjectState } from "../../globalState/globalState";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
 import RelationGraph from "./components/RelationGraph";
@@ -38,7 +38,7 @@ function Home() {
     const tags = useHookstate(tagsState);
     const origins = useHookstate(originsState);
     const user = useHookstate(userState);
-    const fbDB = useHookstate(db);
+    const fbDB = useHookstate(dbState);
     const relationsToList = useHookstate(relationsToListState);
     const updatingObject = useHookstate(updatingObjectState);
 
@@ -90,6 +90,8 @@ function Home() {
     },[navigate, user]);
 
 
+    //const fetchRelationResource = () => getAllRelations(fbDB.get()).then( fetchedResource => relations.set( fetchedResource ) )
+
     /*
     const handleViewChallenge = useCallback(()=>{
         setOpenChallengeDetailDialog(true);
@@ -104,13 +106,13 @@ function Home() {
         }
         
         const db = fbDB.get();
-        
+        //TODO fix state
         getAllRelations(db).then( fetchedRelations => {         
             getAllLessons(db).then( fetchedLessons => {
                 getAllDomains(db).then( fetchedDomains => {
                     getAllTags(db).then( fetchedTags => {
                         getAllOrigins(db).then( fetchedOrigins => {
-                            fetchedLessons = combineLessonsWithRelations(fetchedRelations, fetchedLessons, fetchedDomains, fetchedOrigins, fetchedTags);
+                            fetchedLessons = combineLessonsWithRelations(fetchedRelations, fetchedLessons);
                             if( isMounted ){
                                 relations.set(fetchedRelations)
                                 domains.set(fetchedDomains)
