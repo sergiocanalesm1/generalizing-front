@@ -5,7 +5,7 @@ import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 
-import { db, lessonsState, tagsState, userState } from "../../globalState/globalState";
+import { db, lessonsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
@@ -37,12 +37,13 @@ const lessonsSortObj = {
 
 function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) {
 
-    const navigate = useNavigate();//updates while unmounted
+    const navigate = useNavigate();
 
     const lessons = useHookstate(lessonsState);
     const user = useHookstate(userState);
     const tags = useHookstate(tagsState);
     const fbDB = useHookstate(db);
+    const updatingObject = useHookstate(updatingObjectState);
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
@@ -74,11 +75,17 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
         setOpen(true);
     },[setOpen])
 
-    const handleEdit = useCallback(( lesson ) =>  {
+    const handleEdit = useCallback( (lesson, id) =>  {
         setOpen(false);
-        navigate( lessonPath, {
-            state:{ lesson }
-        })
+        lesson = {
+            ...lesson,
+            id: id
+        }
+        updatingObject.set({
+            object: lesson,
+            state: true
+        });
+        navigate( lessonPath );
     },[navigate,setOpen])
 
 
@@ -101,7 +108,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
         
     },[navigate])
 
-    const handlelessonsSortClick = useCallback((criteria) => {
+    const handlelessonsSortClick = useCallback( criteria => {
         setLessonsFilterCriteria(criteria);
         let sortedLessons = {};
 
@@ -238,14 +245,14 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                                 <IconButton
                                                     edge="end" 
                                                     sx={{ color: 'gray' }}
-                                                    onClick={() => handleEdit(lesson)}
+                                                    onClick={() => handleEdit( lesson, id )}
                                                 >
                                                     <Edit />
                                                 </IconButton>
                                                 <IconButton
                                                     edge="end" 
                                                     sx={{ color: 'gray' }}
-                                                    onClick={() => handleDelete(id)}
+                                                    onClick={() => handleDelete( id )}
                                                 >
                                                     <Delete />
                                                 </IconButton>

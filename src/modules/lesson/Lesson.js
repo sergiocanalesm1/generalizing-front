@@ -1,15 +1,15 @@
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ArrowBack, Send } from "@mui/icons-material";
-import { Autocomplete, Box, Button, Chip, FormHelperText, Grid, MenuItem, Paper, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Autocomplete, Box, Button, Chip, FormHelperText, Grid, MenuItem, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useHookstate } from "@hookstate/core";
 
 import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import FeedbackDialog from "../components/FeedbackDialog";
 import MyEditor from "../home/components/MyEditor";
-import { db, domainsState, originsState, tagsState, userState } from "../../globalState/globalState";
-import { createOrUpdateLesson } from "../../services/lessons_services";
+import { db, domainsState, originsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
+import { createLesson, updateLesson } from "../../services/lessons_services";
 import { createDBTag } from "../../services/tags_services";
 
 
@@ -48,13 +48,13 @@ const styles = {
 function Lesson() {
   //quitar files por ahora
   const navigate = useNavigate();
-  const { state } = useLocation();
 
   const user = useHookstate(userState);
   const domains = useHookstate(domainsState);
   const origins = useHookstate(originsState);
   const Alltags = useHookstate(tagsState);
   const fbDB = useHookstate(db);
+  const updatingObject = useHookstate(updatingObjectState);
 
   const [lesson, setLesson] = useState({
     "title" : "",
@@ -107,6 +107,7 @@ function Lesson() {
 
     const lessonToCreateOrUpdate = {};
 
+    //TODO fix this logic, look for a way to get the ids directly from the autocomplete
     let originToId = {}
     Object.keys( origins.get() ).forEach( id => {
       originToId = {
@@ -129,7 +130,7 @@ function Lesson() {
     }})
 
     let tagIds = [];
-    let existingTagId, label, docId; 
+    let existingTagId, label; 
     for( let i=0; i < tags.length; i++ ){
       label = tags[i].label.toLowerCase();
       existingTagId = tagsToId[ label ];
@@ -146,39 +147,59 @@ function Lesson() {
     lessonToCreateOrUpdate.creationDate = Date.now();
     lessonToCreateOrUpdate.isDescriptionRaw = lesson.isDescriptionRaw ? 1 : 0;
 
+    
     if( lesson.isDescriptionRaw ){
       lessonToCreateOrUpdate.description = JSON.stringify( rawText );
     }
 
-    await createOrUpdateLesson( fbDB.get(), lessonToCreateOrUpdate,
-      ()=>{
-        setSuccess(true);
-        setOpenFeedbackDialog(true);
-      },
-      ()=>{
-        setSuccess(false);
-        setOpenFeedbackDialog(true);
-      }
-    )
+    if( !rawText || !lesson.isDescriptionRaw ){
+      lessonToCreateOrUpdate.description = lesson.description;
+    }
+
+    updatingObject.set({
+      object:{},
+      state:false
+    })  //if error then what, bug?
+    if( isUpdate ){
+      await updateLesson( fbDB.get(), lesson.id, lessonToCreateOrUpdate, onSuccess, onError )
+    }
+    else {
+      await createLesson( fbDB.get(), lessonToCreateOrUpdate, onSuccess, onError )
+    }
   
     setFetching(false);
-  },[ lesson, tags, isUpdate, rawText ])
+  },[ lesson, tags, rawText ])
+
+  const onSuccess = useCallback(()=>{
+    setSuccess(true);
+    setOpenFeedbackDialog(true);
+  },[])
+
+  const onError = useCallback(()=>{
+    setSuccess(false);
+    setOpenFeedbackDialog(true);
+  },[])
   
 
   useEffect(()=>{
     if( !user.get().uid ) {
       navigate( homePath );
     }
-    if( state ){ //TODO remove state
+    if( updatingObject.get().state ){
+      const lessonToUpdate = { ...updatingObject.get().object };
+      
+      lessonToUpdate.domain = domains.get()[ lessonToUpdate.domain ].domain;
+      lessonToUpdate.origin = origins.get()[ lessonToUpdate.origin ].origin;
+      setLesson( lessonToUpdate );
       setIsUpdate(true);
-      setLesson( state.lesson );
-      setTags( state.lesson.tags.map( t => ({
-        label:t,
-        color:stringToColor(t)
+      
+      setTags( lessonToUpdate.tags.map( tId => ({
+        label: Alltags.get()[tId].tag,
+        color:stringToColor(Alltags.get()[tId].tag)
       })) );
     }
     setDbTags( Object.keys(Alltags.get()).map( id => ( capitalizeFirstLetter( Alltags.get()[ id ].tag ) ) ) )
-  },[state])
+  },[])
 
   return (
     <div>

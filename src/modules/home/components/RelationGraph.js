@@ -70,6 +70,7 @@ function RelationGraph({ setOpenList, setFilters }) { //domain blending but, ori
 
 
   useEffect(()=>{
+      let isMounted = true;
       const color = d3.scaleOrdinal(names, d3.quantize(d3.interpolateRainbow, names.length));
 
       const svgEl = d3.select(d3Ref.current);
@@ -123,9 +124,11 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
           .on("click",(e,d)=>{
             const d1 = names[d.source.index];
             const d2 = names[d.target.index];
-            relationsToList.set( filterByDomain( relations.get(), lessons.get(), [d1,d2], domains.get() ) ) 
-            setFilters(`${d1} and ${d2}`)
-            setOpenList(true)
+            if( isMounted ){
+              relationsToList.set( filterByDomain( relations.get(), lessons.get(), [d1,d2], domains.get() ) ) 
+              setFilters(`${d1} and ${d2}`)
+              setOpenList(true)
+            }
           })
           .on("mouseover",(e,d)=>{
             d3.select(`#${getId(d.source.index,d.target.index)}`).attr("fill-opacity", 0.9)
@@ -138,6 +141,7 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
 `${names[d.source.index]} ⇔ ${names[d.target.index]} 
 ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
 ;
+return () => { isMounted = false }
 
     },[ relations, lessons, domains, matrix, names, relationsToList, setFilters, setOpenList ]
   );

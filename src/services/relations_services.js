@@ -1,4 +1,4 @@
-import { collection, getDocs, addDoc, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, addDoc, setDoc, doc, deleteDoc } from "firebase/firestore";
 
 
 const relationsCollection = "relations";
@@ -6,20 +6,39 @@ const relationsCollection = "relations";
 export async function getAllRelations(db){
     const relations = {}
     let data, lessons;
-    const querySnapshot = await getDocs(collection(db, relationsCollection));
-    querySnapshot.forEach((doc) => {
-        data = doc.data();
-        lessons = data.lessons.split(",")
-        data.lessons = lessons
-        relations[doc.id] = data;
-        //relations.push({[doc.id]:data})
-    });
+    try{
+        const querySnapshot = await getDocs(collection(db, relationsCollection));
+        querySnapshot.forEach((doc) => {
+            data = doc.data();
+            lessons = data.lessons.split(",")
+            data.lessons = lessons
+            relations[doc.id] = data;
+            //relations.push({[doc.id]:data})
+        });
+
+    }
+    catch(error){
+        console.log(error)
+    }
     return relations;
 }
 
-export async function createOrUpdateRelation( db, relation, onSuccess, onError ){
+export async function updateRelation( db, id, relation, onSuccess, onError ){
     try{
-        await addDoc(collection(db, relationsCollection), relation, { merge: true });
+        const ref = doc(db, relationsCollection, id);
+        debugger;
+        await setDoc(ref, relation, { merge: true });
+        onSuccess();
+    }
+    catch(error) {
+        onError()
+        console.log(error);
+    }
+}
+
+export async function createRelation( db, relation, onSuccess, onError ){
+    try{
+        await addDoc(collection(db, relationsCollection), relation);
         onSuccess();
     }
     catch(error) {

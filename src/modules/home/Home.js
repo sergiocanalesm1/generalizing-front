@@ -7,7 +7,7 @@ import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
-import { db, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState } from "../../globalState/globalState";
+import { db, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState, updatingObjectState } from "../../globalState/globalState";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
 import RelationGraph from "./components/RelationGraph";
@@ -40,6 +40,7 @@ function Home() {
     const user = useHookstate(userState);
     const fbDB = useHookstate(db);
     const relationsToList = useHookstate(relationsToListState);
+    const updatingObject = useHookstate(updatingObjectState);
 
 
     const [success, setSuccess] = useState( false );
@@ -63,6 +64,10 @@ function Home() {
     const handleCreateLesson = useCallback(()=>{
         if( user.get().uid ) {
             navigate(lessonPath);
+            updatingObject.set({
+                object:{},
+                state:false
+            })
         }
         else  {
             setOpenAuthModal(true);
@@ -73,6 +78,10 @@ function Home() {
     const handleCreateRelation = useCallback(()=>{
         if( user.get().uid ) {
             navigate(relationPath);
+            updatingObject.set({
+                object:{},
+                state:false
+            })
         }
         else  {
             setOpenAuthModal(true);
@@ -87,6 +96,7 @@ function Home() {
     },[])
     */
     useEffect(()=>{
+        let isMounted = true; 
         setFetching(true);
 
         if( !getFirstTimer() ){
@@ -101,13 +111,16 @@ function Home() {
                     getAllTags(db).then( fetchedTags => {
                         getAllOrigins(db).then( fetchedOrigins => {
                             fetchedLessons = combineLessonsWithRelations(fetchedRelations, fetchedLessons, fetchedDomains, fetchedOrigins, fetchedTags);
-                            relations.set(fetchedRelations)
-                            domains.set(fetchedDomains)
-                            tags.set(fetchedTags)
-                            origins.set(fetchedOrigins) 
-                            lessons.set(fetchedLessons)
-                            relationsToList.set(Object.keys(relations));
-                            setFetching(false);
+                            if( isMounted ){
+                                relations.set(fetchedRelations)
+                                domains.set(fetchedDomains)
+                                tags.set(fetchedTags)
+                                origins.set(fetchedOrigins) 
+                                lessons.set(fetchedLessons)
+                                relationsToList.set(Object.keys(relations));
+                                setFetching(false);
+
+                            }
                         })
                     })
                 })
@@ -123,6 +136,7 @@ function Home() {
                 
             });
             */
+        return () => { isMounted = false }
     },[]);
 
     return (

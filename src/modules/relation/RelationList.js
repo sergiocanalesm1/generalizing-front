@@ -3,7 +3,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { db, relationsState, relationsToListState, userState } from "../../globalState/globalState";
+import { db, relationsState, relationsToListState, updatingObjectState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
@@ -48,6 +48,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
     const relationsToList = useHookstate(relationsToListState);
     const relations = useHookstate(relationsState);
     const fbDB = useHookstate(db);
+    const updatingObject = useHookstate(updatingObjectState);
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -66,11 +67,16 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
         setOpen(true);
     },[setOpen])
 
-    const handleEdit = useCallback(( relation ) =>  {
+    const handleEdit = useCallback(( relation, id ) =>  {
         setOpen(false);
-        navigate( relationPath, {
-            state:{ relation }
-        })
+        updatingObject.set({
+            object: {
+                ...relation,
+                id: id
+            },
+            state: true
+        });
+        navigate( relationPath );
     },[navigate,setOpen])
 
     const handleDelete = useCallback(( id ) =>  {
@@ -84,7 +90,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
                     setOpenConfirmModal(false);
                     setOpenFeedbackDialog(true);
                     if( ok ){
-                        navigate(0);
+                        navigate(0);//!
                     }
                 }
             )}
@@ -189,7 +195,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
                                                 <IconButton
                                                     edge="end" 
                                                     sx={{ color: 'gray' }}
-                                                    onClick={() => handleEdit(relation)}
+                                                    onClick={() => handleEdit(relation, id)}
                                                 >
                                                     <Edit />
                                                 </IconButton>

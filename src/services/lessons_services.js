@@ -1,4 +1,4 @@
-import { collection, getDocs, addDoc, doc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, setDoc, addDoc, doc, deleteDoc } from "firebase/firestore";
 
 
 const lessonsCollection = "lessons";
@@ -20,9 +20,21 @@ export async function getAllLessons(db){
     return lessons;
 }
 
-export async function createOrUpdateLesson( db, lesson, onSuccess, onError ){
+export async function updateLesson( db, id, lesson, onSuccess, onError ){
     try{
-        await addDoc(collection(db, lessonsCollection), lesson, { merge: true });
+        const ref = doc(db, lessonsCollection, id);
+        await setDoc(ref, lesson, { merge: true });
+        onSuccess();
+    }
+    catch(error) {
+        onError()
+        console.log(error);
+    }
+}
+
+export async function createLesson( db, lesson, onSuccess, onError ){
+    try{
+        await addDoc(collection(db, lessonsCollection), lesson);
         onSuccess();
     }
     catch(error) {

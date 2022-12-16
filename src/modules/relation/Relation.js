@@ -2,9 +2,9 @@ import { useHookstate } from "@hookstate/core";
 import { Add, ArrowBack, Send } from "@mui/icons-material";
 import { Avatar, Box, Button, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { db, lessonsState, userState } from "../../globalState/globalState";
-import { createOrUpdateRelation } from "../../services/relations_services";
+import { useNavigate } from "react-router-dom";
+import { db, lessonsState, lessonsToRelateState, relationsState, updatingObjectState, userState } from "../../globalState/globalState";
+import { createRelation, updateRelation } from "../../services/relations_services";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import FeedbackDialog from "../components/FeedbackDialog";
@@ -57,11 +57,12 @@ const  styles = {
 function Relation() {
 
   const navigate = useNavigate();
-  const { state } = useLocation();
 
   const user = useHookstate(userState);
   const lessons = useHookstate(lessonsState);
   const fbDB = useHookstate(db);
+  const updatingObject = useHookstate(updatingObjectState);
+  const lessonsToRelate = useHookstate(lessonsToRelateState);
 
   //TODO fix force update
   const [,updateState] = useState();
@@ -102,7 +103,7 @@ function Relation() {
     })
   }, [relation] );
 
-  const detailOrListLesson = useCallback(async(index)=>{
+  const detailOrListLesson = useCallback( index => {
 
 
     if( chosenLessons[index] === 0 ){
@@ -137,20 +138,34 @@ function Relation() {
     if( relation.isExplanationRaw ){
       relationToCreateOrUpdate.explanation = JSON.stringify( rawText );
     }
-    
-    await createOrUpdateRelation( fbDB.get(), relationToCreateOrUpdate,
-      ()=>{
-        setSuccess(true);
-        setOpenFeedbackDialog(true);
-      },
-      ()=>{
-        setSuccess(false);
-        setOpenFeedbackDialog(true);
-      }
-    )
+    if( !rawText || !relation.isExplanationRaw ){
+      relationToCreateOrUpdate.explanation = relation.explanation;
+    }
 
+    
+    updatingObject.set({
+      object:{},
+      state:false
+    })  //if error then what, bug?
+    if( isUpdate ){
+      await updateRelation( fbDB.get(), relation.id, relationToCreateOrUpdate, onSuccess, onError ) //TODO fix fkn update
+    }
+    else{
+      await createRelation( fbDB.get(), relationToCreateOrUpdate, onSuccess, onError )
+    }
     setFetching(false);
-  },[chosenLessons, relation, state, isUpdate, rawText]);
+
+  },[chosenLessons, relation, isUpdate, rawText]);
+
+  const onSuccess = useCallback(()=>{
+    setSuccess(true);
+    setOpenFeedbackDialog(true);
+  },[])
+
+  const onError = useCallback(()=>{
+    setSuccess(false);
+    setOpenFeedbackDialog(true);
+  },[])
 
   useEffect(()=>{
     if( lessonToChoose ){
@@ -161,22 +176,23 @@ function Relation() {
       forceUpdate();
       setLessonToChoose();
     }
-    if( state ){
+    else if( updatingObject.get().state ){
+
+      setIsUpdate(true);
+      const relation = updatingObject.get().object;
+      setChosenLessons( relation.lessons );
+      setRelation( relation );
       /*
       if( state.challengeLessons ){
         setChosenLessons( state.challengeLessons );
       }
       */
-      if( state.relation ){
-        setIsUpdate(true);
-        setChosenLessons( state.relation.lessons );
-        setRelation( state.relation );
-      }
-      if( state.newRelation ){
-        setChosenLessons( state.newRelation.lessons );
-      }
     }
-  },[ lessonToChoose, chosenIndex, chosenLessons, forceUpdate, state ])
+    else if( lessonsToRelate.get().length ){ //quitar estado update en el boton
+      setChosenLessons( lessonsToRelate.get() );
+    }
+
+  },[ chosenIndex, forceUpdate ])
 
   useEffect(()=>{
     if( !user.get().uid ) {
@@ -184,11 +200,11 @@ function Relation() {
     }
   },[])
 
+
   return (
     <div>
       <Toolbar />
-      <Paper 
-        elevation={5}
+      <Box 
         sx={styles.relationPaper}
       >
         <Box
@@ -197,15 +213,11 @@ function Relation() {
           sx={styles.relationBox}
         >
 
-          <Stack justifyContent="center" direction="row">
+          {<Stack justifyContent="center" direction="row">
             <Typography variant="h2" align="center">
-              {
-                state?.challengeId
-                ? <>Relating Challenge {state.challengeId}</>
-                : <>Create a Relation</>
-              }
+              <>Create a Relation</>
             </Typography>
-          </Stack>
+          </Stack>}
 
           <Toolbar />
           <Stack justifyContent="center" direction="row">
@@ -244,7 +256,7 @@ function Relation() {
           <Toolbar />
           
           <Grid container direction="row" justifyContent="space-between">
-          <Grid item xs={12} md={9}>
+          <Grid item xs={12} md={12}>
             <Stack justifyContent="center" direction="row">
               <Typography variant="body" align="center">
                 <strong>Explain</strong> how you relate these concepts
@@ -353,7 +365,7 @@ function Relation() {
             </Button>
           </Stack>
         </Box>
-      </Paper>
+      </Box>
       <LessonListDialog
         open={openLessonList}
         setOpen={setOpenLessonList}

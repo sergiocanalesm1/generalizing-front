@@ -11,7 +11,7 @@ import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
 import FeedbackDialog from './FeedbackDialog';
 import HelpDialog from './HelpDialog';
-import { relationsState, relationsToListState, userState } from '../../globalState/globalState';
+import { relationsState, relationsToListState, updatingObjectState, userState } from '../../globalState/globalState';
 import { logout } from '../../services/user_services';
 //import { tempRelations } from '../../utils/enums';
 
@@ -39,18 +39,23 @@ function Header() {
   const user = useHookstate(userState);
   const relations = useHookstate(relationsState);
   const relationsToList = useHookstate(relationsToListState);
+  const updatingObject = useHookstate(updatingObjectState);
 
   const [path,setPath] = useState("");
 
 
   const handleLogout = useCallback(()=> {
     logout(); // state is cleared in the observer
-    navigate( homePath );
+    navigate( 0 );
   },[navigate])
 
   const handleCreateLesson = useCallback(()=>{
     setAnchorElLessons();
     if( user.get().uid ) {
+      updatingObject.set({
+        object:{},
+        state:false
+    })
       navigate(lessonPath);
     }
     else  {
@@ -68,6 +73,10 @@ function Header() {
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
     if( user.get().uid ) {
+      updatingObject.set({
+        object:{},
+        state:false
+    })
         navigate(relationPath);
     }
     else  {
