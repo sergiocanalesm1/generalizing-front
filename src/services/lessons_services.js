@@ -24,7 +24,7 @@ export async function updateLesson( db, id, lesson, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        console.log(error);
+        //console.log(error);
     }
 }
 
@@ -35,7 +35,7 @@ export async function createLesson( db, lesson, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        console.log(error);
+        //console.log(error);
     }
 }
 
@@ -45,7 +45,7 @@ export async function deleteLesson( db, id ){
         return true
     }
     catch(error){
-        console.log(error)
+        //console.log(error)
         return false
     }
 }

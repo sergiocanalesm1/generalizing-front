@@ -18,6 +18,6 @@ export async function createDBTag(db, tag){
         return docRef.id;
     }
     catch( error ){
-        console.log(error)
+        //console.log(error)
     }
 }

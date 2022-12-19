@@ -1,8 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Box, Button, Grid, Modal, TextField, Typography } from '@mui/material';
-import { login, signin } from '../../services/user_services';
-import { useHookstate } from '@hookstate/core';
-import { userState } from '../../globalState/globalState';
+import { Box, Button, Grid, Modal, Stack, TextField, Typography } from '@mui/material';
+import { login, resetPassword, sendVerification, signin, signinWithGoogle } from '../../services/user_services';
 
 const style = {
     modal :{
@@ -18,6 +16,9 @@ const style = {
     },
     modalItem:{
         p:1
+    },
+    googleImg:{
+        width:"40%",
     }
     
   };
@@ -26,45 +27,62 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     
     //TODO implement errors
 
-    const user = useHookstate(userState);
-
-    const [email,setEmail] = useState('');
-    const [username,setUsername] = useState('');
-    const [password,setPassword] = useState('');
+    const [userForm, setUserForm] = useState({
+        email:"",
+        password:""
+    })
 
     const [isLogin,setIsLogin] = useState(false);
-    const [signupOrSignText,setSignupOrSignText] = useState('');
+    const [submitText,setSubmitText] = useState('');
     const [footText, setFootText] = useState('');
 
     const [fetching, setFetching] = useState(false);
 
+    const [forgotPassword, setForgotPassword] = useState(false);
+
     useEffect(()=>{
         if( open ){
-            if( isLogin ) {
-                setSignupOrSignText('Log in');
+            if( forgotPassword ){
+                setSubmitText('Reset Password');
+            }
+            else if( isLogin ) {
+                setSubmitText('Log in');
                 setFootText("Don't have an account? Sign Up");
             }
             else{
                 setIsLogin(false)
-                setSignupOrSignText('Sign Up');
+                setSubmitText('Sign Up');
                 setFootText('Already have an Account? Log in');
             }
         }
 
-    },[isLogin, open]);
+    },[isLogin, open, forgotPassword]);
+
+    const handleChange = useCallback( e => {
+        setUserForm({
+            ...userForm,
+            [e.target.name] : e.target.value
+        })
+    },[userForm])
+
 
     const handleSubmit = useCallback( async() => {
         setFetching(true);
-        let fbUser;
-        if( isLogin ) {
-            fbUser = await login(email,password,onSuccess,onError)
+        if( forgotPassword ){
+            resetPassword(userForm.email,onSuccess,onError)
+        }
+        else if( isLogin ) {
+            login(userForm.email,userForm.password,onSuccess,onError)
         }
         else {
-            fbUser = await signin(email,username,password,onSuccess,onError);
+            signin(userForm.email,userForm.password,onSuccess,onError)
+            .then( () => {
+                sendVerification();
+            })
         }
-        user.set(fbUser); //uid gets stored in user.get().uid
+
         setFetching(false);
-      }, [email, password, isLogin, username, onError, onSuccess, user]);
+      }, [userForm, isLogin,forgotPassword,onSuccess,onError]);
     
 
     return(
@@ -82,43 +100,50 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                     direction="column"
                 >
                     <Grid item sx={style.modalItem}>
-                        <h4 align='center'> {signupOrSignText} to start relating!</h4>
+                        <h4 align='center'> {submitText} to start relating!</h4>
                     </Grid>
-                    { !isLogin &&
-                        <Grid item sx={style.modalItem}>
-                            <TextField 
-                                variant="outlined"
-                                label="Username"
-                                required
-                                onChange={ (e) => setUsername(e.target.value) }
-                                />
-                        </Grid>  
-                    }
                     <Grid item sx={style.modalItem}>
                         <TextField 
                             variant="outlined"
                             label="Email"
+                            name="email"
                             required
-                            onChange={ (e) => setEmail(e.target.value) }
+                            onChange={ e => handleChange(e) }
                         />
                     </Grid>
+                    { !forgotPassword &&
+                        <Grid item sx={style.modalItem}>
+                            <TextField 
+                                variant="outlined"
+                                label="Password"
+                                required
+                                type="password"
+                                name="password"
+                                onChange={ e => handleChange(e) }
+                            />
+                        </Grid>
+                    }
                     <Grid item sx={style.modalItem}>
-                        <TextField 
-                            variant="outlined"
-                            label="Password"
-                            required
-                            type="password"
-                            onChange={ (e) => setPassword(e.target.value) }
-                        />
-                    </Grid>
-                    <Grid item sx={style.modalItem}>
+                    <Stack direction="row" alignItems="center" justifyContent="space-evenly">
                         <Button
                             variant="contained"
                             onClick={handleSubmit}
-                            disabled={(!email || !password)}
+                            disabled={(!userForm.email || !userForm.password)}
                         >
-                            {signupOrSignText}
+                            {submitText}
                         </Button>
+                        <Button
+                            variant="outlined"
+                            onClick={()=>signinWithGoogle(onSuccess,onError)}
+                            sx={style.googleImg}
+                        >
+                            <img 
+                                src="https://raw.githubusercontent.com/firebase/firebaseui-web/master/image/google.svg"
+                                alt="google_icon"
+                                style={style.googleImg}
+                            />
+                        </Button>
+                    </Stack>
                     </Grid>
                     <Grid item>
                         <Typography variant='small'>
@@ -127,6 +152,7 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                                 size="small"
                                 onClick={()=>{
                                     setIsLogin(!isLogin)
+                                    setForgotPassword(false);
                                 }}
                                 disabled={fetching}
                             >
@@ -134,6 +160,22 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                             </Button>
                         </Typography>
                     </Grid>
+                    { !forgotPassword &&
+                        <Grid item>
+                            <Typography variant='small'>
+                                <Button 
+                                    variant="text"
+                                    size="small"
+                                    onClick={()=>{
+                                        setForgotPassword(true)
+                                    }}
+                                    disabled={fetching}
+                                >
+                                    Forgot your password
+                                </Button>
+                            </Typography>
+                        </Grid>
+                    }
                 </Grid>
             </Box>
         </Modal>

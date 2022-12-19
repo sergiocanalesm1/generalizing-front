@@ -11,7 +11,7 @@ export async function getExamples(db){
         });
     }
     catch( error ){
-        console.log(error)
+        //console.log(error)
     }
     return examples;
 }

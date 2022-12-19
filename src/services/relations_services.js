@@ -18,7 +18,7 @@ export async function getAllRelations(db){
 
     }
     catch(error){
-        console.log(error)
+        //console.log(error)
     }
     return relations;
 }
@@ -31,7 +31,7 @@ export async function updateRelation( db, id, relation, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        console.log(error);
+        //console.log(error);
     }
 }
 
@@ -42,7 +42,7 @@ export async function createRelation( db, relation, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        console.log(error);
+        //console.log(error);
     }
 }
 
@@ -52,7 +52,7 @@ export async function deleteRelation( db, id ){
         return true
     }
     catch(error){
-        console.log(error)
+        //console.log(error)
         return false
     }
 }
