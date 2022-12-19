@@ -8,7 +8,7 @@ import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import FeedbackDialog from "../components/FeedbackDialog";
 import MyEditor from "../home/components/MyEditor";
-import { dbState, domainsState, originsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, domainsState, originsState, tagsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { createLesson, updateLesson } from "../../services/lessons_services";
 import { createDBTag } from "../../services/tags_services";
 
@@ -54,7 +54,7 @@ function Lesson() {
   const origins = useHookstate(originsState);
   const Alltags = useHookstate(tagsState);
   const fbDB = useHookstate(dbState);
-  const updatingObject = useHookstate(updatingObjectState);
+  const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
   const [lesson, setLesson] = useState({
     "title" : "",
@@ -169,9 +169,8 @@ function Lesson() {
       lessonToCreateOrUpdate.description = lesson.description;
     }
 
-    updatingObject.set({
-      object:{},
-      state:false
+    updatingOrCreatingObject.set({
+      object:{}
     })  //if error then what, bug?
     if( isUpdate ){
       await updateLesson( fbDB.get(), lesson.id, lessonToCreateOrUpdate, onSuccess, onError )
@@ -181,17 +180,15 @@ function Lesson() {
     }
   
     setFetching(false);
-  },[ lesson, tags, rawText, Alltags, domains, fbDB, isUpdate, onError, onSuccess, origins, updatingObject, user ])
+  },[ lesson, tags, rawText, Alltags, domains, fbDB, isUpdate, onError, onSuccess, origins, updatingOrCreatingObject, user ])
   
 
   useEffect(()=>{
-    let isMounted = true;
-    if( isMounted ){
       if( !user.get().uid ) {
         navigate( homePath );
       }
-      if( updatingObject.get().state ){
-        const lessonToUpdate = { ...updatingObject.get().object };
+      if( updatingOrCreatingObject.get().updating ){
+        const lessonToUpdate = { ...updatingOrCreatingObject.get().object };
         
         lessonToUpdate.domain = domains.get()[ lessonToUpdate.domain ].domain;
         lessonToUpdate.origin = origins.get()[ lessonToUpdate.origin ].origin;
@@ -204,8 +201,6 @@ function Lesson() {
         })) );
       }
       setDbTags( Object.keys(Alltags.get()).map( id => ( capitalizeFirstLetter( Alltags.get()[ id ].tag ) ) ) )
-    }
-    return () => { isMounted = false };
   },[])
 
   return (

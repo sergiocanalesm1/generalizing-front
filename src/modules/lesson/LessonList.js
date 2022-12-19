@@ -5,7 +5,7 @@ import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 
-import { dbState, lessonsState, tagsState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, lessonsState, tagsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
@@ -43,7 +43,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     const user = useHookstate(userState);
     const tags = useHookstate(tagsState);
     const fbDB = useHookstate(dbState);
-    const updatingObject = useHookstate(updatingObjectState);
+    const updatingObject = useHookstate(updatingOrCreatingObjectState);
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
@@ -83,7 +83,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
         }
         updatingObject.set({
             object: lesson,
-            state: true
+            updating: true
         });
         navigate( lessonPath );
     },[navigate,setOpen, updatingObject])

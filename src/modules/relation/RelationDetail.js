@@ -3,7 +3,7 @@ import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid
 import { Box } from "@mui/system";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { domainsState, lessonsState, userState } from "../../globalState/globalState";
+import { domainsState, lessonsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import AuthModal from "../components/AuthModal";
@@ -20,13 +20,14 @@ const styles = {
     },
 }
 
-function RelationDetailDialog({open, relation, setOpen, onClose}) {
+function RelationDetailDialog({open, relation, setOpen, onClose, id}) {
 
     const navigate = useNavigate();
 
     const user = useHookstate(userState);
     const lessons = useHookstate(lessonsState);
     const domains = useHookstate(domainsState);
+    const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
@@ -39,20 +40,20 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
         setOpenDetail(true);
     },[])
 
-    const newRelation = useCallback(()=>{
+    const newRelation = useCallback( relation =>{
         if( user.get().uid ){
-            navigate( relationPath, {
-                state:{
-                    newRelation: {
-                        lessons: relation.lessons
-                    }
-                }
-            })
+            updatingOrCreatingObject.set({
+                object: {
+                    ...relation
+                },
+                creating: true
+            });
+            navigate( relationPath )
         }
         else{
             setOpenAuthModal(true);
         }
-    },[navigate, relation, user])
+    },[navigate, user,updatingOrCreatingObject])
 
     if( !relation ){
         return<></>;
@@ -133,7 +134,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                     <Grid container>
                         <Grid item xs={12} md={10}>
                             <CardActions>
-                                <Button onClick={newRelation}>
+                                <Button onClick={() => newRelation(relation)}>
                                     Another idea? Relate these lessons!
                                 </Button>
                             </CardActions>

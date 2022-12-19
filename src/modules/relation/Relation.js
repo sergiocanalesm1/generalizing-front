@@ -3,7 +3,7 @@ import { Add, ArrowBack, Send } from "@mui/icons-material";
 import { Avatar, Box, Button, Grid, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dbState, lessonsState, lessonsToRelateState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, lessonsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { createRelation, updateRelation } from "../../services/relations_services";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
@@ -61,8 +61,7 @@ function Relation() {
   const user = useHookstate(userState);
   const lessons = useHookstate(lessonsState);
   const fbDB = useHookstate(dbState);
-  const updatingObject = useHookstate(updatingObjectState);
-  const lessonsToRelate = useHookstate(lessonsToRelateState);
+  const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
   //TODO fix force update
   const [,updateState] = useState();
@@ -152,26 +151,23 @@ function Relation() {
       relationToCreateOrUpdate.explanation = relation.explanation;
     }
 
-    const id = relation.id
-    updatingObject.set({
-      object:{},
-      state:false
-    })  //if error then what, bug?
     if( isUpdate ){
+      const id = relation.id
       await updateRelation( fbDB.get(), id, relationToCreateOrUpdate, onSuccess, onError ) 
       navigate(0) // TODO fix update
     }
     else{
       await createRelation( fbDB.get(), relationToCreateOrUpdate, onSuccess, onError )
     }
+    updatingOrCreatingObject.set({
+      object:{}
+    })  //if error then what, bug?
     setFetching(false);
 
-  },[chosenLessons, relation, isUpdate, rawText, fbDB, navigate, onError, onSuccess, updatingObject, user]);
+  },[chosenLessons, relation, isUpdate, rawText, fbDB, navigate, onError, onSuccess, updatingOrCreatingObject, user]);
 
 
   useEffect(()=>{
-    let isMounted = true;
-    if( isMounted ){
       if( lessonToChoose ){
         //TODO check if same lesson
         const newChosen = chosenLessons;
@@ -180,10 +176,10 @@ function Relation() {
         forceUpdate();
         setLessonToChoose();
       }
-      else if( updatingObject.get().state ){
+      else if( updatingOrCreatingObject.get().updating ){
   
         setIsUpdate(true);
-        const relation = updatingObject.get().object;
+        const relation = updatingOrCreatingObject.get().object;
         setChosenLessons( relation.lessons );
         setRelation( relation );
         /*
@@ -192,11 +188,12 @@ function Relation() {
         }
         */
       }
-      else if( lessonsToRelate.get().length ){ //quitar estado update en el boton
-        setChosenLessons( lessonsToRelate.get() );
+      else if( updatingOrCreatingObject.get().creating ){
+
+        const relation = updatingOrCreatingObject.get().object;
+        setChosenLessons( relation.lessons );
+        setRelation( relation );
       }
-    }
-    return () => { isMounted = false }
 
   },[ chosenIndex, forceUpdate, lessonToChoose ])
 

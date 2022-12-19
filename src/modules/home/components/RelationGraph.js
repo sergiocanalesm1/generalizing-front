@@ -72,6 +72,7 @@ function RelationGraph({ setOpenList, setFilters }) { //domain blending but, ori
   useEffect(()=>{
       let isMounted = true;
       if( isMounted ){
+        
       const color = d3.scaleOrdinal(names, d3.quantize(d3.interpolateRainbow, names.length));
 
       const svgEl = d3.select(d3Ref.current);

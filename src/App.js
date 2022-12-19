@@ -1,6 +1,6 @@
 import { useHookstate } from '@hookstate/core';
 import { CircularProgress, Stack } from '@mui/material';
-import { Fragment } from 'react';
+import { Fragment, StrictMode } from 'react';
 import {
   Routes,
   Route,
@@ -17,25 +17,28 @@ import { homePath, lessonPath, relationPath } from './utils/paths';
 function App() {
 
   const db = useHookstate(dbState);
+  //TODO check memory leaks
   
   return (
   <Fragment>
     {
       !db.promised //TODO check 
-      ? <MainLayout>
-          <Routes>
-            <Route 
-              path={ homePath }
-              element={<Home />}
-            />
-            <Route path={ lessonPath }
-              element={<Lesson />}
-            />
-            <Route path={ relationPath }
-              element={<Relation />}
-            />
-          </Routes>
-       </MainLayout>
+      ? <StrictMode>
+          <MainLayout>
+            <Routes>
+              <Route 
+                path={ homePath }
+                element={<Home />}
+              />
+              <Route path={ lessonPath }
+                element={<Lesson />}
+              />
+              <Route path={ relationPath }
+                element={<Relation />}
+              />
+            </Routes>
+        </MainLayout>
+        </StrictMode>
       :<Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
     }
   </Fragment>

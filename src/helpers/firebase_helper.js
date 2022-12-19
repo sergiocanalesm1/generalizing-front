@@ -7,18 +7,17 @@ import { dbState, userState } from "../globalState/globalState";
 export function initFirebase(){
 
     const firebaseConfig = {
-        // TODO all env variables
         apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
-        authDomain: "generalizing-a91c7.firebaseapp.com",
-        projectId: "generalizing-a91c7",
-        storageBucket: "generalizing-a91c7.appspot.com",
-        messagingSenderId: "759187085409",
-        appId: "1:759187085409:web:a4dfe4f85be424c8f7b220",
-        measurementId: "G-9X20L89CPF"
+        authDomain: process.env.REACT_APP_AUTHDOMAIN,
+        projectId: process.env.REACT_APP_PROJECTID,
+        storageBucket: process.env.REACT_APP_STORAGEBUCKET,
+        messagingSenderId: process.env.REACT_APP_MESSAGESENDERID,
+        appId: process.env.REACT_APP_APPID,
+        measurementId: process.env.REACT_APP_MEASUREMENTID
       };
       
     const app = initializeApp(firebaseConfig);
-    // const analytics = getAnalytics(app);
+    // const analytics = getAnalytics(app); TODO setup analytics
     const firestoreDB = getFirestore(app);
     dbState.set(firestoreDB);
 

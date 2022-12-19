@@ -11,7 +11,7 @@ import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
 import FeedbackDialog from './FeedbackDialog';
 import HelpDialog from './HelpDialog';
-import { relationsState, relationsToListState, updatingObjectState, userState } from '../../globalState/globalState';
+import { relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from '../../globalState/globalState';
 import { logout } from '../../services/user_services';
 //import { tempRelations } from '../../utils/enums';
 
@@ -39,7 +39,7 @@ function Header() {
   const user = useHookstate(userState);
   const relations = useHookstate(relationsState);
   const relationsToList = useHookstate(relationsToListState);
-  const updatingObject = useHookstate(updatingObjectState);
+  const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
   const [path,setPath] = useState("");
 
@@ -52,9 +52,8 @@ function Header() {
   const handleCreateLesson = useCallback(()=>{
     setAnchorElLessons();
     if( user.get().uid ) {
-      updatingObject.set({
-        object:{},
-        state:false
+      updatingOrCreatingObject.set({
+        object:{}
     })
       navigate(lessonPath);
     }
@@ -63,7 +62,7 @@ function Header() {
         setOpenAuthModal(true);
     }
 
-  },[navigate, user])
+  },[navigate, user, updatingOrCreatingObject])
 
   const handleViewLessons = useCallback(()=>{
     setAnchorElLessons();
@@ -73,9 +72,8 @@ function Header() {
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
     if( user.get().uid ) {
-      updatingObject.set({
-        object:{},
-        state:false
+      updatingOrCreatingObject.set({
+        object:{}
     })
         navigate(relationPath);
     }
@@ -83,7 +81,7 @@ function Header() {
         setPath(relationPath);
         setOpenAuthModal(true);
     }
-  },[navigate, user]);
+  },[navigate, user, updatingOrCreatingObject]);
 
   const handleViewRelations = useCallback(()=>{
     relationsToList.set(Object.keys(relations));
@@ -92,7 +90,7 @@ function Header() {
   },[relationsToList, relations])
 
   useEffect(() => {
-    setAnchorElUser();
+      setAnchorElUser();
   }, [openAuthModal,navigate]);
 
   return (

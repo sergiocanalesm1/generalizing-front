@@ -1,19 +1,26 @@
 import { useHookstate } from "@hookstate/core";
 import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Link, Stack, Toolbar, Typography } from "@mui/material";
-import { useCallback, useState } from "react";
-import { lessonsState, relationsState } from "../../globalState/globalState";
+import { Fragment, useCallback, useState } from "react";
+import { dbState, lessonsState, relationsState } from "../../globalState/globalState";
+import { getExamples } from "../../services/examples_services";
 import LessonDetailDialog from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 import RelationDetailDialog from "../relation/RelationDetail";
 import RelationListDialog from "../relation/RelationList";
 
 const lessonsToShow = {
-    lecture : process.env.REACT_APP_LECTURE_LESSON,
-    book : process.env.REACT_APP_BOOK_LESSON,
-    personalExperience : process.env.REACT_APP_PERSONAL_EXPERIENCE_LESSON,
-    song : process.env.REACT_APP_SONG_LESSON,
-    tough : process.env.REACT_APP_TOUGH_LESSON
+    lecture : "lesson_lecture",
+    book : "lesson_book",
+    personalExperience : "lesson_experience",
+    song : "lesson_song",
+    tough : "lesson_tough",
+    subjective : "lesson_subjective"
 }
+
+const fetchResource = () => getExamples(dbState.get())
+    .then( fetchedExamples => fetchedExamples );
+
+
 
 function HelpDialog( {open, onClose} ){
 
@@ -26,17 +33,38 @@ function HelpDialog( {open, onClose} ){
 
     const lessons = useHookstate(lessonsState);
     const relations = useHookstate(relationsState);
+    const examples = useHookstate(fetchResource);
 
-    const showLesson = useCallback( uuid =>{
+    const showLesson = useCallback( type => {
+        const id = examples.get()[ type ].id;
+        setLesson( lessons.get()[ id ]);
+        setOpenLessonDetailDialog( true );
     },[])
 
     const showRelation = useCallback( () => {
-        
+        const id = examples.get()[ "relation_1" ].id;
+        setRelation( relations.get()[ id ]);
+        setOpenRelationDetailDialog( true );
     },[])
 
+    /*
+    useEffect(()=>{
+        let isMounted = true;
+        if( examples.get() === {} ){
+            console.log("hola bb")
+            getExamples(db.get()).then( fetchedExamples => {
+                if( isMounted ){
+                    examples.set(fetchedExamples);
+                }
+            })
+        }
+        return () => { isMounted = false }
+
+    },[])
+    */
 
     return(
-        <div>
+        <Fragment>
             <Dialog
                 scroll="paper"
                 open={open}
@@ -153,7 +181,7 @@ function HelpDialog( {open, onClose} ){
                     relations={relations}
                     />
             }
-        </div>
+        </Fragment>
     )
 }
 

@@ -39,17 +39,19 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     const [fetching, setFetching] = useState(false);
 
     useEffect(()=>{
-        if( isLogin ) {
-            setSignupOrSignText('Log in');
-            setFootText("Don't have an account? Sign Up");
-        }
-        else{
-            setIsLogin(false)
-            setSignupOrSignText('Sign Up');
-            setFootText('Already have an Account? Log in');
+        if( open ){
+            if( isLogin ) {
+                setSignupOrSignText('Log in');
+                setFootText("Don't have an account? Sign Up");
+            }
+            else{
+                setIsLogin(false)
+                setSignupOrSignText('Sign Up');
+                setFootText('Already have an Account? Log in');
+            }
         }
 
-    },[isLogin]);
+    },[isLogin, open]);
 
     const handleSubmit = useCallback( async() => {
         setFetching(true);

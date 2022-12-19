@@ -7,7 +7,7 @@ import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
-import { dbState, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState, updatingObjectState } from "../../globalState/globalState";
+import { dbState, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState, updatingOrCreatingObjectState } from "../../globalState/globalState";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
 import RelationGraph from "./components/RelationGraph";
@@ -40,7 +40,7 @@ function Home() {
     const user = useHookstate(userState);
     const fbDB = useHookstate(dbState);
     const relationsToList = useHookstate(relationsToListState);
-    const updatingObject = useHookstate(updatingObjectState);
+    const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
 
     const [success, setSuccess] = useState( false );
@@ -64,30 +64,28 @@ function Home() {
     const handleCreateLesson = useCallback(()=>{
         if( user.get().uid ) {
             navigate(lessonPath);
-            updatingObject.set({
+            updatingOrCreatingObject.set({
                 object:{},
-                state:false
             })
         }
         else  {
             setOpenAuthModal(true);
             setPath(lessonPath);
         }
-    },[navigate, user])
+    },[navigate, user, updatingOrCreatingObject])
 
     const handleCreateRelation = useCallback(()=>{
         if( user.get().uid ) {
             navigate(relationPath);
-            updatingObject.set({
+            updatingOrCreatingObject.set({
                 object:{},
-                state:false
             })
         }
         else  {
             setOpenAuthModal(true);
             setPath(relationPath);
         }
-    },[navigate, user]);
+    },[navigate, user, updatingOrCreatingObject]);
 
 
     //const fetchRelationResource = () => getAllRelations(fbDB.get()).then( fetchedResource => relations.set( fetchedResource ) )
@@ -99,6 +97,7 @@ function Home() {
     */
     useEffect(()=>{
         let isMounted = true; 
+
         setFetching(true);
 
         if( !getFirstTimer() ){

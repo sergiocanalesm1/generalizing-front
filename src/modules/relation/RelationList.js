@@ -3,7 +3,7 @@ import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { dbState, relationsState, relationsToListState, updatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
@@ -48,7 +48,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
     const relationsToList = useHookstate(relationsToListState);
     const relations = useHookstate(relationsState);
     const fbDB = useHookstate(dbState);
-    const updatingObject = useHookstate(updatingObjectState);
+    const updatingObject = useHookstate(updatingOrCreatingObjectState);
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -74,10 +74,10 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
                 ...relation,
                 id: id
             },
-            state: true
+            updating: true
         });
         navigate( relationPath );
-    },[navigate,setOpen])
+    },[navigate,setOpen,updatingObject])
 
     const handleDelete = useCallback(( id ) =>  {
         setOpenConfirmModal(true);
@@ -95,7 +95,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
                 }
             )}
         );
-    },[])
+    },[fbDB, navigate])
 
     /*
     const handleRelationsSortClick = useCallback((criteria) => {
