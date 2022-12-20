@@ -131,18 +131,12 @@ function Relation() {
     setFetching(true);
 
     const relationToCreateOrUpdate = {
-      creationDate: Date.now()
+      creationDate: isUpdate ? relation.creationDate : Date.now(),
+      title: relation.title,
+      userUid: user.get().uid,
+      lessons: chosenLessons.join(","),
+      isExplanationRaw: relation.isExplanationRaw ? 1 : 0
     }
-
-    relationToCreateOrUpdate.title = relation.title;
-    relationToCreateOrUpdate.userUid = user.get().uid;
-    relationToCreateOrUpdate.lessons = chosenLessons.join(",");
-    relationToCreateOrUpdate.isExplanationRaw = relation.isExplanationRaw ? 1 : 0;
-    /*
-    if( state?.challengeId ){
-      relation.challenge = state.challengeId;
-    }
-    */
 
     if( relation.isExplanationRaw ){
       relationToCreateOrUpdate.explanation = JSON.stringify( rawText );

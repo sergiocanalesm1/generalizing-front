@@ -114,10 +114,8 @@ function Lesson() {
   },[])
 
   const createOrUpdate = useCallback( async()=> {
+
     setFetching(true);
-
-
-    const lessonToCreateOrUpdate = {};
 
     //TODO fix this logic, look for a way to get the ids directly from the autocomplete
     let originToId = {}
@@ -151,14 +149,16 @@ function Lesson() {
       }
       tagIds.push(existingTagId);
     }
-    
-    lessonToCreateOrUpdate.title = lesson.title;
-    lessonToCreateOrUpdate.origin = originToId[ lesson.origin ];
-    lessonToCreateOrUpdate.domain = domainsToId[ lesson.domain ];
-    lessonToCreateOrUpdate.userUid = user.get().uid;
-    lessonToCreateOrUpdate.creationDate = Date.now();
-    lessonToCreateOrUpdate.isDescriptionRaw = lesson.isDescriptionRaw ? 1 : 0;
-    lessonToCreateOrUpdate.tags = tagIds;
+
+    const lessonToCreateOrUpdate = {
+      title: lesson.title,
+      origin: originToId[ lesson.origin ],
+      domain: domainsToId[ lesson.domain ],
+      userUid: user.get().uid,
+      creationDate: isUpdate ? lesson.creationDate : Date.now(),
+      isDescriptionRaw: lesson.isDescriptionRaw ? 1 : 0,
+      tags: tagIds
+    };
 
     
     if( lesson.isDescriptionRaw ){
