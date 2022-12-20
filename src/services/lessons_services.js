@@ -1,4 +1,5 @@
 import { collection, getDocs, setDoc, addDoc, doc, deleteDoc } from "firebase/firestore";
+import { reportError } from "../helpers/bug_reporter";
 
 
 const lessonsCollection = "lessons";
@@ -16,7 +17,7 @@ export async function getAllLessons(db){
         });
     }
     catch(error){
-        console.log(error)
+        reportError( error );
     }
     return lessons;
 }
@@ -29,7 +30,7 @@ export async function updateLesson( db, id, lesson, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        console.log(error);
+        reportError( error );
     }
 }
 
@@ -40,7 +41,7 @@ export async function createLesson( db, lesson, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        console.log(error);
+        reportError( error );
     }
 }
 
@@ -50,7 +51,7 @@ export async function deleteLesson( db, id ){
         return true
     }
     catch(error){
-        console.log(error)
+        reportError( error );
         return false
     }
 }

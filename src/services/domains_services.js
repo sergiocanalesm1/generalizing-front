@@ -1,4 +1,5 @@
 import { collection, getDocs } from "firebase/firestore";
+import { reportError } from "../helpers/bug_reporter";
 
 const domainsCollection = "domains";
 
@@ -12,7 +13,7 @@ export async function getAllDomains(db){
         });
     }
     catch(error){
-        console.log(error)
+        reportError(error);
     }
     return domains;
 }
