@@ -4,7 +4,6 @@ import {  } from "firebase/auth";
 
 
 export async function signin(email,password,onSuccess,onError){
-    //TODO recuperacion clave, verificacion email
     
     const auth = getAuth();
     try {
@@ -13,9 +12,8 @@ export async function signin(email,password,onSuccess,onError){
         return userCredential.user
     }
     catch(error) {
-        //const errorCode = error.code;
-        //const errorMessage = error.message;
         onError();
+        console.log(error)
         return;
     }
 }
@@ -33,7 +31,7 @@ export async function signinWithGoogle(onSuccess,onError){
         onSuccess();
     }
     catch( error ){
-        //console.log(error)
+        console.log(error)
         onError();
     }
 }
@@ -45,7 +43,7 @@ export async function resetPassword(email, onSuccess, onError) {
         onSuccess();
     }
     catch(error){
-        //console.log(error);
+        console.log(error);
         onError();
     }
 }
@@ -56,7 +54,7 @@ export async function sendVerification(){
         sendEmailVerification(auth.currentUser)
     }
     catch(error){
-        //console.log(error)
+        console.log(error)
     }
 
 }
@@ -70,8 +68,7 @@ export async function login(email, password,onSuccess,onError){
         return userCredential.user
     }
     catch(error) {
-        //const errorCode = error.code;
-        //const errorMessage = error.message;
+        console.log(error);
         onError()
         return;
     }
@@ -83,6 +80,6 @@ export async function logout(){
         await auth.signOut();
     }
     catch(error){
-
+        console.log(error)
     }
 }

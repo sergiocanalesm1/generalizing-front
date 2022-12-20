@@ -7,12 +7,17 @@ export async function getAllLessons(db){
 
     const lessons = {};
     let data;
-    const querySnapshot = await getDocs(collection(db, lessonsCollection));
-    querySnapshot.forEach((doc) => {
-        data = doc.data();
-        lessons[doc.id] = data;
-        //lessons.push({[doc.id]:data})
-    });
+    try{
+        const querySnapshot = await getDocs(collection(db, lessonsCollection));
+        querySnapshot.forEach((doc) => {
+            data = doc.data();
+            lessons[doc.id] = data;
+            //lessons.push({[doc.id]:data})
+        });
+    }
+    catch(error){
+        console.log(error)
+    }
     return lessons;
 }
 
@@ -24,7 +29,7 @@ export async function updateLesson( db, id, lesson, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        //console.log(error);
+        console.log(error);
     }
 }
 
@@ -35,7 +40,7 @@ export async function createLesson( db, lesson, onSuccess, onError ){
     }
     catch(error) {
         onError()
-        //console.log(error);
+        console.log(error);
     }
 }
 
@@ -45,7 +50,7 @@ export async function deleteLesson( db, id ){
         return true
     }
     catch(error){
-        //console.log(error)
+        console.log(error)
         return false
     }
 }
