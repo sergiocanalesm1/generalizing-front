@@ -39,13 +39,13 @@ function HelpDialog( {open, onClose} ){
         const id = examples.get()[ type ].id;
         setLesson( lessons.get()[ id ]);
         setOpenLessonDetailDialog( true );
-    },[])
+    },[examples, lessons])
 
     const showRelation = useCallback( () => {
         const id = examples.get()[ "relation_1" ].id;
         setRelation( relations.get()[ id ]);
         setOpenRelationDetailDialog( true );
-    },[])
+    },[examples, relations])
 
     /*
     useEffect(()=>{
