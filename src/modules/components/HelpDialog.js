@@ -47,21 +47,6 @@ function HelpDialog( {open, onClose} ){
         setOpenRelationDetailDialog( true );
     },[examples, relations])
 
-    /*
-    useEffect(()=>{
-        let isMounted = true;
-        if( examples.get() === {} ){
-            console.log("hola bb")
-            getExamples(db.get()).then( fetchedExamples => {
-                if( isMounted ){
-                    examples.set(fetchedExamples);
-                }
-            })
-        }
-        return () => { isMounted = false }
-
-    },[])
-    */
 
     return(
         <Fragment>

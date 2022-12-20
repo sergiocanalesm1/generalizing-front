@@ -1,4 +1,5 @@
 import { collection, getDocs } from "firebase/firestore";
+import { reportError } from "../helpers/bug_reporter";
 
 const originsCollection = "origins";
 
@@ -12,7 +13,7 @@ export async function getAllOrigins(db){
         });
     }
     catch(error){
-        console.log(error)
+        reportError( error );
     }
     return origins;
 }

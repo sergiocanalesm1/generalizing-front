@@ -1,4 +1,5 @@
 import { collection, getDocs } from "firebase/firestore";
+import { reportError } from "../helpers/bug_reporter";
 
 const examplesCollection = "examples";
 
@@ -11,7 +12,7 @@ export async function getExamples(db){
         });
     }
     catch( error ){
-        console.log(error)
+        reportError(error);
     }
     return examples;
 }

@@ -8,8 +8,10 @@ import { initFirebase } from './helpers/firebase_helper';
 import theme from './common/theme';
 import * as serviceWorker from './serviceWorker';
 import App from './App';
+import { initBugReporter } from './helpers/bug_reporter';
 
 initFirebase();
+initBugReporter();
 
 ReactDOM.render(
   <React.StrictMode>

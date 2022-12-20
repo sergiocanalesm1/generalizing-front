@@ -1,5 +1,5 @@
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, sendPasswordResetEmail,GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import {  } from "firebase/auth";
+import { reportError } from "../helpers/bug_reporter";
 
 
 
@@ -13,7 +13,7 @@ export async function signin(email,password,onSuccess,onError){
     }
     catch(error) {
         onError();
-        console.log(error)
+        reportError( error );
         return;
     }
 }
@@ -31,7 +31,7 @@ export async function signinWithGoogle(onSuccess,onError){
         onSuccess();
     }
     catch( error ){
-        console.log(error)
+        reportError( error );
         onError();
     }
 }
@@ -43,7 +43,7 @@ export async function resetPassword(email, onSuccess, onError) {
         onSuccess();
     }
     catch(error){
-        console.log(error);
+        reportError( error );
         onError();
     }
 }
@@ -54,7 +54,7 @@ export async function sendVerification(){
         sendEmailVerification(auth.currentUser)
     }
     catch(error){
-        console.log(error)
+        reportError( error );
     }
 
 }
@@ -68,7 +68,7 @@ export async function login(email, password,onSuccess,onError){
         return userCredential.user
     }
     catch(error) {
-        console.log(error);
+        reportError( error );
         onError()
         return;
     }
@@ -80,6 +80,6 @@ export async function logout(){
         await auth.signOut();
     }
     catch(error){
-        console.log(error)
+        reportError( error );
     }
 }
