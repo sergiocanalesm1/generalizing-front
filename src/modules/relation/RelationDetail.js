@@ -1,10 +1,11 @@
+import { useHookstate } from "@hookstate/core";
 import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { domainsState, lessonsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
-import { getUserId } from "../../utils/user";
 import AuthModal from "../components/AuthModal";
 import FeedbackDialog from "../components/FeedbackDialog";
 import MyEditor from "../home/components/MyEditor";
@@ -19,9 +20,14 @@ const styles = {
     },
 }
 
-function RelationDetailDialog({open, relation, setOpen, onClose}) {
+function RelationDetailDialog({open, relation, setOpen, onClose, id}) {
 
     const navigate = useNavigate();
+
+    const user = useHookstate(userState);
+    const lessons = useHookstate(lessonsState);
+    const domains = useHookstate(domainsState);
+    const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLessonDetail, setSelectedLessonDetail] = useState();
@@ -34,20 +40,20 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
         setOpenDetail(true);
     },[])
 
-    const newRelation = useCallback(()=>{
-        if(Boolean(getUserId())){
-            navigate( relationPath, {
-                state:{
-                    newRelation: {
-                        lessons: relation.lessons
-                    }
-                }
-            })
+    const newRelation = useCallback( relation =>{
+        if( user.get().uid ){
+            updatingOrCreatingObject.set({
+                object: {
+                    ...relation
+                },
+                creating: true
+            });
+            navigate( relationPath )
         }
         else{
             setOpenAuthModal(true);
         }
-    },[navigate, relation])
+    },[navigate, user,updatingOrCreatingObject])
 
     if( !relation ){
         return<></>;
@@ -65,7 +71,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                 <Card sx={{overflow: 'auto'}}>
                     <CardContent>
                         <Stack direction="row" justifyContent="center">
-                            <Typography variant="h4">{relation.name}</Typography>
+                            <Typography variant="h4">{relation.title}</Typography>
                         </Stack>
                         
                         <br />
@@ -78,30 +84,34 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                             direction="row"
                         >
                             {
-                                relation.lessons.map( (l) =>(
-                                    <Stack direction="column" alignContent="center" key={l.id}>
-                                        <Stack direction="row" justifyContent="center">
-                                            <Typography variant="small">{l.domain}</Typography>
+                                relation.lessons.map( lessonId =>{
+                                    const lesson = lessons.get()[lessonId];
+                                    return(
+                                        <Stack direction="column" alignContent="center" key={lesson.title}>
+                                            <Stack direction="row" justifyContent="center">
+                                                <Typography variant="small">
+                                                    { domains.get()[ lesson.domain ].domain }
+                                                </Typography>
+                                            </Stack>
+                                            <Button onClick={()=>showLessonDetail(lesson)}>
+                                                {   
+                                                    lesson.fileName
+                                                    ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${lesson.fileName}`} />
+                                                    : <Avatar {...stringAvatar(lesson.title)} />
+                                                }
+                                            </Button>
                                         </Stack>
-                                        <Button onClick={()=>showLessonDetail(l)}>
-                                            {   
-                                                l.files.length > 0
-                                                ? <Avatar src={l.files[0].file.split("?")[0]} />
-                                                : <Avatar {...stringAvatar(l.name)} />
-                                            }
-                                        </Button>
-                                    </Stack>
-                                ))
+                                )})
                             }
                         </Stack>
                         
-                        {relation.files && relation.files.length > 0 &&
+                        {relation.fileName &&
                             <div>
                                 <br />
                                 <CardMedia
                                     component="img"
                                     height="50%"
-                                    image={relation.files[0].file.split("?")[0]}
+                                    image={`${process.env.REACT_APP_BUCKET}/${relation.fileName}`}
                                     alt="relation_file"
                                 />
                             </div>
@@ -124,7 +134,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose}) {
                     <Grid container>
                         <Grid item xs={12} md={10}>
                             <CardActions>
-                                <Button onClick={newRelation}>
+                                <Button onClick={() => newRelation(relation)}>
                                     Another idea? Relate these lessons!
                                 </Button>
                             </CardActions>

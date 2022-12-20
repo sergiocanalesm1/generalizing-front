@@ -3,25 +3,22 @@ import { useNavigate } from 'react-router-dom';
 
 import { AccountCircle, HelpOutline } from '@mui/icons-material';
 import { AppBar, Button, ButtonGroup, CardMedia, Container, Grid, IconButton, Menu, MenuItem, Stack, Toolbar, Typography } from '@mui/material';
+import { useHookstate } from '@hookstate/core';
 
 import { homePath, lessonPath, relationPath } from '../../utils/paths';
 import AuthModal from './AuthModal';
 import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
-import { clearUser, getUserUuid } from '../../utils/user';
 import FeedbackDialog from './FeedbackDialog';
-import { getAllRelations } from '../../services/relations_services';
-import { getAllLessons } from '../../services/lessons_services';
 import HelpDialog from './HelpDialog';
-import { combineLessonsWithRelations } from '../../utils/filters';
+import { relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from '../../globalState/globalState';
+import { logout } from '../../services/user_services';
 //import { tempRelations } from '../../utils/enums';
 
 
 function Header() {
 
   const navigate = useNavigate();
-
-  const [isLogged, setIsLogged] = useState( false );
  
   const [openAuthModal, setOpenAuthModal] = useState( false );
   const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
@@ -39,21 +36,25 @@ function Header() {
   const [anchorElLessons, setAnchorElLessons] = useState();
   const refLessons = useRef();
 
-  const [lessons, setLessons] = useState([]);
-  const [relations, setRelations] = useState([]);
+  const user = useHookstate(userState);
+  const relations = useHookstate(relationsState);
+  const relationsToList = useHookstate(relationsToListState);
+  const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
   const [path,setPath] = useState("");
 
 
   const handleLogout = useCallback(()=> {
-    clearUser();
-    setIsLogged(false);
-    navigate( homePath );
+    logout(); // state is cleared in the observer
+    navigate( 0 );
   },[navigate])
 
   const handleCreateLesson = useCallback(()=>{
     setAnchorElLessons();
-    if( Boolean(getUserUuid()) ) {
+    if( user.get().uid ) {
+      updatingOrCreatingObject.set({
+        object:{}
+    })
       navigate(lessonPath);
     }
     else  {
@@ -61,38 +62,35 @@ function Header() {
         setOpenAuthModal(true);
     }
 
-  },[navigate])
+  },[navigate, user, updatingOrCreatingObject])
 
-  const handleViewLessons = useCallback(async()=>{
+  const handleViewLessons = useCallback(()=>{
     setAnchorElLessons();
-    const fetchedRelations = await getAllRelations();
-    const fetchedLessons = await getAllLessons();
-    combineLessonsWithRelations(fetchedRelations, fetchedLessons) 
-    setLessons(fetchedLessons);
     setOpenLessonListDialog(true);
   },[]);
 
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
-    if( Boolean(getUserUuid()) ) {
+    if( user.get().uid ) {
+      updatingOrCreatingObject.set({
+        object:{}
+    })
         navigate(relationPath);
     }
     else  {
         setPath(relationPath);
         setOpenAuthModal(true);
     }
-  },[navigate]);
+  },[navigate, user, updatingOrCreatingObject]);
 
-  const handleViewRelations = useCallback(async()=>{
+  const handleViewRelations = useCallback(()=>{
+    relationsToList.set(Object.keys(relations));
     setAnchorElRelations();
-    const fetchedRelations = await getAllRelations();
-    setRelations(fetchedRelations);
     setOpenRelationListDialog(true);
-  },[])
+  },[relationsToList, relations])
 
   useEffect(() => {
-    setIsLogged( Boolean(getUserUuid()) );
-    setAnchorElUser();
+      setAnchorElUser();
   }, [openAuthModal,navigate]);
 
   return (
@@ -164,7 +162,7 @@ function Header() {
               <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
             </Menu>
           </Stack>
-          {isLogged 
+          {user.get().uid
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
                 <Grid item container xs={8} md={1} justifyContent="flex-end">
@@ -252,20 +250,16 @@ function Header() {
           open={openLessonListDialog}
           setOpen={setOpenLessonListDialog}
           onClose={()=>setOpenLessonListDialog(false)}
-          lessons={lessons}
       />
 
       <RelationListDialog
           open={openRelationListDialog}
           setOpen={setOpenRelationListDialog}
           onClose={()=>setOpenRelationListDialog(false)}
-          relations={relations}
       />
       <HelpDialog
         open={openHelpDialog}
         onClose={()=>setOpenHelpDialog(false)}
-        lessons={lessons}
-        relations={relations}
       />
       <FeedbackDialog
         success={success}

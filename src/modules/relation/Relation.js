@@ -1,14 +1,12 @@
+import { useHookstate } from "@hookstate/core";
 import { Add, ArrowBack, Send } from "@mui/icons-material";
-import { Avatar, Box, Button, Grid, Paper, Stack, TextField, Toolbar, Typography } from "@mui/material";
+import { Avatar, Box, Button, Grid, Stack, TextField, Toolbar, Typography } from "@mui/material";
 import { useCallback, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { getAllLessons } from "../../services/lessons_services";
-import { createOrUpdateRelation, getAllRelations } from "../../services/relations_services";
-import { methods } from "../../services/urls";
-import { combineLessonsWithRelations } from "../../utils/filters";
+import { useNavigate } from "react-router-dom";
+import { dbState, lessonsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
+import { createRelation, updateRelation } from "../../services/relations_services";
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
-import { getUserId, getUserUuid } from "../../utils/user";
 import FeedbackDialog from "../components/FeedbackDialog";
 import MyEditor from "../home/components/MyEditor";
 import LessonDetailDialog from "../lesson/LessonDetail";
@@ -59,16 +57,19 @@ const  styles = {
 function Relation() {
 
   const navigate = useNavigate();
-  const { state } = useLocation();
+
+  const user = useHookstate(userState);
+  const lessons = useHookstate(lessonsState);
+  const fbDB = useHookstate(dbState);
+  const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
   //TODO fix force update
   const [,updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
 
-  const [lessons, setLessons] = useState([]);
   const [openLessonList, setOpenLessonList] = useState(false);
 
-  const [chosenLessons, setChosenLessons] = useState([]);
+  const [chosenLessons, setChosenLessons] = useState([0,0]);
   const [lessonToChoose, setLessonToChoose] = useState();
   const [chosenIndex, setChosenIndex] = useState(-1);
 
@@ -78,14 +79,14 @@ function Relation() {
   const [openFeedbackDialog,setOpenFeedbackDialog] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  const [files, setFiles] = useState([]);
+  //const [files, setFiles] = useState([]);
 
   const [isUpdate,setIsUpdate] = useState(false);
 
   const [rawText, setRawText] = useState();
 
   const [relation, setRelation] = useState({
-    name : "",
+    title : "",
     user : "",
     lessons : "",
     explanation : "",
@@ -101,13 +102,20 @@ function Relation() {
     })
   }, [relation] );
 
-  const detailOrListLesson = useCallback(async(index)=>{
-    const fetchedRelations = await getAllRelations();
-    const fetchedLessons = await getAllLessons();
-    combineLessonsWithRelations(fetchedRelations, fetchedLessons);
-    setLessons(fetchedLessons);
 
-    if( !chosenLessons[index] ){
+  const onSuccess = useCallback(()=>{
+    setSuccess(true);
+    setOpenFeedbackDialog(true);
+
+  },[])
+
+  const onError = useCallback(()=>{
+    setSuccess(false);
+    setOpenFeedbackDialog(true);
+  },[])
+
+  const detailOrListLesson = useCallback( index => {
+    if( chosenLessons[index] === 0 ){
       //choose lesson, show list
       setChosenIndex(index);
       setOpenLessonList(true);
@@ -121,65 +129,85 @@ function Relation() {
 
   const createOrUpdate = useCallback(async()=>{
     setFetching(true);
-    relation.user = getUserId();
-    relation.lessons = chosenLessons.map((l)=>l.id);
+
+    const relationToCreateOrUpdate = {
+      creationDate: Date.now()
+    }
+
+    relationToCreateOrUpdate.title = relation.title;
+    relationToCreateOrUpdate.userUid = user.get().uid;
+    relationToCreateOrUpdate.lessons = chosenLessons.join(",");
+    relationToCreateOrUpdate.isExplanationRaw = relation.isExplanationRaw ? 1 : 0;
+    /*
     if( state?.challengeId ){
       relation.challenge = state.challengeId;
     }
+    */
 
     if( relation.isExplanationRaw ){
-      relation.explanation = JSON.stringify( rawText );
+      relationToCreateOrUpdate.explanation = JSON.stringify( rawText );
+    }
+    if( !rawText || !relation.isExplanationRaw ){
+      relationToCreateOrUpdate.explanation = relation.explanation;
     }
 
-    const method = isUpdate ? methods.UPDATE : methods.CREATE;
-    await createOrUpdateRelation( relation, files, method,
-      ()=>{
-        setSuccess(true);
-        setOpenFeedbackDialog(true);
-      },
-      ()=>{
-        setSuccess(false);
-        setOpenFeedbackDialog(true);
-      }
-    )
+    if( isUpdate ){
+      const id = relation.id
+      await updateRelation( fbDB.get(), id, relationToCreateOrUpdate, onSuccess, onError ) 
+      navigate(0) // TODO fix update
+    }
+    else{
+      await createRelation( fbDB.get(), relationToCreateOrUpdate, onSuccess, onError )
+    }
+    updatingOrCreatingObject.set({
+      object:{}
+    })  //if error then what, bug?
     setFetching(false);
-  },[chosenLessons, files, relation, state, isUpdate, rawText]);
+
+  },[chosenLessons, relation, isUpdate, rawText, fbDB, navigate, onError, onSuccess, updatingOrCreatingObject, user]);
+
 
   useEffect(()=>{
-    if( lessonToChoose ){
-      //TODO check if same lesson
-      const newChosen = chosenLessons;
-      newChosen[ chosenIndex ] = lessonToChoose;
-      setChosenLessons( newChosen );
-      forceUpdate();
-      setLessonToChoose();
-    }
-    if( state ){
-      if( state.challengeLessons ){
-        setChosenLessons( state.challengeLessons );
+      if( lessonToChoose ){
+        //TODO check if same lesson
+        const newChosen = chosenLessons;
+        newChosen[ chosenIndex ] = lessonToChoose;
+        setChosenLessons( newChosen );
+        forceUpdate();
+        setLessonToChoose();
       }
-      if( state.relation ){
+      else if( updatingOrCreatingObject.get().updating ){
+  
         setIsUpdate(true);
-        setChosenLessons( state.relation.lessons );
-        setRelation( state.relation );
+        const relation = updatingOrCreatingObject.get().object;
+        setChosenLessons( relation.lessons );
+        setRelation( relation );
+        /*
+        if( state.challengeLessons ){
+          setChosenLessons( state.challengeLessons );
+        }
+        */
       }
-      if( state.newRelation ){
-        setChosenLessons( state.newRelation.lessons );
+      else if( updatingOrCreatingObject.get().creating ){
+
+        const relation = updatingOrCreatingObject.get().object;
+        setChosenLessons( relation.lessons );
+        setRelation( relation );
       }
-    }
-  },[ lessonToChoose, chosenIndex, chosenLessons, forceUpdate, state ])
+
+  },[ chosenIndex, forceUpdate, lessonToChoose ])
 
   useEffect(()=>{
-    if( !Boolean(getUserUuid()) ) {
+    if( !user.get().uid ) {
       navigate( homePath );
     }
-  },[navigate])
+  },[])
+
 
   return (
     <div>
       <Toolbar />
-      <Paper 
-        elevation={5}
+      <Box 
         sx={styles.relationPaper}
       >
         <Box
@@ -188,15 +216,11 @@ function Relation() {
           sx={styles.relationBox}
         >
 
-          <Stack justifyContent="center" direction="row">
+          {<Stack justifyContent="center" direction="row">
             <Typography variant="h2" align="center">
-              {
-                state?.challengeId
-                ? <>Relating Challenge {state.challengeId}</>
-                : <>Create a Relation</>
-              }
+              <>Create a Relation</>
             </Typography>
-          </Stack>
+          </Stack>}
 
           <Toolbar />
           <Stack justifyContent="center" direction="row">
@@ -209,37 +233,33 @@ function Relation() {
             alignContent="center"
             direction="row"
           >
-            <Button 
-              onClick={() => detailOrListLesson(0)}
-            >
-                { chosenLessons[0]
-                  ?                                         
-                    chosenLessons[0].files?.length > 0
-                    ? <Avatar src={chosenLessons[0].files[ chosenLessons[0].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
-                    : <Avatar {...stringAvatar(chosenLessons[0].name, styles.relationAvatar)} />
-                  : <Avatar sx={styles.relationAvatar}>
-                      <Add fontSize="large"/>
-                    </Avatar>
-                }
-            </Button>
-            <Button onClick={() => detailOrListLesson(1)}>
-                { chosenLessons[1]
-                  ?                                         
-                    chosenLessons[1].files?.length > 0
-                    ? <Avatar src={chosenLessons[1].files[ chosenLessons[1].files.length - 1 ].file.split("?")[0]} sx={styles.relationAvatar}/>
-                    : <Avatar {...stringAvatar(chosenLessons[1].name, styles.relationAvatar)} />
-                  : <Avatar sx={styles.relationAvatar}>
-                      <Add fontSize="large"/>
-                    </Avatar>
-                }
-            </Button>
+          {
+            chosenLessons.map( (id, i) => {
+              const lesson = lessons.get()[id];
+              return (
+                <Button onClick={() => detailOrListLesson(i)}>
+                  {
+                    lesson
+                    ?                                         
+                      lesson.fileName
+                      ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${lesson.fileName}`} sx={styles.relationAvatar}/>
+                      : <Avatar {...stringAvatar(lesson.title, styles.relationAvatar)} />
+                    : <Avatar sx={styles.relationAvatar}>
+                        <Add fontSize="large"/>
+                      </Avatar>
+                  }
+                </Button>
+                )
+            })
+          }
+
           </Stack>
 
 
           <Toolbar />
           
           <Grid container direction="row" justifyContent="space-between">
-          <Grid item xs={12} md={9}>
+          <Grid item xs={12} md={12}>
             <Stack justifyContent="center" direction="row">
               <Typography variant="body" align="center">
                 <strong>Explain</strong> how you relate these concepts
@@ -264,11 +284,12 @@ function Relation() {
                   required
                   minRows={3}
                   disabled={chosenLessons.length < 2}
-                  autcomplete={false}
+                  autcomplete={"off"}
                 />
             }
           </Grid>
 
+            {/* 
           <Grid item xs={12} md={3}>
             <Stack
               direction="column"
@@ -301,20 +322,22 @@ function Relation() {
               </Typography>
             </Stack>
             </Grid>
+            
+          */}
           </Grid>
 
           <Toolbar />
           <Grid container justifyContent="center" alignItems="center" >
             <Grid item container justifyContent="center">
               <Typography variant="body">
-                Give it a <strong>name</strong>
+                Give it a <strong>Title</strong>
               </Typography>
             </Grid>
             <Grid item container justifyContent="center" xs={12} md={7}>
               <TextField
                 fullWidth
-                value={relation.name}
-                name="name"
+                value={relation.title}
+                name="title"
                 onChange={handleChange}
                 required
                 disabled={chosenLessons.length < 2}
@@ -339,13 +362,13 @@ function Relation() {
               variant="contained"
               endIcon={<Send color="secondary" />}
               onClick={createOrUpdate}
-              disabled={ (!relation.name  || !(relation.explanation || rawText)) || fetching }
+              disabled={ (!relation.title  || !(relation.explanation || rawText)) || fetching }
             >
               { isUpdate ? "Update" : "Relate!" }
             </Button>
           </Stack>
         </Box>
-      </Paper>
+      </Box>
       <LessonListDialog
         open={openLessonList}
         setOpen={setOpenLessonList}
@@ -358,8 +381,8 @@ function Relation() {
       />
       <LessonDetailDialog
         open={openDetail}
-            lesson={selectedLessonDetail}
-            onClose={()=>setOpenDetail(false)}
+        lesson={lessons.get()[ selectedLessonDetail ]}
+        onClose={()=>setOpenDetail(false)}
       />
       <FeedbackDialog
         success={success}
@@ -367,7 +390,7 @@ function Relation() {
         onClose={()=>{
             setOpenFeedbackDialog(false);
             if( success ){
-              navigate(homePath);
+              navigate(0);
             }
         }}
       />      

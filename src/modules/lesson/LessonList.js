@@ -1,13 +1,16 @@
-import { Delete, Edit } from "@mui/icons-material";
-import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 import { Fragment, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
+import { useHookstate } from "@hookstate/core";
+import { Delete, Edit } from "@mui/icons-material";
+import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
+
+import { dbState, lessonsState, tagsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
-import { homePath, lessonPath } from "../../utils/paths";
+import { lessonPath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringAvatar } from "../../utils/strings";
-import { getUserId } from "../../utils/user";
 import ConfirmModal from "../components/ConfirmModal";
 import FeedbackDialog from "../components/FeedbackDialog";
 import LessonDetailDialog from "./LessonDetail";
@@ -15,7 +18,8 @@ import LessonDetailDialog from "./LessonDetail";
 const styles = {
     lessonList:{ 
         width: '100%',
-        bgcolor: 'background.paper'
+        bgcolor: 'background.paper',
+        pt:0
     },
     lessonListItem:{
         '&:hover': {
@@ -31,13 +35,19 @@ const lessonsSortObj = {
 }
 
 
-function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosenLesson}) {
+function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) {
 
     const navigate = useNavigate();
 
+    const lessons = useHookstate(lessonsState);
+    const user = useHookstate(userState);
+    const tags = useHookstate(tagsState);
+    const fbDB = useHookstate(dbState);
+    const updatingObject = useHookstate(updatingOrCreatingObjectState);
+
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
-    const [lessonsSort, setlessonsSort] = useState( lessonsSortObj.random );
+    const [lessonsFilterCriteria, setLessonsFilterCriteria] = useState( lessonsSortObj.random );
     const [proxyLessons, setProxyLessons] = useState([]);
     const [latestLessons, setLatestLessons] = useState([]);
     const [ownedLessons, setOwnedLessons] = useState([]);
@@ -48,35 +58,41 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
     const [confirmCallback, setConfirmCallback] = useState(()=>{});
 
 
-    const handleOpenDetail = useCallback(( lesson )=>{
+    const handleOpenDetail = useCallback( id => {
         if( canChoose ) {
-            setChosenLesson(lesson);
+            setChosenLesson(id);
             setOpen(false);
         }
         else{
             setOpen(false);
             setOpenDetail(true);
-            setSelectedLesson(lesson);
+            setSelectedLesson( lessons.get()[id] );
         }
-    },[setOpen, setChosenLesson, canChoose]);
+    },[setOpen, setChosenLesson, canChoose, lessons]);
 
     const handleDetailClose = useCallback(()=>{
         setOpenDetail(false);
         setOpen(true);
-    },[setOpen])
+    },[setOpen, setOpenDetail])
 
-    const handleEdit = useCallback(( lesson ) =>  {
+    const handleEdit = useCallback( (lesson, id) =>  {
         setOpen(false);
-        navigate( lessonPath, {
-            state:{ lesson }
-        })
-    },[navigate,setOpen])
+        lesson = {
+            ...lesson,
+            id: id
+        }
+        updatingObject.set({
+            object: lesson,
+            updating: true
+        });
+        navigate( lessonPath );
+    },[navigate,setOpen, updatingObject])
 
 
-    const handleDelete = useCallback(( uuid ) =>  {
+    const handleDelete = useCallback(async( id ) =>  {
         setOpenConfirmModal(true);
-        setConfirmCallback( ( prevState ) => () => {
-            deleteLesson( uuid )
+        setConfirmCallback( () => () => {
+            deleteLesson(fbDB.get(), id )
                 .then( ok => {
                     if( !ok ){
                         setSuccess(false);
@@ -84,55 +100,67 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                     setOpenConfirmModal(false);
                     setOpenFeedbackDialog(true);
                     if( ok ){
-                        navigate( homePath );
+                        navigate(0);
                     }
                 }
             )}
         );
-    },[navigate])
+        
+    },[navigate, setOpenConfirmModal, setConfirmCallback, fbDB])
 
-    const handlelessonsSortClick = useCallback((criteria) => {
+    const handlelessonsSortClick = useCallback( criteria => {
+        setLessonsFilterCriteria(criteria);
+        let sortedLessons = {};
 
-        setlessonsSort(lessonsSortObj[criteria]);
-        if( lessonsSortObj[criteria] === lessonsSortObj.random ){
-            shuffle(lessons);
-            setProxyLessons(lessons);
+        switch( criteria ){
+            case lessonsSortObj.random:
+                sortedLessons = {}
+                const shuffledIds = shuffle( Object.keys( lessons.get() ) );
+                shuffledIds.forEach( id => {
+                    sortedLessons[id] = lessons.get()[id];
+                })
+                setProxyLessons(sortedLessons);
+                break;
+            case lessonsSortObj.mine:
+                if( ownedLessons.length === 0 ){ //if lessons havent been cached
+                    sortedLessons = {}
+                    sortedLessons = filterByOwned( lessons.get(), user.get().uid );
+                    setOwnedLessons(sortedLessons);
+                    setProxyLessons(sortedLessons);
+                }
+                else{
+                    setProxyLessons(ownedLessons)
+                }
+                break;
+            
+            case lessonsSortObj.latest:
+                if( latestLessons.length === 0 ){
+                    sortedLessons = {}
+                    const temp = Object.keys(lessons.get()).map( id => ({ ...lessons.get()[id], id:id }));
+                    temp.sort(sortByLatest);
+                    temp.forEach( element => {
+                        sortedLessons[ element.id ] = element
+                    })
+                    setLatestLessons(sortedLessons);
+                    setProxyLessons(sortedLessons);
+                }
+                else{
+                    setProxyLessons(latestLessons);;
+                }
+                break;
+            default:
+                break;
         }
-        if( lessonsSortObj[criteria] === lessonsSortObj.mine ){
-            if( ownedLessons.length === 0 ){
-                const temp = filterByOwned(lessons);
-                setOwnedLessons(temp);
-                setProxyLessons(temp);
-            }
-            else{
-                setProxyLessons(ownedLessons)
-            }
-        }
-        if( lessonsSortObj[criteria] === lessonsSortObj.latest ){
-            if( latestLessons.length === 0 ){
-                const temp = lessons;
-                temp.sort(sortByLatest);
-                setLatestLessons(temp);
-                setProxyLessons(temp);
-            }
-            else{
-                setProxyLessons(latestLessons);
-            }
-        }
-    },[lessons, latestLessons, ownedLessons])
+    },[lessons, latestLessons, ownedLessons, user])
 
     const handleClose = useCallback(()=>{
-        setlessonsSort(lessonsSortObj.random);//random?
-        setLatestLessons([]);
-        setOwnedLessons([]);
+        setLessonsFilterCriteria(lessonsSortObj.random);//random?
         onClose()
     },[onClose])
 
     useEffect(()=>{
-        if(open){
-            setProxyLessons(lessons);
-        }
-    },[open,lessons])
+        handlelessonsSortClick(lessonsSortObj.random)
+    },[open,handlelessonsSortClick])
 
 
     return(
@@ -149,19 +177,19 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                             View Lessons
                         </Typography>
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
-                            {
-                                Object.keys(lessonsSortObj).map( ls => (
-                                    lessonsSortObj[ls] === lessonsSortObj.mine & !Boolean(getUserId())
-                                    ? <></>
+                            {  lessons.get() &&
+                                Object.keys(lessonsSortObj).map( (ls, i) => (
+                                    lessonsSortObj[ls] === lessonsSortObj.mine && !user.get().uid
+                                    ? <Fragment key={i}></Fragment>
                                     :
                                     <Button
-                                        key={ls}
+                                        key={i}
                                         sx={{ borderRadius: 28 }}
                                         size="small"
                                         color="neutral"
-                                        variant={ lessonsSortObj[ls] === lessonsSort ? "contained" :"outlined" }
+                                        variant={ lessonsSortObj[ls] === lessonsFilterCriteria ? "contained" :"outlined" }
                                         disableElevation
-                                        onClick={() => handlelessonsSortClick(ls) }
+                                        onClick={() => handlelessonsSortClick( lessonsSortObj[ls]) }
                                     >
                                         {lessonsSortObj[ls]}    
                                     </Button>
@@ -172,59 +200,66 @@ function LessonListDialog({open, setOpen, onClose, lessons, canChoose, setChosen
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.lessonList}>
-                        { proxyLessons.map((l)=>(
-                            <Grid
-                                key={l.id}
-                                container
-                                spacing={3}
-                                alignItems="center"
-                            >
-                                <Grid item xs={10}>
-                                    <ListItemButton
-                                        disableGutters
-                                        onClick={()=>handleOpenDetail(l)}
-                                        sx={styles.lessonListItem}
-                                    >
-                                        <ListItemAvatar>
-                                            {
-                                                l.files.length > 0
-                                                ? <Avatar src={l.files[ l.files.length - 1 ].file.split("?")[0]} />
-                                                : <Avatar {...stringAvatar(l.name)} />
-                                            }
-                                            
-                                        </ListItemAvatar>
-                                        <ListItemText  primary={l.name} secondary={ 
-                                            <Fragment>
-                                                {l.tags.map(t => capitalizeFirstLetter(t) ).join(', ')}
-                                                {l.tags.length > 0 && <br />}
-                                                {toDate(l.creation_date)}
-                                            </Fragment>
-                                        }/>
-                                    </ListItemButton>
+                        {/* proxyLessons.map(id=>( */}
+                        
+                        { Object.keys(proxyLessons).map( id =>{
+                            const lesson = proxyLessons[id];
+                            return (
+                                <Grid
+                                    key={id}
+                                    container
+                                    spacing={3}
+                                    alignItems="center"
+                                >
+                                    <Grid item xs={10}>
+                                        <ListItemButton
+                                            key={id}
+                                            disableGutters
+                                            onClick={()=>handleOpenDetail(id)}
+                                            sx={styles.lessonListItem}
+                                        >
+                                            <ListItemAvatar>
+                                                {
+                                                    lesson.fileName
+                                                    ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${lesson.fileName}`} />
+                                                    : <Avatar {...stringAvatar(lesson.title)} />
+                                                }
+                                                
+                                            </ListItemAvatar>
+                                            <ListItemText  primary={lesson.title} secondary={ 
+                                                <Fragment>
+                                                    {lesson.tags && 
+                                                        lesson.tags.map( tagId => capitalizeFirstLetter( tags.get()[ tagId ].tag ))
+                                                            .join(', ')
+                                                    }
+                                                    {lesson.tags.length && <br />}
+                                                    {toDate(lesson.creationDate)}
+                                                </Fragment>
+                                            }/>
+                                        </ListItemButton>
 
+                                    </Grid>
+                                    {
+                                        lesson.userUid === user.get().uid &&
+                                            <Grid item xs={2}>
+                                                <IconButton
+                                                    edge="end" 
+                                                    sx={{ color: 'gray' }}
+                                                    onClick={() => handleEdit( lesson, id )}
+                                                >
+                                                    <Edit />
+                                                </IconButton>
+                                                <IconButton
+                                                    edge="end" 
+                                                    sx={{ color: 'gray' }}
+                                                    onClick={() => handleDelete( id )}
+                                                >
+                                                    <Delete />
+                                                </IconButton>
+                                            </Grid>
+                                    }
                                 </Grid>
-                                {
-                                    l.user === getUserId() &&
-                                        <Grid item xs={2}>
-                                            <IconButton
-                                                edge="end" 
-                                                sx={{ color: 'gray' }}
-                                                onClick={() => handleEdit(l)}
-                                            >
-                                                <Edit />
-                                            </IconButton>
-                                            <IconButton
-                                                edge="end" 
-                                                sx={{ color: 'gray' }}
-                                                onClick={() => handleDelete(l.uuid)}
-                                            >
-                                                <Delete />
-                                            </IconButton>
-                                        </Grid>
-                                }
-                            </Grid>
-                        ))
-                        }
+                        )})}
                     </List>
                 </DialogContent>
                 <DialogActions>

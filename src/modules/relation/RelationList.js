@@ -1,12 +1,13 @@
+import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { dbState, relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
-import { getUserId } from "../../utils/user";
 import ConfirmModal from "../components/ConfirmModal";
 import FeedbackDialog from "../components/FeedbackDialog";
 import RelationDetailDialog from "./RelationDetail";
@@ -34,7 +35,7 @@ const relationsSortObj = {
 */
 
 
-function RelationListDialog({open, setOpen, onClose, relations, filterType, filters}) {
+function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//check if filters should be at globalstate
 
     const navigate = useNavigate();
 
@@ -42,6 +43,12 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
     const [selectedRelation, setSelectedRelation] = useState();
     //const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
     //const [proxyRelations, setProxyRelations] = useState([]);
+
+    const user = useHookstate(userState);
+    const relationsToList = useHookstate(relationsToListState);
+    const relations = useHookstate(relationsState);
+    const fbDB = useHookstate(dbState);
+    const updatingObject = useHookstate(updatingOrCreatingObjectState);
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -60,42 +67,50 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
         setOpen(true);
     },[setOpen])
 
-    const handleEdit = useCallback(( relation ) =>  {
+    const handleEdit = useCallback(( relation, id ) =>  {
         setOpen(false);
-        navigate( relationPath, {
-            state:{ relation }
-        })
-    },[navigate,setOpen])
+        updatingObject.set({
+            object: {
+                ...relation,
+                id: id
+            },
+            updating: true
+        });
+        navigate( relationPath );
+    },[navigate,setOpen,updatingObject])
 
-    const handleDelete = useCallback(( uuid ) =>  {
+    const handleDelete = useCallback(( id ) =>  {
         setOpenConfirmModal(true);
-        setConfirmCallback( ( prevState ) => () => {
-            deleteRelation( uuid )
+        setConfirmCallback( () => () => {
+            deleteRelation(fbDB.get(), id )
                 .then( ok => {
                     if( !ok ){
                         setSuccess(false);
                     }
                     setOpenConfirmModal(false);
                     setOpenFeedbackDialog(true);
+                    if( ok ){
+                        navigate(0);//!
+                    }
                 }
             )}
         );
-    },[])
+    },[fbDB, navigate])
 
     /*
     const handleRelationsSortClick = useCallback((criteria) => {
         setRelationsSort(relationsSortObj[criteria]);
         if( relationsSortObj[criteria] === relationsSortObj.random ){
-            shuffle(relations);
+            shuffle(relationsToList);
         }
         if( relationsSortObj[criteria] === relationsSortObj.mine ){
-            relations.sort(sortByOwned);//cache
+            relationsToList.sort(sortByOwned);//cache
         }
         if( relationsSortObj[criteria] === relationsSortObj.latest ){
-            relations.sort(sortByLatest);//cache
+            relationsToList.sort(sortByLatest);//cache
         }
-        setProxyRelations(relations);
-    },[relations])
+        setProxyRelations(relationsToList);
+    },[relationsToList])
     */
 
     const handleClose = useCallback(()=>{
@@ -103,13 +118,9 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
         onClose()
     },[onClose])
 
-    useEffect(()=>{
-        //setProxyRelations(relations);
-    },[relations])
+    //useEffect(()=>{setProxyRelations(relationsToList);},[relationsToList])
 
-    if( !relations ){
-        return <></>;
-    }
+    //if( !relationsToList.get() ){return <></>;}
 
     return(
         <div>
@@ -150,53 +161,55 @@ function RelationListDialog({open, setOpen, onClose, relations, filterType, filt
                 </DialogTitle>
                 <DialogContent dividers>
                     <List sx={styles.relationList}>
-                        { relations?.map((r)=>(
-                            <Grid
-                                key={r.id}
-                                container
-                                spacing={3}
-                                alignItems="center"
-                            >
-                                <Grid item xs={10}>
-                                    <ListItemButton
-                                        disableGutters
-                                        key={r.id}
-                                        sx={styles.relationListItem}
-                                        onClick={()=>handleOpenDetail(r)}
-                                    >
-                                        <ListItemAvatar>
-                                            {/* TODO validate if file is img */}
-                                            {
-                                                r.files?.length > 0
-                                                ? <Avatar src={r.files[0].file.split("?")[0]} />
-                                                : <Avatar {...stringAvatar(r.name)} />
-                                            }
-                                            
-                                        </ListItemAvatar>
-                                        <ListItemText  primary={r.name} secondary={toDate(r.creation_date)}/>
-                                    </ListItemButton>
+                        {  relationsToList.get().map( id => {
+                            const relation = relations.get()[id];
+                            return (
+                                <Grid
+                                    key={id}
+                                    container
+                                    spacing={3}
+                                    alignItems="center"
+                                >
+                                    <Grid item xs={10}>
+                                        <ListItemButton
+                                            disableGutters
+                                            key={id}
+                                            sx={styles.relationListItem}
+                                            onClick={()=>handleOpenDetail(relation)}
+                                        >
+                                            <ListItemAvatar>
+                                                {/* TODO validate if file is img */}
+                                                {
+                                                    relation.fileName
+                                                    ? <Avatar src={`${process.env.REACT_APP_BUCKET}/${relation.fileName}`} />
+                                                    : <Avatar {...stringAvatar(relation.title)} />
+                                                }
+                                                
+                                            </ListItemAvatar>
+                                            <ListItemText  primary={relation.title} secondary={toDate(relation.creationDate)}/>
+                                        </ListItemButton>
+                                    </Grid>
+                                    {
+                                        relation.userUid === user.get().uid &&
+                                            <Grid item xs={2}>
+                                                <IconButton
+                                                    edge="end" 
+                                                    sx={{ color: 'gray' }}
+                                                    onClick={() => handleEdit(relation, id)}
+                                                >
+                                                    <Edit />
+                                                </IconButton>
+                                                <IconButton
+                                                    edge="end" 
+                                                    sx={{ color: 'gray' }}
+                                                    onClick={() => handleDelete(id)}
+                                                >
+                                                    <Delete />
+                                                </IconButton>
+                                            </Grid>
+                                    }
                                 </Grid>
-                                {
-                                    r.user === getUserId() &&
-                                        <Grid item xs={2}>
-                                            <IconButton
-                                                edge="end" 
-                                                sx={{ color: 'gray' }}
-                                                onClick={() => handleEdit(r)}
-                                            >
-                                                <Edit />
-                                            </IconButton>
-                                            <IconButton
-                                                edge="end" 
-                                                sx={{ color: 'gray' }}
-                                                onClick={() => handleDelete(r.uuid)}
-                                            >
-                                                <Delete />
-                                            </IconButton>
-                                        </Grid>
-                                }
-                            </Grid>
-                        ))
+                        )})
                         }
                         
                     </List>

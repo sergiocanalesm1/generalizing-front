@@ -1,69 +1,58 @@
-import { methods, url } from "./urls";
+import { collection, getDocs, addDoc, setDoc, doc, deleteDoc } from "firebase/firestore";
 
-export async function getAllRelations(){
 
-    const response = await fetch(
-        `${url}relations/`,
-        {
-            method: 'GET',
-            headers: {
-                'Content-Type': 'application/json',
-        },
-    });
-    if( response.ok ) {
-        const fetchedRelations = await response.json();
-        fetchedRelations.reverse();//latest first
-        return fetchedRelations;
+const relationsCollection = "relations";
+
+export async function getAllRelations(db){
+    const relations = {}
+    let data, lessons;
+    try{
+        const querySnapshot = await getDocs(collection(db, relationsCollection));
+        querySnapshot.forEach((doc) => {
+            data = doc.data();
+            lessons = data.lessons.split(",")
+            data.lessons = lessons
+            relations[doc.id] = data;
+            //relations.push({[doc.id]:data})
+        });
+
     }
+    catch(error){
+        //console.log(error)
+    }
+    return relations;
 }
 
-export async function createOrUpdateRelation( relation, files, method, onSuccess, onError ){
-    const uuid = method === methods.UPDATE ? `${relation.uuid}` : ``;
-    let response = await fetch(`${url}relations/${uuid}`,{
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(relation)
-    })
-
-    if( response.ok ){
-        const createdRelation = await response.json();
-
-        if( files.name ) {
-          let formData = new FormData();
-          formData.append( 'relation', createdRelation.id )
-          formData.append( 'file', files );
-
-          response = await fetch(`${url}rfiles/`,{
-              method: 'POST',
-              body: formData
-          });
-
-          if( response.ok ){
-
-            }
-        }
+export async function updateRelation( db, id, relation, onSuccess, onError ){
+    try{
+        const ref = doc(db, relationsCollection, id);
+        await setDoc(ref, relation, { merge: true });
         onSuccess();
     }
-    else{
+    catch(error) {
         onError()
+        //console.log(error);
     }
 }
 
-export async function getRelation( uuid ){
-    const relations = await getAllRelations();
-    return relations.filter( r => (r.uuid === uuid ))[0];
+export async function createRelation( db, relation, onSuccess, onError ){
+    try{
+        await addDoc(collection(db, relationsCollection), relation);
+        onSuccess();
+    }
+    catch(error) {
+        onError()
+        //console.log(error);
+    }
 }
 
-export async function deleteRelation( uuid ){
-    const response = await fetch(
-        `${url}relations/${uuid}`,
-        {
-        method: 'DELETE',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-    });
-    return response.ok;
+export async function deleteRelation( db, id ){
+    try{
+        await deleteDoc(doc(db, relationsCollection, id));
+        return true
+    }
+    catch(error){
+        //console.log(error)
+        return false
+    }
 }

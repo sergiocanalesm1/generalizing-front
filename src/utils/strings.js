@@ -23,6 +23,7 @@ export function stringToColor(string) {
 }
 
 export function stringAvatar(name,sxProps) {
+    if(!name) return;
     return {
         sx: {
             bgcolor: stringToColor(name),

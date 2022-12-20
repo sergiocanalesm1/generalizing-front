@@ -21,7 +21,6 @@ function MyEditor( { setText, readOnly, rawText } ){
         }
     },[rawText, readOnly])
 
-
     return (
         <div>
             { readOnly

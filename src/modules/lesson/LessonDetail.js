@@ -1,9 +1,13 @@
-import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { useCallback, useState } from "react";
 import Linkify from "react-linkify";
+
+import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
+
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import MyEditor from "../home/components/MyEditor";
 import RelationListDialog from "../relation/RelationList";
+import { useHookstate } from "@hookstate/core";
+import { domainsState, originsState, tagsState, relationsToListState } from "../../globalState/globalState";
 
 const styles = {
     root: {
@@ -18,10 +22,15 @@ const styles = {
 function LessonDetailDialog({ lesson, open, onClose }) {
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
 
+    const tags = useHookstate(tagsState);
+    const domains = useHookstate(domainsState);
+    const origins = useHookstate(originsState);
+    const relationsToList = useHookstate(relationsToListState);
+
     const handleOpenExistingRelations = useCallback(() => {
+        relationsToList.set(JSON.parse(JSON.stringify(lesson.relations)));
         setOpenRelationListDialog(true)
-    },[])
-    //TODO fix file url
+    },[relationsToList, lesson])
     if( !lesson ){
         return <></>;
     }
@@ -35,22 +44,21 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                 scroll="paper"
             >
                 <Card sx={{overflow: 'auto'}}>
-                    {lesson.files && lesson.files.length > 0 &&
+                    {lesson.fileName &&
                         <CardMedia
                             component="img"
                             height="50%"
-                            image={lesson.files[lesson.files.length - 1].file.split("?")[0]}
+                            image={`${process.env.REACT_APP_BUCKET}/${lesson.fileName}`}
                             alt="lesson_file"
                         />
                     }
                     <CardContent>
-                        <Typography variant="h4">{lesson.name}</Typography>
-                        
+                        <Typography variant="h4">{lesson.title}</Typography>
+                        <Toolbar  />
 
                         { lesson.isDescriptionRaw
                           ? 
                             <Box sx={styles.root}>
-                                <br />
                                 <Box sx={styles.editor}>
                                     <MyEditor
                                         readOnly
@@ -58,20 +66,17 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                                     />
                                 </Box>
                             </Box>
-                          : <div>
-                                <Toolbar  />
-                                <Typography variant="body">
-                                    <Linkify
-                                        componentDecorator={(decoratedHref, decoratedText, key) => (
-                                            <a target="blank" href={decoratedHref} key={key}>
-                                                {decoratedText}
-                                            </a>
-                                        )}
-                                    >
-                                        {lesson.description}
-                                    </Linkify>
-                                </Typography>
-                            </div>
+                          : <Typography variant="body">
+                                <Linkify
+                                    componentDecorator={(decoratedHref, decoratedText, key) => (
+                                        <a target="blank" href={decoratedHref} key={key}>
+                                            {decoratedText}
+                                        </a>
+                                    )}
+                                >
+                                    {lesson.description}
+                                </Linkify>
+                            </Typography>
                         }
                         <br />
                             <Stack 
@@ -82,26 +87,33 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                                     display: 'flex',
                                     flexWrap: 'wrap'
                                 }}>
-                            { lesson.tags?.map( t =>(
-                                <Chip 
-                                    key={t}
-                                    label={capitalizeFirstLetter(t)}
-                                    sx={{
-                                        bgcolor:stringToColor(t),
-                                        color:"#FFF",
-                                        m:1}}
-                                    />
-                            ))}
+                            { lesson.tags && 
+                                lesson.tags.map( tagId => {
+                                    const tag = tags.get()[ tagId ].tag
+                                    return (
+                                        <Chip 
+                                            key={tag}
+                                            label={capitalizeFirstLetter(tag)}
+                                            sx={{
+                                                bgcolor:stringToColor(tag),
+                                                color:"#FFF",
+                                                m:1}}
+                                        />
+                                    )
+                                })
+                            }
                             </Stack>
                         <Stack 
                             direction="row"
                             justifyContent="flex-end"
                             alignItems="center"
                         >
-                            <Typography variant="small">{lesson.domain}, {lesson.origin}</Typography>
+                            <Typography variant="small">
+                                { domains.get()[ lesson.domain ].domain }, { origins.get()[ lesson.origin ].origin }
+                            </Typography>
                         </Stack>
                     </CardContent>
-                        { lesson.relations && lesson.relations.length > 0 
+                        { lesson.relations
                             ?
                             <Grid container>
                                 <Grid item xs={12} md={10}>
@@ -137,7 +149,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                 onClose={()=>setOpenRelationListDialog(false)}
                 relations={lesson.relations}
                 filterType={"Lesson"}
-                filters={lesson.name}
+                filters={lesson.title}
             />
         </div>
     );

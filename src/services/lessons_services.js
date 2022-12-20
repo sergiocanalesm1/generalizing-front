@@ -1,54 +1,55 @@
-import { shuffle } from "../utils/filters";
-import { methods, url } from "./urls";
+import { collection, getDocs, setDoc, addDoc, doc, deleteDoc } from "firebase/firestore";
 
-export async function getAllLessons(){
 
-    const response = await fetch(
-        `${url}lessons/`,
-        {
-        method: 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-        },
+const lessonsCollection = "lessons";
+
+export async function getAllLessons(db){
+
+    const lessons = {};
+    let data;
+    const querySnapshot = await getDocs(collection(db, lessonsCollection));
+    querySnapshot.forEach((doc) => {
+        data = doc.data();
+        lessons[doc.id] = data;
+        //lessons.push({[doc.id]:data})
     });
-    if( response.ok ) {
-        const fetchedLessons = await response.json();
-        shuffle(fetchedLessons);
-        return fetchedLessons;
-    }
+    return lessons;
 }
 
-export async function createOrUpdateLesson( lesson, files, method, onSuccess, onError ){
-    const uuid = method === methods.UPDATE ? `${lesson.uuid}` : ``;
-    let response = await fetch(`${url}lessons/${uuid}`,{
-        method: method,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(lesson)
-    })
-
-    if( response.ok ){
-        const createdLesson = await response.json();
-        if( files.name ) {
-          let formData = new FormData();
-          formData.append( 'lesson', createdLesson.id )
-          formData.append( 'file', files );
-
-          response = await fetch(`${url}lfiles/`,{
-              method: 'POST',
-              body: formData
-          });
-
-          if( response.ok ){
-          }
-        }
+export async function updateLesson( db, id, lesson, onSuccess, onError ){
+    try{
+        const ref = doc(db, lessonsCollection, id);
+        await setDoc(ref, lesson, { merge: true });
         onSuccess();
     }
-    else{
-        onError();
+    catch(error) {
+        onError()
+        //console.log(error);
     }
 }
+
+export async function createLesson( db, lesson, onSuccess, onError ){
+    try{
+        await addDoc(collection(db, lessonsCollection), lesson);
+        onSuccess();
+    }
+    catch(error) {
+        onError()
+        //console.log(error);
+    }
+}
+
+export async function deleteLesson( db, id ){
+    try{
+        await deleteDoc(doc(db, lessonsCollection, id));
+        return true
+    }
+    catch(error){
+        //console.log(error)
+        return false
+    }
+}
+/*
 
 export async function getLesson( uuid ){
     const lessons = await getAllLessons();
@@ -66,3 +67,4 @@ export async function deleteLesson( uuid ){
     });
     return response.ok;
 }
+*/
