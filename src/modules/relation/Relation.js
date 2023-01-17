@@ -1,8 +1,9 @@
 import { useHookstate } from "@hookstate/core";
 import { Add, ArrowBack, Send } from "@mui/icons-material";
 import { Avatar, Box, Button, Grid, Stack, TextField, Toolbar, Typography } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { dbState, lessonsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { createRelation, updateRelation } from "../../services/relations_services";
 import { homePath } from "../../utils/paths";
@@ -63,7 +64,8 @@ function Relation() {
   const fbDB = useHookstate(dbState);
   const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
-  //TODO fix force update
+  // TODO fix force update
+  // eslint-disable-next-line react/hook-use-state
   const [,updateState] = useState();
   const forceUpdate = useCallback(() => updateState({}), []);
 
@@ -79,7 +81,7 @@ function Relation() {
   const [openFeedbackDialog,setOpenFeedbackDialog] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  //const [files, setFiles] = useState([]);
+  // Const [files, setFiles] = useState([]);
 
   const [isUpdate,setIsUpdate] = useState(false);
 
@@ -116,12 +118,12 @@ function Relation() {
 
   const detailOrListLesson = useCallback( index => {
     if( chosenLessons[index] === 0 ){
-      //choose lesson, show list
+      // Choose lesson, show list
       setChosenIndex(index);
       setOpenLessonList(true);
     }
     else{
-      //show detail
+      // Show detail
       setSelectedLessonDetail(chosenLessons[index]);
       setOpenDetail(true);
     }
@@ -141,21 +143,23 @@ function Relation() {
     if( relation.isExplanationRaw ){
       relationToCreateOrUpdate.explanation = JSON.stringify( rawText );
     }
+
     if( !rawText || !relation.isExplanationRaw ){
       relationToCreateOrUpdate.explanation = relation.explanation;
     }
 
     if( isUpdate ){
-      const id = relation.id
+      const {id} = relation
       await updateRelation( fbDB.get(), id, relationToCreateOrUpdate, onSuccess, onError ) 
       navigate(0) // TODO fix update
     }
     else{
       await createRelation( fbDB.get(), relationToCreateOrUpdate, onSuccess, onError )
     }
+
     updatingOrCreatingObject.set({
       object:{}
-    })  //if error then what, bug?
+    })  // If error then what, bug?
     setFetching(false);
 
   },[chosenLessons, relation, isUpdate, rawText, fbDB, navigate, onError, onSuccess, updatingOrCreatingObject, user]);
@@ -163,7 +167,7 @@ function Relation() {
 
   useEffect(()=>{
       if( lessonToChoose ){
-        //TODO check if same lesson
+        // TODO check if same lesson
         const newChosen = chosenLessons;
         newChosen[ chosenIndex ] = lessonToChoose;
         setChosenLessons( newChosen );
@@ -177,7 +181,7 @@ function Relation() {
         setChosenLessons( relation.lessons );
         setRelation( relation );
         /*
-        if( state.challengeLessons ){
+        If( state.challengeLessons ){
           setChosenLessons( state.challengeLessons );
         }
         */
@@ -210,11 +214,11 @@ function Relation() {
           sx={styles.relationBox}
         >
 
-          {<Stack justifyContent="center" direction="row">
+          <Stack justifyContent="center" direction="row">
             <Typography variant="h2" align="center">
-              <>Create a Relation</>
+              Create a Relation
             </Typography>
-          </Stack>}
+          </Stack>
 
           <Toolbar />
           <Stack justifyContent="center" direction="row">
@@ -231,7 +235,7 @@ function Relation() {
             chosenLessons.map( (id, i) => {
               const lesson = lessons.get()[id];
               return (
-                <Button onClick={() => detailOrListLesson(i)}>
+                <Button key={id} onClick={() => detailOrListLesson(i)}>
                   {
                     lesson
                     ?                                         
@@ -270,15 +274,15 @@ function Relation() {
                   </Box>
                 </Box>
               : <TextField
-                  value={relation.explanation}
                   fullWidth
-                  name="explanation"
                   multiline
-                  onChange={handleChange}
                   required
+                  value={relation.explanation}
+                  name="explanation"
                   minRows={3}
                   disabled={chosenLessons.length < 2}
-                  autcomplete={"off"}
+                  autcomplete="off"
+                  onChange={handleChange}
                 />
             }
           </Grid>
@@ -330,11 +334,11 @@ function Relation() {
             <Grid item container justifyContent="center" xs={12} md={7}>
               <TextField
                 fullWidth
+                required
                 value={relation.title}
                 name="title"
-                onChange={handleChange}
-                required
                 disabled={chosenLessons.length < 2}
+                onChange={handleChange}
               />
             </Grid>
           </Grid>
@@ -355,8 +359,8 @@ function Relation() {
             <Button 
               variant="contained"
               endIcon={<Send color="secondary" />}
-              onClick={createOrUpdate}
               disabled={ (!relation.title  || !(relation.explanation || rawText)) || fetching }
+              onClick={createOrUpdate}
             >
               { isUpdate ? "Update" : "Relate!" }
             </Button>
@@ -364,14 +368,14 @@ function Relation() {
         </Box>
       </Box>
       <LessonListDialog
+        canChoose
         open={openLessonList}
         setOpen={setOpenLessonList}
+        lessons={lessons}
+        setChosenLesson={setLessonToChoose}
         onClose={()=>{
           setOpenLessonList(false);
         }}
-        lessons={lessons}
-        canChoose
-        setChosenLesson={setLessonToChoose}
       />
       <LessonDetailDialog
         open={openDetail}

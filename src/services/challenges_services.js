@@ -11,6 +11,6 @@ export async function getLastChallenge(){
     });
     if( response.ok ) {
         const fetchedChallenges = await response.json();
-        return fetchedChallenges[ fetchedChallenges.length - 1 ];//fix, create an endpoint for this
+        return fetchedChallenges[ fetchedChallenges.length - 1 ];// Fix, create an endpoint for this
     }
 }

@@ -1,7 +1,5 @@
-//https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/generalizing.png
-
 import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Typography } from "@mui/material";
-import { useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { lessonPath } from "../../utils/paths";
 import { setFirstTimer } from "../../utils/user";
@@ -21,9 +19,9 @@ function WelcomingDialog( {open, lessons, relations} ){
     return(
         <div>
             <Dialog
+                fullWidth
                 scroll="paper"
                 open={open}
-                fullWidth
             >
                 <Card sx={{
                     overflow: 'auto',
@@ -39,7 +37,7 @@ function WelcomingDialog( {open, lessons, relations} ){
                     </Stack>
                     <CardMedia
                         component="img"
-                        image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/relations.png"
+                        image={`${process.env.REACT_APP_BUCKET}/relations.png`}
                         alt="generalizing"
                         sx={{pr:2}}
                     />
@@ -55,7 +53,7 @@ function WelcomingDialog( {open, lessons, relations} ){
                         <Grid container justifyContent="center" alignItems="center">
                         <Grid item xs={12} md={6}>
                             <CardActions>
-                                <Button onClick={()=>setOpenHelpDialog(true)} color="primary">
+                                <Button color="primary" onClick={()=>setOpenHelpDialog(true)}>
                                     WTF, i need more info
                                 </Button>
                             </CardActions>
@@ -63,7 +61,7 @@ function WelcomingDialog( {open, lessons, relations} ){
                         <Grid item xs={12} md={6}>
                             <Stack direction="row" justifyContent="flex-end">
                                 <CardActions>
-                                    <Button onClick={()=>setOpenAuthModal(true)} color="primary">
+                                    <Button color="primary" onClick={()=>setOpenAuthModal(true)}>
                                         Ready to Sign up and start
                                     </Button>
                                 </CardActions>
@@ -103,9 +101,9 @@ function WelcomingDialog( {open, lessons, relations} ){
             />
             <HelpDialog
                 open={openHelpDialog}
-                onClose={()=>setOpenHelpDialog(false)}
                 lessons={lessons}
                 relations={relations}
+                onClose={()=>setOpenHelpDialog(false)}
             />
         </div>
     )

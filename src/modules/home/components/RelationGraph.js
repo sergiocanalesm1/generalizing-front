@@ -1,6 +1,6 @@
 import { useHookstate } from '@hookstate/core';
 import * as d3 from 'd3';
-import { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 
 
 import { filterByDomain } from '../../../utils/filters';
@@ -8,7 +8,7 @@ import { domainsState, lessonsState,relationsState, relationsToListState } from 
 
 
 function getId(sI,tI){
-  return `p${sI}-${tI}`; //p is neccesary because ids must begin with letter
+  return `p${sI}-${tI}`; // P is neccesary because ids must begin with letter
 }
 
 const heightConstant = window.innerWidth < 700 ? 1.2 : 0.5;
@@ -29,7 +29,7 @@ const ribbon = d3.ribbonArrow()
   .padAngle(1 / innerRadius);
   
 
-function RelationGraph({ setOpenList, setFilters }) { //domain blending but, origin blending?
+function RelationGraph({ setOpenList, setFilters }) { // Domain blending but, origin blending?
 
   const relations = useHookstate(relationsState);
   const lessons = useHookstate(lessonsState);
@@ -37,11 +37,13 @@ function RelationGraph({ setOpenList, setFilters }) { //domain blending but, ori
   const relationsToList = useHookstate(relationsToListState);
 
   const data = useMemo(() => {
-    let d1,d2,sortedDomains = [];
+    let d1; 
+    let d2; 
+    let sortedDomains = [];
     return Object.keys(relations).map( id => {
       d1 = domains.get()[ lessons.get()[relations.get()[id].lessons[0]].domain ].domain;
       d2 = domains.get()[ lessons.get()[relations.get()[id].lessons[1]].domain ].domain;
-    //this gets sorted because it simplifies the filtering by domain
+    // This gets sorted because it simplifies the filtering by domain
       sortedDomains =  [d1,d2].sort();
   
       return {
@@ -52,11 +54,7 @@ function RelationGraph({ setOpenList, setFilters }) { //domain blending but, ori
     })
   },[relations, lessons, domains] )
 
-  const names = useMemo(() => {
-    return Object.keys(domains.get()).map( id => {
-      return domains.get()[id].domain
-    } )
-  },[domains])
+  const names = useMemo(() => Object.keys(domains.get()).map( id => domains.get()[id].domain ),[domains])
 
   const matrix = useMemo(()=> {
     const index = new Map(names.map((d, i) => [d, i]));
@@ -70,7 +68,7 @@ function RelationGraph({ setOpenList, setFilters }) { //domain blending but, ori
 
 
   useEffect(()=>{
-      let isMounted = true;
+      const isMounted = true;
       if( isMounted ){
         
       const color = d3.scaleOrdinal(names, d3.quantize(d3.interpolateRainbow, names.length));
@@ -94,6 +92,7 @@ function RelationGraph({ setOpenList, setFilters }) { //domain blending but, ori
           ;
     
       group.append("text")
+          // eslint-disable-next-line no-return-assign
           .each(d => (d.angle = (d.startAngle + d.endAngle) / 2))
           .attr("dy", "0.35em")
           .attr("transform", d => `
@@ -108,10 +107,10 @@ function RelationGraph({ setOpenList, setFilters }) { //domain blending but, ori
       group.append("title")
           .text(d => {
             
-      const total_relations = d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value);
+      const totalRelations = d3.sum(chords, c => (c.source.index === d.index) * c.source.value) + d3.sum(chords, c => (c.target.index === d.index) * c.source.value);
 
       return `${names[d.index]}
-${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
+${totalRelations} ${totalRelations > 1 ? "relations" : "relation"}`
   })
 
       svg.append("g")
@@ -141,13 +140,12 @@ ${total_relations} ${total_relations > 1 ? "relations" : "relation"}`
 `${names[d.source.index]} ⇔ ${names[d.target.index]} 
 ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
 ;}
-return () => { isMounted = false }
 
     },[ relations, lessons, domains, matrix, names, relationsToList, setFilters, setOpenList ]
   );
 
   return (
-    <svg ref={d3Ref}></svg>
+    <svg ref={d3Ref} />
   );
 }
 

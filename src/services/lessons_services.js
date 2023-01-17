@@ -13,12 +13,13 @@ export async function getAllLessons(db){
         querySnapshot.forEach((doc) => {
             data = doc.data();
             lessons[doc.id] = data;
-            //lessons.push({[doc.id]:data})
+            // Lessons.push({[doc.id]:data})
         });
     }
     catch(error){
         reportError( error );
     }
+
     return lessons;
 }
 
@@ -57,7 +58,7 @@ export async function deleteLesson( db, id ){
 }
 /*
 
-export async function getLesson( uuid ){
+Export async function getLesson( uuid ){
     const lessons = await getAllLessons();
     return lessons.filter( l => (l.uuid === uuid) )[0];
 }

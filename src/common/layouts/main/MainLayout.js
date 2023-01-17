@@ -1,17 +1,16 @@
-import React, { Fragment } from 'react';
+import React from 'react';
 
-//import Splash from '../../../modules/splash/Splash';
 import Header from '../../../modules/components/Header';
 
 
 function MainLayout({ children }){
   return (
-      <Fragment >
+      <div >
         <Header />
-        <Fragment>
+        <div>
           { children }
-        </Fragment>
-      </Fragment>
+        </div>
+      </div>
     );
 }
 

@@ -1,4 +1,4 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useHookstate } from "@hookstate/core";
@@ -79,7 +79,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
         setOpen(false);
         lesson = {
             ...lesson,
-            id: id
+            id
         }
         updatingObject.set({
             object: lesson,
@@ -97,6 +97,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                     if( !ok ){
                         setSuccess(false);
                     }
+
                     setOpenConfirmModal(false);
                     setOpenFeedbackDialog(true);
                     if( ok ){
@@ -113,7 +114,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
         let sortedLessons = {};
 
         switch( criteria ){
-            case lessonsSortObj.random:
+            case lessonsSortObj.random:{
                 sortedLessons = {}
                 const shuffledIds = shuffle( Object.keys( lessons.get() ) );
                 shuffledIds.forEach( id => {
@@ -121,8 +122,10 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                 })
                 setProxyLessons(sortedLessons);
                 break;
+            }
+
             case lessonsSortObj.mine:
-                if( ownedLessons.length === 0 ){ //if lessons havent been cached
+                if( ownedLessons.length === 0 ){ // If lessons havent been cached
                     sortedLessons = {}
                     sortedLessons = filterByOwned( lessons.get(), user.get().uid );
                     setOwnedLessons(sortedLessons);
@@ -131,12 +134,13 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                 else{
                     setProxyLessons(ownedLessons)
                 }
+
                 break;
             
             case lessonsSortObj.latest:
                 if( latestLessons.length === 0 ){
                     sortedLessons = {}
-                    const temp = Object.keys(lessons.get()).map( id => ({ ...lessons.get()[id], id:id }));
+                    const temp = Object.keys(lessons.get()).map( id => ({ ...lessons.get()[id], id }));
                     temp.sort(sortByLatest);
                     temp.forEach( element => {
                         sortedLessons[ element.id ] = element
@@ -147,6 +151,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                 else{
                     setProxyLessons(latestLessons);;
                 }
+
                 break;
             default:
                 break;
@@ -154,7 +159,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     },[lessons, latestLessons, ownedLessons, user])
 
     const handleClose = useCallback(()=>{
-        setLessonsFilterCriteria(lessonsSortObj.random);//random?
+        setLessonsFilterCriteria(lessonsSortObj.random);// Random?
         onClose()
     },[onClose])
 
@@ -166,10 +171,10 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     return(
         <div>
             <Dialog
+                fullWidth
                 scroll="paper"
                 open={open}
                 onClose={handleClose}
-                fullWidth
             >
                 <DialogTitle>
                     <div>
@@ -178,17 +183,17 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                         </Typography>
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
                             {  lessons.get() &&
-                                Object.keys(lessonsSortObj).map( (ls, i) => (
+                                Object.keys(lessonsSortObj).map( ls => (
                                     lessonsSortObj[ls] === lessonsSortObj.mine && !user.get().uid
-                                    ? <Fragment key={i}></Fragment>
+                                    ? <div key={lessonsSortObj[ls]} />
                                     :
                                     <Button
-                                        key={i}
+                                        key={lessonsSortObj[ls]}
+                                        disableElevation
                                         sx={{ borderRadius: 28 }}
                                         size="small"
                                         color="neutral"
                                         variant={ lessonsSortObj[ls] === lessonsFilterCriteria ? "contained" :"outlined" }
-                                        disableElevation
                                         onClick={() => handlelessonsSortClick( lessonsSortObj[ls]) }
                                     >
                                         {lessonsSortObj[ls]}    
@@ -215,8 +220,8 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                         <ListItemButton
                                             key={id}
                                             disableGutters
-                                            onClick={()=>handleOpenDetail(id)}
                                             sx={styles.lessonListItem}
+                                            onClick={()=>handleOpenDetail(id)}
                                         >
                                             <ListItemAvatar>
                                                 {
@@ -227,14 +232,14 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                                 
                                             </ListItemAvatar>
                                             <ListItemText  primary={lesson.title} secondary={ 
-                                                <Fragment>
+                                                <div>
                                                     {lesson.tags && 
                                                         lesson.tags.map( tagId => capitalizeFirstLetter( tags.get()[ tagId ].tag ))
                                                             .join(', ')
                                                     }
                                                     {lesson.tags.length && <br />}
                                                     {toDate(lesson.creationDate)}
-                                                </Fragment>
+                                                </div>
                                             }/>
                                         </ListItemButton>
 

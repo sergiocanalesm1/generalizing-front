@@ -14,7 +14,6 @@ export async function signin(email,password,onSuccess,onError){
     catch(error) {
         onError();
         reportError( error );
-        return;
     }
 }
 
@@ -24,10 +23,10 @@ export async function signinWithGoogle(onSuccess,onError){
     try{
     
         await signInWithPopup(auth, provider);
-        //const credential = GoogleAuthProvider.credentialFromResult(result);
-        //const token = credential.accessToken;
+        // Const credential = GoogleAuthProvider.credentialFromResult(result);
+        // const token = credential.accessToken;
         // The signed-in user info.
-        //const user = result.user;
+        // const user = result.user;
         onSuccess();
     }
     catch( error ){
@@ -70,7 +69,7 @@ export async function login(email, password,onSuccess,onError){
     catch(error) {
         reportError( error );
         onError()
-        return;
+        
     }
 }
 

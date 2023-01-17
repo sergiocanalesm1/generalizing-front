@@ -25,7 +25,7 @@ const style = {
 
 function AuthModal( { open, onClose, onSuccess, onError } ) {
     
-    //TODO implement errors
+    // TODO implement errors
 
     const [userForm, setUserForm] = useState({
         email:"",
@@ -88,9 +88,9 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
     return(
         <Modal
             open={open}
-            onClose={onClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
+            onClose={onClose}
         >
             <Box sx={style.modal}>
                 <Grid
@@ -104,19 +104,19 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                     </Grid>
                     <Grid item sx={style.modalItem}>
                         <TextField 
+                            required
                             variant="outlined"
                             label="Email"
                             name="email"
-                            required
                             onChange={ e => handleChange(e) }
                         />
                     </Grid>
                     { !forgotPassword &&
                         <Grid item sx={style.modalItem}>
                             <TextField 
+                                required
                                 variant="outlined"
                                 label="Password"
-                                required
                                 type="password"
                                 name="password"
                                 onChange={ e => handleChange(e) }
@@ -127,15 +127,15 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                     <Stack direction="row" alignItems="center" justifyContent="space-evenly">
                         <Button
                             variant="contained"
-                            onClick={handleSubmit}
                             disabled={(!userForm.email || !userForm.password)}
+                            onClick={handleSubmit}
                         >
                             {submitText}
                         </Button>
                         <Button
                             variant="outlined"
-                            onClick={()=>signinWithGoogle(onSuccess,onError)}
                             sx={style.googleImg}
+                            onClick={()=>signinWithGoogle(onSuccess,onError)}
                         >
                             <img 
                                 src="https://raw.githubusercontent.com/firebase/firebaseui-web/master/image/google.svg"
@@ -150,11 +150,11 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                             <Button 
                                 variant="text"
                                 size="small"
+                                disabled={fetching}
                                 onClick={()=>{
                                     setIsLogin(!isLogin)
                                     setForgotPassword(false);
                                 }}
-                                disabled={fetching}
                             >
                                 {footText}
                             </Button>
@@ -166,10 +166,10 @@ function AuthModal( { open, onClose, onSuccess, onError } ) {
                                 <Button 
                                     variant="text"
                                     size="small"
+                                    disabled={fetching}
                                     onClick={()=>{
                                         setForgotPassword(true)
                                     }}
-                                    disabled={fetching}
                                 >
                                     Forgot your password
                                 </Button>

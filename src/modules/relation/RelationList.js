@@ -1,8 +1,9 @@
 import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { dbState, relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
@@ -11,7 +12,7 @@ import { stringAvatar } from "../../utils/strings";
 import ConfirmModal from "../components/ConfirmModal";
 import FeedbackDialog from "../components/FeedbackDialog";
 import RelationDetailDialog from "./RelationDetail";
-//import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
+// Import { shuffle, sortByLatest, sortByOwned } from "../../utils/filters";
 
 const styles = {
     relationList:{ 
@@ -27,7 +28,7 @@ const styles = {
 };
 
 /*
-const relationsSortObj = {
+Const relationsSortObj = {
     random: "RANDOM",
     mine: "MINE",
     latest: "LATEST"
@@ -35,14 +36,14 @@ const relationsSortObj = {
 */
 
 
-function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//check if filters should be at globalstate
+function RelationListDialog({open, setOpen, onClose, filterType, filters}) {// Check if filters should be at globalstate
 
     const navigate = useNavigate();
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedRelation, setSelectedRelation] = useState();
-    //const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
-    //const [proxyRelations, setProxyRelations] = useState([]);
+    // Const [relationsSort, setRelationsSort] = useState( relationsSortObj.random );
+    // const [proxyRelations, setProxyRelations] = useState([]);
 
     const user = useHookstate(userState);
     const relationsToList = useHookstate(relationsToListState);
@@ -72,7 +73,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
         updatingObject.set({
             object: {
                 ...relation,
-                id: id
+                id
             },
             updating: true
         });
@@ -87,6 +88,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
                     if( !ok ){
                         setSuccess(false);
                     }
+
                     setOpenConfirmModal(false);
                     setOpenFeedbackDialog(true);
                     if( ok ){
@@ -98,7 +100,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
     },[fbDB, navigate])
 
     /*
-    const handleRelationsSortClick = useCallback((criteria) => {
+    Const handleRelationsSortClick = useCallback((criteria) => {
         setRelationsSort(relationsSortObj[criteria]);
         if( relationsSortObj[criteria] === relationsSortObj.random ){
             shuffle(relationsToList);
@@ -114,21 +116,21 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
     */
 
     const handleClose = useCallback(()=>{
-        //setRelationsSort(relationsSortObj.random);
+        // SetRelationsSort(relationsSortObj.random);
         onClose()
     },[onClose])
 
-    //useEffect(()=>{setProxyRelations(relationsToList);},[relationsToList])
+    // UseEffect(()=>{setProxyRelations(relationsToList);},[relationsToList])
 
-    //if( !relationsToList.get() ){return <></>;}
+    // if( !relationsToList.get() ){return <></>;}
 
     return(
         <div>
             <Dialog
+                fullWidth
                 scroll="paper"
                 open={open}
                 onClose={handleClose}
-                fullWidth
             >
                 <DialogTitle>
                     <div>
@@ -172,8 +174,8 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {//ch
                                 >
                                     <Grid item xs={10}>
                                         <ListItemButton
-                                            disableGutters
                                             key={id}
+                                            disableGutters
                                             sx={styles.relationListItem}
                                             onClick={()=>handleOpenDetail(relation)}
                                         >

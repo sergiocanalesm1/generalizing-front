@@ -6,7 +6,8 @@ const relationsCollection = "relations";
 
 export async function getAllRelations(db){
     const relations = {}
-    let data, lessons;
+    let data; 
+    let lessons;
     try{
         const querySnapshot = await getDocs(collection(db, relationsCollection));
         querySnapshot.forEach((doc) => {
@@ -14,12 +15,13 @@ export async function getAllRelations(db){
             lessons = data.lessons.split(",")
             data.lessons = lessons
             relations[doc.id] = data;
-            //relations.push({[doc.id]:data})
+            // Relations.push({[doc.id]:data})
         });
     }
     catch(error){
         reportError( error );
     }
+
     return relations;
 }
 

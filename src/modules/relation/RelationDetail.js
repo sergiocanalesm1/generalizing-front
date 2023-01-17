@@ -1,8 +1,9 @@
 import { useHookstate } from "@hookstate/core";
 import { Avatar, Button, Card, CardActions, CardContent, CardMedia, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 import { Box } from "@mui/system";
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import { domainsState, lessonsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
@@ -56,17 +57,18 @@ function RelationDetailDialog({open, relation, setOpen, onClose, id}) {
     },[navigate, user,updatingOrCreatingObject])
 
     if( !relation ){
+        // eslint-disable-next-line react/jsx-no-useless-fragment
         return<></>;
     }
 
-    //TODO fix file url
+    // TODO fix file url
     return(
         <div>
             <Dialog
-                scroll="paper"
                 fullWidth
-                onClose={onClose}
+                scroll="paper"
                 open={open}
+                onClose={onClose}
             >
                 <Card sx={{overflow: 'auto'}}>
                     <CardContent>
@@ -87,7 +89,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose, id}) {
                                 relation.lessons.map( lessonId =>{
                                     const lesson = lessons.get()[lessonId];
                                     return(
-                                        <Stack direction="column" alignContent="center" key={lesson.title}>
+                                        <Stack key={lesson.title} direction="column" alignContent="center">
                                             <Stack direction="row" justifyContent="center">
                                                 <Typography variant="small">
                                                     { domains.get()[ lesson.domain ].domain }

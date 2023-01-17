@@ -1,3 +1,4 @@
+/* eslint-disable react/react-in-jsx-scope */
 import { useHookstate } from '@hookstate/core';
 import { CircularProgress, Stack } from '@mui/material';
 import { Fragment, StrictMode } from 'react';
@@ -17,14 +18,12 @@ import { homePath, lessonPath, relationPath } from './utils/paths';
 function App() {
 
   const db = useHookstate(dbState);
-  //TODO check memory leaks
+  // TODO: check memory leaks
   
   return (
-  <Fragment>
-    {
-      !db.promised //TODO check 
-      ? <StrictMode>
-          <MainLayout>
+    db.promised 
+    ?
+    <MainLayout>
             <Routes>
               <Route 
                 path={ homePath }
@@ -38,10 +37,7 @@ function App() {
               />
             </Routes>
         </MainLayout>
-        </StrictMode>
       :<Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
-    }
-  </Fragment>
   )
 }
 
