@@ -5,7 +5,7 @@ import { useHookstate } from "@hookstate/core";
 import { Delete, Edit } from "@mui/icons-material";
 import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid, IconButton, List, ListItemAvatar, ListItemButton, ListItemText, Stack, Typography } from "@mui/material";
 
-import { dbState, lessonsState, tagsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, filtersState, filterTypeState, lessonsState, lessonsToListState, tagsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { deleteLesson } from "../../services/lessons_services";
 import { toDate } from "../../utils/dates";
 import { filterByOwned, shuffle, sortByLatest } from "../../utils/filters";
@@ -44,6 +44,9 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     const tags = useHookstate(tagsState);
     const fbDB = useHookstate(dbState);
     const updatingObject = useHookstate(updatingOrCreatingObjectState);
+    const lessonsToList = useHookstate(lessonsToListState);
+    const filterType = useHookstate(filterTypeState);
+    const filters = useHookstate(filtersState);
 
     const [openDetail, setOpenDetail] = useState(false);
     const [selectedLesson, setSelectedLesson] = useState();
@@ -119,8 +122,9 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
 
         switch( criteria ){
             case lessonsSortObj.random:{
-                sortedLessons = {}
-                const shuffledIds = shuffle( Object.keys( lessons.get() ) );
+                sortedLessons = {};
+                const shuffledIds = [...lessonsToList.get()];
+                shuffle( shuffledIds );
                 shuffledIds.forEach( id => {
                     sortedLessons[id] = lessons.get()[id];
                 })
@@ -131,7 +135,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
             case lessonsSortObj.mine:
                 if( ownedLessons.length === 0 ){ // If lessons havent been cached
                     sortedLessons = {}
-                    sortedLessons = filterByOwned( lessons.get(), user.get().uid );
+                    sortedLessons = filterByOwned( lessonsToList.get(), lessons.get(), user.get().uid );
                     setOwnedLessons(sortedLessons);
                     setProxyLessons(sortedLessons);
                 }
@@ -144,7 +148,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
             case lessonsSortObj.latest:
                 if( latestLessons.length === 0 ){
                     sortedLessons = {}
-                    const temp = Object.keys(lessons.get()).map( id => ({ ...lessons.get()[id], id }));
+                    const temp = lessonsToList.get().map( id => ({ ...lessons.get()[id], id }));
                     temp.sort(sortByLatest);
                     temp.forEach( element => {
                         sortedLessons[ element.id ] = element
@@ -160,7 +164,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
             default:
                 break;
         }
-    },[lessons, latestLessons, ownedLessons, user])
+    },[lessons, latestLessons, lessonsToList, user])
 
     const handleClose = useCallback(()=>{
         setLessonsFilterCriteria(lessonsSortObj.random);// Random?
@@ -186,6 +190,11 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                         <Typography variant="h3">
                             View Lessons
                         </Typography>
+                        { filters.get() &&
+                            <Typography variant="small" >
+                                Filtering by {filterType.get()}: {filters.get()}
+                            </Typography>
+                        }
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
                             {  lessons.get() &&
                                 Object.keys(lessonsSortObj).map( ls => (
@@ -216,7 +225,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                             const lesson = proxyLessons[id];
                             return (
                                 <Grid
-                                    key={id}
+                                    key={`${id},${id}`}
                                     container
                                     spacing={3}
                                     alignItems="center"
@@ -237,14 +246,14 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
                                                 
                                             </ListItemAvatar>
                                             <ListItemText  primary={lesson.title} secondary={ 
-                                                <div>
+                                                <span>
                                                     {lesson.tags && 
                                                         lesson.tags.map( tagId => capitalizeFirstLetter( tags.get()[ tagId ].tag ))
                                                             .join(', ')
                                                     }
                                                     {lesson.tags.length && <br />}
                                                     {toDate(lesson.creationDate)}
-                                                </div>
+                                                </span>
                                             }/>
                                         </ListItemButton>
 

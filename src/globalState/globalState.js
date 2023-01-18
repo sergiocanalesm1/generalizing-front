@@ -9,9 +9,13 @@ export const tagsState = hookstate();
 export const originsState = hookstate();
 export const userState = hookstate();
 
+export const filterTypeState = hookstate("");
+export const filtersState = hookstate("")
 
-// This variable is used so that the d3 graph does not get rendered constantly. it is an array of the relation ids
+
+// These variables are used so that the graphs dont rendered constantly. it is an array of ids
 export const relationsToListState = hookstate([]);
+export const lessonsToListState = hookstate([]);
 
 // This is used to handle the navigation when an user is updating the lesson or relation
 export const updatingOrCreatingObjectState = hookstate({

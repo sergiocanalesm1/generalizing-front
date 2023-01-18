@@ -8,7 +8,7 @@ import {
 
 
 import MainLayout from './common/layouts/main/MainLayout';
-import { dbState, domainsState, lessonsState, originsState, relationsState, relationsToListState, tagsState } from './globalState/globalState';
+import { dbState, domainsState, lessonsState, lessonsToListState, originsState, relationsState, relationsToListState, tagsState } from './globalState/globalState';
 import { combineLessonsWithRelations } from './helpers/lessons_helper';
 import Home from './modules/home/Home';
 import Lesson from './modules/lesson/Lesson';
@@ -31,6 +31,7 @@ function App() {
   const origins = useHookstate(originsState);
   const fbDB = useHookstate(dbState);
   const relationsToList = useHookstate(relationsToListState);
+  const lessonsToList = useHookstate(lessonsToListState);
   
   const [fetching, setFetching] = useState(true);
 
@@ -47,9 +48,6 @@ function App() {
     setFetching(true);
     
     const db = fbDB.get();
-    // TODO fix state
-
-    /*
 
     Promise.all([
       getAllRelations(db),
@@ -72,11 +70,11 @@ function App() {
           tags.set(fetchedTags)
           origins.set(fetchedOrigins) 
           lessons.set(combinedLessons)
-          relationsToList.set(Object.keys(relations));
+          relationsToList.set(Object.keys(fetchedRelations));
+          lessonsToList.set(Object.keys(fetchedLessons));
           setFetching(false);
       }
   })
-  */
 
     
     return () => { 
@@ -85,10 +83,8 @@ function App() {
 // eslint-disable-next-line react-hooks/exhaustive-deps
 },[]);
 
-// CHANGE
   return (
-    // eslint-disable-next-line no-negated-condition
-    !fetching
+    fetching
     ?
       <Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
     :

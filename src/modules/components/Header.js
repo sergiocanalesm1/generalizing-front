@@ -11,7 +11,7 @@ import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
 import FeedbackDialog from './FeedbackDialog';
 import HelpDialog from './HelpDialog';
-import { relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from '../../globalState/globalState';
+import { filtersState, lessonsState, lessonsToListState, relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from '../../globalState/globalState';
 import { logout } from '../../services/user_services';
 // Import { tempRelations } from '../../utils/enums';
 
@@ -38,7 +38,9 @@ function Header() {
 
   const user = useHookstate(userState);
   const relations = useHookstate(relationsState);
+  const lessons = useHookstate(lessonsState)
   const relationsToList = useHookstate(relationsToListState);
+  const lessonsToList = useHookstate(lessonsToListState);
   const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
   const [path,setPath] = useState("");
@@ -65,9 +67,11 @@ function Header() {
   },[navigate, user, updatingOrCreatingObject])
 
   const handleViewLessons = useCallback(()=>{
+    filtersState.set("");
+    lessonsToList.set(Object.keys(lessons));
     setAnchorElLessons();
     setOpenLessonListDialog(true);
-  },[]);
+  },[lessonsToList, lessons]);
 
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
@@ -84,6 +88,7 @@ function Header() {
   },[navigate, user, updatingOrCreatingObject]);
 
   const handleViewRelations = useCallback(()=>{
+    filtersState.set("");
     relationsToList.set(Object.keys(relations));
     setAnchorElRelations();
     setOpenRelationListDialog(true);

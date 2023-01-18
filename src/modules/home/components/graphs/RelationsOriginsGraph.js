@@ -1,4 +1,3 @@
-/* eslint-disable react/jsx-key */
 import React, { Suspense, useCallback, useMemo } from 'react';
 
 import * as THREE from 'three';
@@ -6,13 +5,12 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Environment } from '@react-three/drei';
 import { useHookstate } from '@hookstate/core';
 
-import { lessonsState, originsState, relationsState,relationsToListState } from '../../../../globalState/globalState';
+import { filtersState, lessonsState, lessonsToListState, originsState, relationsState,relationsToListState } from '../../../../globalState/globalState';
 import Models, {originsComponentOrder} from '../Models';
 import { mapOriginsToRelations } from '../../../../helpers/relations_helper';
-// import { tempLessons, tempOrigins, tempRelations } from '../../../../utils/temp';
 import { invertResource } from '../../../../helpers/data_helper';
 import Line from '../Line';
-import { tempLessons, tempOrigins, tempRelations } from '../../../../utils/temp';
+import { filterByOrigin } from '../../../../utils/filters';
 
 const rad = 10;
 const lineAmp = rad/3;
@@ -21,25 +19,17 @@ const y0 = 0.1;
 
 // for hdrs https://polyhaven.com/hdris
 
-export default function RelationsOriginsGraph({setOpenList, setFilters}) {
+export default function RelationsOriginsGraph({setOpenRelationsList, setOpenLessonsList, setFilters}) {
 
-  /*
-  
-  
-  const lessons = useHookstate(lessonsState);
-  const origins = useHookstate(originsState);
-  const originToId = useMemo(()=>invertResource(origins.get(),"origin"),[origins])
-  const relationsToList = useHookstate(relationsToListState);
-  const relations = useHookstate(relationsState);
-  
-  */
- const origins = tempOrigins;
- const lessons = tempLessons;
- const relations = tempRelations;
- const originToId = invertResource(origins, "origin");
+ const lessons = useHookstate(lessonsState);
+ const origins = useHookstate(originsState);
+ const originToId = useMemo(()=>invertResource(origins.get(),"origin"),[origins])
+ const relationsToList = useHookstate(relationsToListState);
+ const relations = useHookstate(relationsState);
+ const lessonsToList = useHookstate(lessonsToListState);
+ const filters = useHookstate(filtersState);
 
-    // origins.get()
-    const dTheta = useMemo(()=>( 2*Math.PI )/(Object.keys(origins).length),[origins]);
+    const dTheta = useMemo(()=>( 2*Math.PI )/(Object.keys(origins.get()).length),[origins]);
 
     const components = useMemo(()=> Models,[]);
 
@@ -51,8 +41,7 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
             },
         }  
     */
-    // relations.get(), lessons.get()
-    const originsRelations = useMemo(()=> mapOriginsToRelations(relations, lessons),[relations, lessons]);
+    const originsRelations = useMemo(()=> mapOriginsToRelations(relations.get(), lessons.get()),[relations, lessons]);
 
     const getPointsGeometry = useCallback((X,Z) => {
     const points = [];
@@ -77,10 +66,8 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
       <Environment
         background
         files="./imgs/hilly_terrain_01_puresky_1k.hdr"
-        blur={0}
-        
       />
-      <ambientLight intensity={1} />
+      <ambientLight intensity={0.5} />
       <Suspense fallback={null}>
         {
             components.map( (Component, i) => {
@@ -95,16 +82,19 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
                 }
 
                 return (
-                    <group>
+                    <group key={ originToId[ originsComponentOrder[i] ]}>
                         <Component 
-                            key={ originToId[ originsComponentOrder[i] ]}
                             position={[X[0],0,Z[0]]}
+                            onClick={() => {
+                              filters.set(originsComponentOrder[i])
+                              lessonsToList.set( filterByOrigin( lessons.get(), originToId[ originsComponentOrder[i] ] ))
+                              setOpenLessonsList(true);
+                            }}
                         />
                         {
                             originsRelatedWithOrigin1?.map( origin2Id => {
                                 // primero deme el segundo origin
-                                // get()
-                                const origin2name = origins[ origin2Id ].origin;
+                                const origin2name = origins.get()[ origin2Id ].origin;
                                 // indice del segundo origin
                                 const j = originsComponentOrder.indexOf(origin2name);
                                 if( i === j ){
@@ -117,19 +107,18 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
                                 Z[1] = rad * Math.sin(dTheta * j);
 
                                 // TODO compute maximun amount of relations between a pair of origins
-                                // this places the width between 2 and 5
                                 const lineWidth = Math.floor((originsRelations[ originId1 ][ origin2Id ].length)*(2/7)) + 2;
 
                                 return(
                                   <Line
+                                    key={`${origins.get()[originId1].origin}, ${origin2name}`}
                                     color={Math.random()* 0xffffff}
                                     points={getPointsGeometry(X,Z)}
                                     lineWidth={lineWidth}
                                     handleClick={()=>{
-                                      // get()
-                                      setFilters(`${origins[originId1].origin}, ${origin2name}`);
-                                      setOpenList(true);
-                                      // relationsToList.set( originsRelations[ originId1 ][ origin2Id ] );
+                                      filters.set(`${origins.get()[originId1].origin}, ${origin2name}`);
+                                      setOpenRelationsList(true);
+                                      relationsToList.set( originsRelations[ originId1 ][ origin2Id ] );
                                     }}
                                   />
                                 )

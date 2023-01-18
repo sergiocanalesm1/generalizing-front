@@ -15,18 +15,28 @@ export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
     return filteredRelationsIds;
 }
 
-export function filterByOwned( objects, uid ){
+export function filterByOwned( ids, objects, uid ){
   if( !uid ){
     return [];
   }
 
-  const owned = {}
-  Object.keys( objects ).forEach( id => {
+  const owned = {};
+  ids.forEach( id => {
     if( objects[id].userUid === uid ){
       owned[id] = objects[id]
     }
   })
   return owned;
+}
+
+export function filterByOrigin( lessons, originId ){
+  const filteredIds = [];
+  Object.keys(lessons).forEach( id => {
+    if( lessons[id].origin === originId ){
+      filteredIds.push(id)
+    }
+  })
+  return filteredIds;
 }
 
 export function sortByOwned( o1, o2, uid ){

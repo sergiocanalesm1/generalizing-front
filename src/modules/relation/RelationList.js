@@ -4,7 +4,7 @@ import { Avatar, Button, Dialog, DialogActions, DialogContent, DialogTitle, Grid
 import React, { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { dbState, relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
+import { dbState, filtersState, filterTypeState, relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { deleteRelation } from "../../services/relations_services";
 import { toDate } from "../../utils/dates";
 import { relationPath } from "../../utils/paths";
@@ -36,7 +36,7 @@ Const relationsSortObj = {
 */
 
 
-function RelationListDialog({open, setOpen, onClose, filterType, filters}) {// Check if filters should be at globalstate
+function RelationListDialog({open, setOpen, onClose}) {
 
     const navigate = useNavigate();
 
@@ -50,6 +50,8 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {// C
     const relations = useHookstate(relationsState);
     const fbDB = useHookstate(dbState);
     const updatingObject = useHookstate(updatingOrCreatingObjectState);
+    const filterType = useHookstate(filterTypeState);
+    const filters = useHookstate(filtersState);
 
     const [success, setSuccess] = useState(true);
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
@@ -137,9 +139,9 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {// C
                         <Typography variant="h3">
                             View Relations
                         </Typography>
-                        { filters &&
+                        { filters.get() &&
                             <Typography variant="small" >
-                                Filtering by {filterType}: {filters}
+                                Filtering by {filterType.get()}: {filters.get()}
                             </Typography>
                         }
                         <Stack direction="row" justifyContent="flex-end" spacing={1}>
@@ -167,7 +169,7 @@ function RelationListDialog({open, setOpen, onClose, filterType, filters}) {// C
                             const relation = relations.get()[id];
                             return (
                                 <Grid
-                                    key={id}
+                                    key={`${id},${id}`}
                                     container
                                     spacing={3}
                                     alignItems="center"

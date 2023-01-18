@@ -8,7 +8,7 @@ import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
-import { lessonsState, relationsState, userState, updatingOrCreatingObjectState } from "../../globalState/globalState";
+import { lessonsState, relationsState, userState, updatingOrCreatingObjectState, filterTypeState } from "../../globalState/globalState";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
 import FeedbackDialog from "../components/FeedbackDialog";
@@ -21,6 +21,13 @@ import RelationsOriginsGraph from "./components/graphs/RelationsOriginsGraph";
 
 
 const homeStyles = {
+    container: {
+        '@media only screen and (max-width: 600px)': {
+            p:1,
+            mt:0,
+        },
+        mt:2
+    },
     graphContainer:{
         width: '100vw',
         height: '70vh',
@@ -31,6 +38,15 @@ const homeStyles = {
         height: '100%',
         position:"absolute",
         margin: 'auto'
+    },
+    arrow:{
+        width: 80,
+        height: 80,
+        zIndex: 'tooltip',
+        position:"absolute",
+        "&:hover":{
+            opacity: 0.3
+        }
     }
 }
 
@@ -41,7 +57,7 @@ function Home() {
     const relations = useHookstate(relationsState);
     const user = useHookstate(userState);
     const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
-
+    const filterType = useHookstate(filterTypeState);
 
     const [success, setSuccess] = useState( false );
     const [openAuthModal, setOpenAuthModal] = useState( false );
@@ -50,8 +66,7 @@ function Home() {
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
     const [openHelpDialog, setOpenHelpDialog] = useState( false );
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
-    const [selectedGraph, setSelectedGraph] = useState(2); // Better with strings?
-    const [filterType, setFilterType] = useState("Origins");// CHANGE
+    const [selectedGraph, setSelectedGraph] = useState(1); // Better with strings?
 
 
     const [relationsFilters, setRelationsFilters] = useState("");
@@ -61,10 +76,10 @@ function Home() {
 
     useEffect( () => {
         if( selectedGraph === 1 ){
-            setFilterType("Domains")
+            filterType.set("domains")
         }
         else if( selectedGraph === 2 ){
-            setFilterType("Origins")
+            filterType.set("origins")
         }
     },[selectedGraph])
 
@@ -109,13 +124,7 @@ function Home() {
                         container
                         justifyContent="center"
                         alignItems="center"
-                        sx={{
-                            '@media only screen and (max-width: 600px)': {
-                                p:1,
-                                mt:0,
-                            },
-                            mt:2
-                        }}
+                        sx={homeStyles.container}
                         spacing={1}
                     >
                         <Grid item xs={12} md={2}>
@@ -151,29 +160,19 @@ function Home() {
                     {   lessonsState.get()
                         ? 
                             <div>
-                                <Toolbar />
-                                <Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
-                            </div>
-
-                        : 
-                            <div>
                                 { selectedGraph === 1 
                                 ?
                                     <div style={homeStyles.graphContainer}>
                                         <RelationsDomainsGraph 
                                             setOpenList={setOpenRelationListDialog}
-                                            setFilters={setRelationsFilters}
                                             sx={homeStyles.graph}
                                         />  
                                         <ArrowForwardIos
                                             color="primary" 
                                             sx={{
-                                                width: 80,
-                                                height: 80,
-                                                zIndex: 'tooltip',
-                                                top: height / 2 - 80,
+                                                ...homeStyles.arrow,
                                                 right: '3%',
-                                                position:"absolute",
+                                                top: height / 2 - 80,
                                             }}
                                             onClick={()=> setSelectedGraph(2) }
                                         />
@@ -182,25 +181,27 @@ function Home() {
                                     <div style={homeStyles.graphContainer}>
                                         <Toolbar />
                                         <RelationsOriginsGraph
-                                            setOpenList={setOpenRelationListDialog}
-                                            setFilters={setRelationsFilters}
+                                            setOpenRelationsList={setOpenRelationListDialog}
+                                            setOpenLessonsList={setOpenLessonListDialog}
                                             sx={homeStyles.graph}
                                         /> 
                                         <ArrowBackIos 
                                             color="primary" 
                                             sx={{
-                                                width: 80,
-                                                height: 80,
-                                                zIndex: 'tooltip',
-                                                top: height / 2 - 80,
+                                                ...homeStyles.arrow,
                                                 left: '3%',
-                                                position:"absolute",
+                                                top: height / 2 - 80,
                                             }}
                                             onClick={()=> setSelectedGraph(1) }
                                         />
                                     </div>
                                 }
                             </div>
+                        :
+                            <div>
+                                <Toolbar />
+                                <Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
+                            </div> 
 
                     }
                 </Box>

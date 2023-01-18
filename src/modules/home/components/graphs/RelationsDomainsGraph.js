@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef } from 'react';
 
 
 import { filterByDomain } from '../../../../utils/filters';
-import { domainsState, lessonsState,relationsState, relationsToListState } from '../../../../globalState/globalState'
+import { domainsState, filtersState, lessonsState,relationsState, relationsToListState } from '../../../../globalState/globalState'
 
 
 function getId(sI,tI){
@@ -29,12 +29,13 @@ const ribbon = d3.ribbonArrow()
   .padAngle(1 / innerRadius);
   
 
-function RelationsDomainsGraph({ setOpenList, setFilters }) { // Domain blending but, origin blending?
+function RelationsDomainsGraph({ setOpenList }) { // Domain blending but, origin blending?
 
   const relations = useHookstate(relationsState);
   const lessons = useHookstate(lessonsState);
   const domains = useHookstate(domainsState);
   const relationsToList = useHookstate(relationsToListState);
+  const filters = useHookstate(filtersState);
 
   const data = useMemo(() => {
     let d1; 
@@ -126,7 +127,7 @@ ${totalRelations} ${totalRelations > 1 ? "relations" : "relation"}`
             const d1 = names[d.source.index];
             const d2 = names[d.target.index];
             relationsToList.set( filterByDomain( relations.get(), lessons.get(), [d1,d2], domains.get() ) ) 
-            setFilters(`${d1} and ${d2}`)
+            filters.set(`${d1} and ${d2}`)
             setOpenList(true)
           })
           .on("mouseover",(e,d)=>{
@@ -141,7 +142,7 @@ ${totalRelations} ${totalRelations > 1 ? "relations" : "relation"}`
 ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
 ;}
 
-    },[ relations, lessons, domains, matrix, names, relationsToList, setFilters, setOpenList ]
+    },[relations, lessons, domains, matrix, names, relationsToList, filters, setOpenList]
   );
 
   return (

@@ -89,7 +89,7 @@ function RelationDetailDialog({open, relation, setOpen, onClose, id}) {
                                 relation.lessons.map( lessonId =>{
                                     const lesson = lessons.get()[lessonId];
                                     return(
-                                        <Stack key={lesson.title} direction="column" alignContent="center">
+                                        <Stack key={lessonId} direction="column" alignContent="center">
                                             <Stack direction="row" justifyContent="center">
                                                 <Typography variant="small">
                                                     { domains.get()[ lesson.domain ].domain }
