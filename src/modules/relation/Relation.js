@@ -9,7 +9,7 @@ import { createRelation, updateRelation } from "../../services/relations_service
 import { homePath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import FeedbackDialog from "../components/FeedbackDialog";
-import MyEditor from "../home/components/MyEditor";
+import MyEditor from "../components/MyEditor";
 import LessonDetailDialog from "../lesson/LessonDetail";
 import LessonListDialog from "../lesson/LessonList";
 

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowBack, Send } from "@mui/icons-material";
 import { Autocomplete, Box, Button, Chip, FormHelperText, Grid, MenuItem, Select, Stack, TextField, Toolbar, Typography } from "@mui/material";
@@ -7,10 +7,11 @@ import { useHookstate } from "@hookstate/core";
 import { homePath } from "../../utils/paths";
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
 import FeedbackDialog from "../components/FeedbackDialog";
-import MyEditor from "../home/components/MyEditor";
+import MyEditor from "../components/MyEditor";
 import { dbState, domainsState, originsState, tagsState, updatingOrCreatingObjectState, userState } from "../../globalState/globalState";
 import { createLesson, updateLesson } from "../../services/lessons_services";
 import { createDBTag } from "../../services/tags_services";
+import { invertResource } from "../../helpers/data_helper";
 
 
 const styles = {
@@ -55,6 +56,10 @@ function Lesson() {
   const Alltags = useHookstate(tagsState);
   const fbDB = useHookstate(dbState);
   const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
+
+  const domainsToId =  useMemo(()=>invertResource(domains, "domain" ),[domains]) ;
+  const originsToId = useMemo(()=>invertResource(origins, "origin" ),[origins]) ;
+  const tagsToId = useMemo(()=>invertResource(tags, "tag" ),[tags]) ;
 
   const [lesson, setLesson] = useState({
     "title" : "",
@@ -117,34 +122,13 @@ function Lesson() {
 
     setFetching(true);
 
-    // TODO fix this logic, look for a way to get the ids directly from the autocomplete
-    let originToId = {}
-    Object.keys( origins.get() ).forEach( id => {
-      originToId = {
-        ...originToId,
-        [origins.get()[id].origin] : id 
-    }})
 
-    let domainsToId = {}
-    Object.keys( domains.get() ).forEach( id => {
-      domainsToId = {
-        ...domainsToId,
-        [domains.get()[id].domain] : id 
-    }})
-
-    let tagsToId = {};
-    Object.keys( Alltags.get() ).forEach( id => {
-      tagsToId = {
-        ...tagsToId,
-        [Alltags.get()[id].tag] : id 
-    }})
-
-    const tagIds = [];
+    let tagIds = [];
     let existingTagId; 
     let label; 
     for( let i=0; i < tags.length; i++ ){
       label = tags[i].label.toLowerCase();
-      existingTagId = tagsToId[ label ];
+      existingTagId = tagsToId.get()[ label ];
       if( !existingTagId ){
         existingTagId = createDBTag(fbDB.get(), { tag: label } )
       }
@@ -152,12 +136,12 @@ function Lesson() {
       tagIds.push(existingTagId);
     }
     
-    await Promise.all(tagIds);
+    tagIds = await Promise.all(tagIds); // TODO check
 
     const lessonToCreateOrUpdate = {
       title: lesson.title,
-      origin: originToId[ lesson.origin ],
-      domain: domainsToId[ lesson.domain ],
+      origin: originsToId.get()[ lesson.origin ],
+      domain: domainsToId.get()[ lesson.domain ],
       userUid: user.get().uid,
       creationDate: isUpdate ? lesson.creationDate : Date.now(),
       isDescriptionRaw: lesson.isDescriptionRaw ? 1 : 0,

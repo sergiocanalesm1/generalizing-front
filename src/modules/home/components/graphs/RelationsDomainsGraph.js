@@ -3,8 +3,8 @@ import * as d3 from 'd3';
 import React, { useEffect, useMemo, useRef } from 'react';
 
 
-import { filterByDomain } from '../../../utils/filters';
-import { domainsState, lessonsState,relationsState, relationsToListState } from '../../../globalState/globalState'
+import { filterByDomain } from '../../../../utils/filters';
+import { domainsState, lessonsState,relationsState, relationsToListState } from '../../../../globalState/globalState'
 
 
 function getId(sI,tI){
@@ -29,7 +29,7 @@ const ribbon = d3.ribbonArrow()
   .padAngle(1 / innerRadius);
   
 
-function RelationGraph({ setOpenList, setFilters }) { // Domain blending but, origin blending?
+function RelationsDomainsGraph({ setOpenList, setFilters }) { // Domain blending but, origin blending?
 
   const relations = useHookstate(relationsState);
   const lessons = useHookstate(lessonsState);
@@ -149,4 +149,4 @@ ${d.source.value} ${d.source.value > 1 ? "relations" : "relation"}`)
   );
 }
 
-export default RelationGraph;
+export default RelationsDomainsGraph;

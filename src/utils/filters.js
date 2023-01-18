@@ -13,20 +13,22 @@ export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
       }
     })
     return filteredRelationsIds;
-    /*
-    
-    Return relations.filter( r => {
-        newD1 = r.lessons[0].domain;
-        newD2 = r.lessons[1].domain;
-        set2 = [newD1,newD2].sort()
-        return sortedDomains[0]=== set2[0]  && sortedDomains[1]=== set2[1]
-      })
-    */
 }
 
-export function filterByChallenge( relations, challengeId ){
-  return relations.filter( r => (r.challenge === challengeId ))
+export function filterByOrigins( relations, originsRelations, originId1, origin2Id ){
+
+  const relationsIds = originsRelations[originId1][origin2Id];
+  const filteredRelations = {};
+  let id;
+  for(let i=0; i<relationsIds.length; i++){
+    id = relationsIds[i]
+    filteredRelations[id] = relations[id]
+  }
+
+  return filteredRelations;
 }
+
+
 
 export function filterByOwned( objects, uid ){
   if( !uid ){

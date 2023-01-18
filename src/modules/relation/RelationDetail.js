@@ -9,7 +9,7 @@ import { relationPath } from "../../utils/paths";
 import { stringAvatar } from "../../utils/strings";
 import AuthModal from "../components/AuthModal";
 import FeedbackDialog from "../components/FeedbackDialog";
-import MyEditor from "../home/components/MyEditor";
+import MyEditor from "../components/MyEditor";
 import LessonDetailDialog from "../lesson/LessonDetail";
 
 const styles = {

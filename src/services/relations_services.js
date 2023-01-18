@@ -21,7 +21,7 @@ export async function getAllRelations(db){
     catch(error){
         reportError( error );
     }
-
+    
     return relations;
 }
 

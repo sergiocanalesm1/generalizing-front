@@ -4,7 +4,7 @@ import Linkify from "react-linkify";
 import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
-import MyEditor from "../home/components/MyEditor";
+import MyEditor from "../components/MyEditor";
 import RelationListDialog from "../relation/RelationList";
 import { useHookstate } from "@hookstate/core";
 import { domainsState, originsState, tagsState, relationsToListState } from "../../globalState/globalState";

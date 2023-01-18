@@ -112,6 +112,10 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     const handlelessonsSortClick = useCallback( criteria => {
         setLessonsFilterCriteria(criteria);
         let sortedLessons = {};
+        
+        if(!lessons.get()){
+            return;
+        }
 
         switch( criteria ){
             case lessonsSortObj.random:{
@@ -166,6 +170,7 @@ function LessonListDialog({open, setOpen, onClose, canChoose, setChosenLesson}) 
     useEffect(()=>{
         handlelessonsSortClick(lessonsSortObj.random)
     },[open,handlelessonsSortClick])
+
 
 
     return(

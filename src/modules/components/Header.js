@@ -51,7 +51,7 @@ function Header() {
 
   const handleCreateLesson = useCallback(()=>{
     setAnchorElLessons();
-    if( user.get().uid ) {
+    if( user.get()?.uid ) {
       updatingOrCreatingObject.set({
         object:{}
     })
@@ -71,7 +71,7 @@ function Header() {
 
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
-    if( user.get().uid ) {
+    if( user.get()?.uid ) {
       updatingOrCreatingObject.set({
         object:{}
     })
@@ -162,7 +162,7 @@ function Header() {
               <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
             </Menu>
           </Stack>
-          {user.get().uid
+          {user.get()?.uid
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
                 <Grid item container xs={8} md={1} justifyContent="flex-end">

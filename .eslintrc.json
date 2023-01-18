@@ -30,6 +30,8 @@
         "react/jsx-props-no-spreading": "warn",
         "guard-for-in":"warn",
         "no-unused-expressions": "warn",
-        "react/prop-types":"off"
+        "react/prop-types":"off",
+        "capitalized-comments":"off",
+        "one-var":"off"
     }
 }

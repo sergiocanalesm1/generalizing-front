@@ -1,3 +1,4 @@
+/* eslint-disable no-negated-condition */
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,42 +8,42 @@ import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
-import { dbState, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState, updatingOrCreatingObjectState } from "../../globalState/globalState";
+import { lessonsState, relationsState, userState, updatingOrCreatingObjectState } from "../../globalState/globalState";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
-import RelationGraph from "./components/RelationGraph";
 import FeedbackDialog from "../components/FeedbackDialog";
 import WelcomingDialog from "../components/Welcoming";
 import LessonListDialog from "../lesson/LessonList";
 import RelationListDialog from "../relation/RelationList";
-import { getAllRelations } from "../../services/relations_services";
-import { getAllLessons } from "../../services/lessons_services";
-import { getAllDomains } from "../../services/domains_services";
-import { getAllTags } from "../../services/tags_services";
-import { getAllOrigins } from "../../services/origins_services";
-import { combineLessonsWithRelations } from "../../helpers/lessons_helper";
-// Const t_relations =  tempRelations()
+import useWindowDimensions from "../../utils/hooks";
+import RelationsDomainsGraph from "./components/graphs/RelationsDomainsGraph";
+import RelationsOriginsGraph from "./components/graphs/RelationsOriginsGraph";
+
 
 const homeStyles = {
-    arrows:{width: 80,height: 80}
+    graphContainer:{
+        width: '100vw',
+        height: '70vh',
+        position: 'relative'
+    },
+    graph:{
+        width: '100%',
+        height: '100%',
+        position:"absolute",
+        margin: 'auto'
+    }
 }
+
 function Home() {
     
     const navigate = useNavigate();
 
-    const lessons = useHookstate(lessonsState);
     const relations = useHookstate(relationsState);
-    const domains = useHookstate(domainsState);
-    const tags = useHookstate(tagsState);
-    const origins = useHookstate(originsState);
     const user = useHookstate(userState);
-    const fbDB = useHookstate(dbState);
-    const relationsToList = useHookstate(relationsToListState);
     const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
 
     const [success, setSuccess] = useState( false );
-    const [fetching, setFetching] = useState( true );
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
@@ -50,11 +51,22 @@ function Home() {
     const [openHelpDialog, setOpenHelpDialog] = useState( false );
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
     const [selectedGraph, setSelectedGraph] = useState(1); // Better with strings?
+    const [filterType, setFilterType] = useState("Origins");// CHANGE
 
 
     const [relationsFilters, setRelationsFilters] = useState("");
     const [path,setPath] = useState("");
 
+    const {height, width} = useWindowDimensions();
+
+    useEffect( () => {
+        if( selectedGraph === 1 ){
+            setFilterType("Domains")
+        }
+        else if( selectedGraph === 2 ){
+            setFilterType("Origins")
+        }
+    },[selectedGraph])
 
     const handleCreateLesson = useCallback(()=>{
         if( user.get().uid ) {
@@ -82,43 +94,11 @@ function Home() {
         }
     },[navigate, user, updatingOrCreatingObject]);
 
-    useEffect(()=>{
-        let isMounted = true; 
-
-        setFetching(true);
-
-        if( !getFirstTimer() ){
-            setOpenWelcomingDialog(true);
-        }
-        
-        const db = fbDB.get();
-        // TODO fix state
-        getAllRelations(db).then( fetchedRelations => {         
-            getAllLessons(db).then( fetchedLessons => {
-                getAllDomains(db).then( fetchedDomains => {
-                    getAllTags(db).then( fetchedTags => {
-                        getAllOrigins(db).then( fetchedOrigins => {
-                            fetchedLessons = combineLessonsWithRelations(fetchedRelations, fetchedLessons);
-                            if( isMounted ){
-                                relations.set(fetchedRelations)
-                                domains.set(fetchedDomains)
-                                tags.set(fetchedTags)
-                                origins.set(fetchedOrigins) 
-                                lessons.set(fetchedLessons)
-                                relationsToList.set(Object.keys(relations));
-                                setFetching(false);
-
-                            }
-                        })
-                    })
-                })
-            })
-        })
-        
-        return () => { 
-            isMounted = false 
-        }
-    },[]);
+ useEffect(()=>{
+     if( !getFirstTimer() ){
+         setOpenWelcomingDialog(true);
+     }
+ },[]);
 
     return (
         <>
@@ -168,7 +148,7 @@ function Home() {
                             </Button>
                         </Grid>
                     </Grid>
-                    {   fetching
+                    {   !lessonsState.get()
                         ? 
                             <div>
                                 <Toolbar />
@@ -176,22 +156,51 @@ function Home() {
                             </div>
 
                         : 
-                        
                             <div>
                                 { selectedGraph === 1 
                                 ?
-                                    <RelationGraph 
-                                        setOpenList={setOpenRelationListDialog}
-                                        setFilters={setRelationsFilters}
-                                    />
+                                    <div style={homeStyles.graphContainer}>
+                                        <RelationsDomainsGraph 
+                                            setOpenList={setOpenRelationListDialog}
+                                            setFilters={setRelationsFilters}
+                                            sx={homeStyles.graph}
+                                        />  
+                                        <ArrowForwardIos
+                                            color="primary" 
+                                            sx={{
+                                                width: 80,
+                                                height: 80,
+                                                zIndex: 'tooltip',
+                                                top: height / 2 - 80,
+                                                right: '3%',
+                                                position:"absolute",
+                                            }}
+                                            onClick={()=> setSelectedGraph(2) }
+                                        />
+                                    </div>
                                 :
-                                    <ArrowBackIos 
-                                        color="primary" 
-                                        sx={homeStyles.arrows}
-                                        onClick={()=> setSelectedGraph(1) }
-                                    />
+                                    <div style={homeStyles.graphContainer}>
+                                        <Toolbar />
+                                        <RelationsOriginsGraph
+                                            setOpenList={setOpenRelationListDialog}
+                                            setFilters={setRelationsFilters}
+                                            sx={homeStyles.graph}
+                                        /> 
+                                        <ArrowBackIos 
+                                            color="primary" 
+                                            sx={{
+                                                width: 80,
+                                                height: 80,
+                                                zIndex: 'tooltip',
+                                                top: height / 2 - 80,
+                                                left: '3%',
+                                                position:"absolute",
+                                            }}
+                                            onClick={()=> setSelectedGraph(1) }
+                                        />
+                                    </div>
                                 }
-                        </div>
+                            </div>
 
                     }
                 </Box>
@@ -231,7 +240,7 @@ function Home() {
                 onClose={()=>setOpenHelpDialog(false)}
             />
             {
-                !fetching &&
+                relations.get() &&
                 <>
                     <LessonListDialog
                         open={openLessonListDialog}
@@ -242,7 +251,7 @@ function Home() {
                         open={openRelationListDialog}
                         setOpen={setOpenRelationListDialog}
                         filters={relationsFilters}
-                        filterType="Domains"
+                        filterType={filterType}
                         onClose={()=>setOpenRelationListDialog(false)}
                     />
                 </>
