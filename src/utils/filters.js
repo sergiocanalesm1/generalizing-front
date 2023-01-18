@@ -15,21 +15,6 @@ export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
     return filteredRelationsIds;
 }
 
-export function filterByOrigins( relations, originsRelations, originId1, origin2Id ){
-
-  const relationsIds = originsRelations[originId1][origin2Id];
-  const filteredRelations = {};
-  let id;
-  for(let i=0; i<relationsIds.length; i++){
-    id = relationsIds[i]
-    filteredRelations[id] = relations[id]
-  }
-
-  return filteredRelations;
-}
-
-
-
 export function filterByOwned( objects, uid ){
   if( !uid ){
     return [];

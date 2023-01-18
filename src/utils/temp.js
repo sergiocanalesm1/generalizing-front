@@ -1,4 +1,4 @@
-// origins
+// origins TODO remove
 export const tempOrigins = {
     "GgfLWUnHHFb6KGgbxHFY": {
         "origin": "Lecture"

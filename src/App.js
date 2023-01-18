@@ -49,6 +49,8 @@ function App() {
     const db = fbDB.get();
     // TODO fix state
 
+    /*
+
     Promise.all([
       getAllRelations(db),
       getAllLessons(db),
@@ -74,6 +76,7 @@ function App() {
           setFetching(false);
       }
   })
+  */
 
     
     return () => { 
@@ -82,9 +85,10 @@ function App() {
 // eslint-disable-next-line react-hooks/exhaustive-deps
 },[]);
 
-
+// CHANGE
   return (
-    fetching
+    // eslint-disable-next-line no-negated-condition
+    !fetching
     ?
       <Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
     :

@@ -1,4 +1,4 @@
-/* eslint-disable no-negated-condition */
+ 
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -50,7 +50,7 @@ function Home() {
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
     const [openHelpDialog, setOpenHelpDialog] = useState( false );
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
-    const [selectedGraph, setSelectedGraph] = useState(1); // Better with strings?
+    const [selectedGraph, setSelectedGraph] = useState(2); // Better with strings?
     const [filterType, setFilterType] = useState("Origins");// CHANGE
 
 
@@ -148,7 +148,7 @@ function Home() {
                             </Button>
                         </Grid>
                     </Grid>
-                    {   !lessonsState.get()
+                    {   lessonsState.get()
                         ? 
                             <div>
                                 <Toolbar />

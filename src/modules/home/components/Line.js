@@ -14,7 +14,7 @@ export default function Line({points, lineWidth, handleClick,color}){
             onPointerOver={(event) => setHovered(true)}
             onPointerOut={(event) => setHovered(false)}
         >
-            <lineBasicMaterial color={hovered ? "white": color} linewidth={hovered ? 7 : lineWidth} />
+            <lineBasicMaterial color={hovered ? color : "white"} linewidth={hovered ? 7 : lineWidth} />
         </line>
     )
 }

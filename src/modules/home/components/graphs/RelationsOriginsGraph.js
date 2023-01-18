@@ -12,28 +12,34 @@ import { mapOriginsToRelations } from '../../../../helpers/relations_helper';
 // import { tempLessons, tempOrigins, tempRelations } from '../../../../utils/temp';
 import { invertResource } from '../../../../helpers/data_helper';
 import Line from '../Line';
-import { filterByOrigins } from '../../../../utils/filters';
+import { tempLessons, tempOrigins, tempRelations } from '../../../../utils/temp';
 
 const rad = 10;
-const lineAmp = rad / 2;
+const lineAmp = rad/3;
+const steps = 30;
+const y0 = 0.1;
+
+// for hdrs https://polyhaven.com/hdris
 
 export default function RelationsOriginsGraph({setOpenList, setFilters}) {
 
   /*
-  const origins = tempOrigins;
-  const lessons = tempLessons;
-  const relations = tempRelations;
-  const originToId = invertResource(origins, "origin");
-  */
-  const relations = useHookstate(relationsState);
+  
+  
   const lessons = useHookstate(lessonsState);
   const origins = useHookstate(originsState);
   const originToId = useMemo(()=>invertResource(origins.get(),"origin"),[origins])
   const relationsToList = useHookstate(relationsToListState);
-
+  const relations = useHookstate(relationsState);
+  
+  */
+ const origins = tempOrigins;
+ const lessons = tempLessons;
+ const relations = tempRelations;
+ const originToId = invertResource(origins, "origin");
 
     // origins.get()
-    const dTheta = useMemo(()=>( 2*Math.PI )/(Object.keys(origins.get()).length),[origins]);
+    const dTheta = useMemo(()=>( 2*Math.PI )/(Object.keys(origins).length),[origins]);
 
     const components = useMemo(()=> Models,[]);
 
@@ -46,21 +52,19 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
         }  
     */
     // relations.get(), lessons.get()
-    const originsRelations = useMemo(()=> mapOriginsToRelations(relations.get(), lessons.get()),[relations, lessons]);
-
+    const originsRelations = useMemo(()=> mapOriginsToRelations(relations, lessons),[relations, lessons]);
 
     const getPointsGeometry = useCallback((X,Z) => {
     const points = [];
-    let x,y,z;
-    const steps = 30;
+
     const dx = (X[1]-X[0])/steps;
     const dz = (Z[1]-Z[0])/steps;
-    // const dx = 2 * (lineRad / steps);
+
     for (let t = 0; t <= steps; t += 1) {
-      x = X[0] + dx * t;
-      z = Z[0] + dz * t;
-      y = lineAmp * Math.sin((Math.PI * t) / steps);
-      points.push(new THREE.Vector3(x, y, z));
+      const x = X[0] + dx * t;
+      const z = Z[0] + dz * t;
+      const y = y0 + lineAmp * Math.sin((Math.PI * t) / steps);
+      points.push(new THREE.Vector3(x, -y, z));
     }
 
     return new THREE.BufferGeometry().setFromPoints(points);
@@ -68,14 +72,15 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
 
   return (
     <Canvas
-      camera={{ position: [0, 20, 50], fov: 15 }}
+      camera={{ position: [0,30, 70], fov: 15 }}
     >
       <Environment
         background
-        files="./imgs/drakensberg_solitary_mountain_puresky_1k.hdr"
-        blur={0.5}
+        files="./imgs/hilly_terrain_01_puresky_1k.hdr"
+        blur={0}
+        
       />
-      <ambientLight intensity={0.1} />
+      <ambientLight intensity={1} />
       <Suspense fallback={null}>
         {
             components.map( (Component, i) => {
@@ -89,8 +94,6 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
                   originsRelatedWithOrigin1 = Object.keys(originsRelations[ originId1 ]);
                 }
 
-                console.log(originsRelations)
-
                 return (
                     <group>
                         <Component 
@@ -100,6 +103,7 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
                         {
                             originsRelatedWithOrigin1?.map( origin2Id => {
                                 // primero deme el segundo origin
+                                // get()
                                 const origin2name = origins[ origin2Id ].origin;
                                 // indice del segundo origin
                                 const j = originsComponentOrder.indexOf(origin2name);
@@ -114,7 +118,7 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
 
                                 // TODO compute maximun amount of relations between a pair of origins
                                 // this places the width between 2 and 5
-                                const lineWidth = Math.floor((originsRelations[ originId1 ][ origin2Id ].length)*(3/7)) + 2;
+                                const lineWidth = Math.floor((originsRelations[ originId1 ][ origin2Id ].length)*(2/7)) + 2;
 
                                 return(
                                   <Line
@@ -122,11 +126,10 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
                                     points={getPointsGeometry(X,Z)}
                                     lineWidth={lineWidth}
                                     handleClick={()=>{
+                                      // get()
                                       setFilters(`${origins[originId1].origin}, ${origin2name}`);
                                       setOpenList(true);
-                                      // relations.get()
-                                      const r = filterByOrigins( relations.get(), originsRelations, originId1, origin2Id  )
-                                      relationsToList.set( filterByOrigins( relations.get(), originsRelations, originId1, origin2Id  ) )
+                                      // relationsToList.set( originsRelations[ originId1 ][ origin2Id ] );
                                     }}
                                   />
                                 )
@@ -136,40 +139,6 @@ export default function RelationsOriginsGraph({setOpenList, setFilters}) {
                 )
             })
         }
-        {/* <Chalkboard position={[0, 0, -rad]} />
-        <Newspaper
-          position={[
-            rad * Math.cos(Math.PI / 4),
-            0,
-            -rad * Math.sin(Math.PI / 4),
-          ]}
-        />
-        <Vinyl position={[rad, 0, 0]} scale={[3, 3, 3]} />
-        <Book
-          position={[
-            rad * Math.cos(Math.PI / 4),
-            0,
-            rad * Math.sin(Math.PI / 4),
-          ]}
-        />
-        <Videogame position={[0, 0, rad]} />
-        <PersonalXP
-          position={[
-            -rad * Math.cos(Math.PI / 4),
-            0,
-            rad * Math.sin(Math.PI / 4),
-          ]}
-          scale={[0.5, 0.5, 0.5]}
-        />
-        <Theater position={[-rad, 0, 0]} />
-        <Video
-          position={[
-            -rad * Math.cos(Math.PI / 4),
-            0,
-            -rad * Math.sin(Math.PI / 4),
-          ]}
-          scale={[0.75, 0.75, 0.75]}
-        />  */}
       </Suspense>
       <OrbitControls />
     </Canvas>
