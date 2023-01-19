@@ -28,8 +28,6 @@ export default function Vinyl(props) {
       onPointerOut={() => setHovered(false)}
     >
       <mesh
-        castShadow
-        receiveShadow
         geometry={nodes.vinyl.geometry}
         material={materials.vynil_complete}
         scale={3}

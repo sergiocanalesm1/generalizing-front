@@ -28,8 +28,6 @@ export default function Theater(props) {
       onPointerOut={() => setHovered(false)}
     >
       <mesh
-        castShadow
-        receiveShadow
         rotation={[0, Math.PI / 4, 0]}
         geometry={nodes.masks.geometry}
         material={materials["tragcom-removebg-preview"]}

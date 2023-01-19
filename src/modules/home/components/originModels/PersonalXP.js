@@ -29,8 +29,6 @@ export default function PersonalXP(props) {
       onPointerOut={() => setHovered(false)}
     >
       <mesh
-        castShadow
-        receiveShadow
         geometry={nodes.Cube.geometry}
         material={materials.material}
         position={[0.15, 0.61, 0.04]}
@@ -38,8 +36,6 @@ export default function PersonalXP(props) {
         scale={0.62}
       />
       <mesh
-        castShadow
-        receiveShadow
         geometry={nodes.man.geometry}
         material={materials.material}
         position={[0.81, 1.97, -0.49]}

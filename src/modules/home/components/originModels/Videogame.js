@@ -28,39 +28,21 @@ export default function Videogame(props) {
       onPointerOut={() => setHovered(false)}
     >
       <group rotation={[Math.PI, 1.57, 0]} scale={[0.66, 0.06, 0.66]}>
+        <mesh geometry={nodes.Cylinder.geometry} material={materials.main} />
         <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Cylinder.geometry}
-          material={materials.main}
-        />
-        <mesh
-          castShadow
-          receiveShadow
           geometry={nodes.Cylinder_1.geometry}
           material={materials["xy but"]}
         />
         <mesh
-          castShadow
-          receiveShadow
           geometry={nodes.Cylinder_2.geometry}
           material={materials["ab but"]}
         />
         <mesh
-          castShadow
-          receiveShadow
           geometry={nodes.Cylinder_3.geometry}
           material={materials["black buttons"]}
         />
+        <mesh geometry={nodes.Cylinder_4.geometry} material={materials.z} />
         <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Cylinder_4.geometry}
-          material={materials.z}
-        />
-        <mesh
-          castShadow
-          receiveShadow
           geometry={nodes.Cylinder_5.geometry}
           material={materials["cyl right inside"]}
         />

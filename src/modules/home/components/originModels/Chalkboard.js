@@ -29,15 +29,8 @@ export default function Chalkboard(props) {
       onPointerOut={() => setHovered(false)}
     >
       <group scale={[2.2, 1, 1]} rotation={[0, Math.PI / 4, 0]}>
+        <mesh geometry={nodes.Plane001.geometry} material={materials.board} />
         <mesh
-          castShadow
-          receiveShadow
-          geometry={nodes.Plane001.geometry}
-          material={materials.board}
-        />
-        <mesh
-          castShadow
-          receiveShadow
           geometry={nodes.Plane001_1.geometry}
           material={materials.border}
         />

@@ -28,8 +28,6 @@ export default function Newspaper(props) {
       onPointerOut={() => setHovered(false)}
     >
       <mesh
-        castShadow
-        receiveShadow
         geometry={nodes.np_mid.geometry}
         material={materials["newspaper_page-0001"]}
         scale={5}
