@@ -151,6 +151,31 @@ function Lesson() {
   const createOrUpdate = useCallback(async () => {
     setFetching(true);
 
+    // TODO fix this logic, look for a way to get the ids directly from the autocomplete
+    let originToId = {};
+    Object.keys(origins.get()).forEach(id => {
+      originToId = {
+        ...originToId,
+        [origins.get()[id].origin]: id,
+      };
+    });
+
+    let domainsToId = {};
+    Object.keys(domains.get()).forEach(id => {
+      domainsToId = {
+        ...domainsToId,
+        [domains.get()[id].domain]: id,
+      };
+    });
+
+    let tagsToId = {};
+    Object.keys(Alltags.get()).forEach(id => {
+      tagsToId = {
+        ...tagsToId,
+        [Alltags.get()[id].tag]: id,
+      };
+    });
+
     let tagIds = [];
     const tagsToCreate = [];
     let existingTagId;
