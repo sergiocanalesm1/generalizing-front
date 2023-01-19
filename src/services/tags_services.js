@@ -8,13 +8,14 @@ export async function getAllTags(db){
     try{
         const querySnapshot = await getDocs(collection(db, tagsCollection));
         querySnapshot.forEach((doc) => {
-            //tags.push({[doc.id]:doc.data()})
+            // Tags.push({[doc.id]:doc.data()})
             tags[doc.id] = doc.data();
         });
     }
     catch(error){
         reportError(error);
     }
+
     return tags;
 }
 

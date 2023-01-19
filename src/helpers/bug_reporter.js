@@ -16,7 +16,7 @@ export function initBugReporter(){
 
 export function reportError(error){
     if( process.env.REACT_APP_ENVIRONMENT === 'PRODUCTION' ){
-        //TODO setup source maps
+        // TODO setup source maps
         Sentry.captureException(error);
     }
     else{

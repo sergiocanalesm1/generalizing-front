@@ -14,5 +14,6 @@ export async function getExamples(db){
     catch( error ){
         reportError(error);
     }
+
     return examples;
 }

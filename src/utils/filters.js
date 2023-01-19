@@ -1,6 +1,8 @@
 export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
-  //should return array of keys
-    let d1, d2, set2;
+  // Should return array of keys
+    let d1; 
+    let d2; 
+    let set2;
     const filteredRelationsIds = [];
     Object.keys(relations).forEach( id => {
       d1 = allDomains[ lessons[relations[id].lessons[0]].domain ].domain;
@@ -11,27 +13,15 @@ export function filterByDomain( relations, lessons, sortedDomains, allDomains ){
       }
     })
     return filteredRelationsIds;
-    /*
-    
-    return relations.filter( r => {
-        newD1 = r.lessons[0].domain;
-        newD2 = r.lessons[1].domain;
-        set2 = [newD1,newD2].sort()
-        return sortedDomains[0]=== set2[0]  && sortedDomains[1]=== set2[1]
-      })
-    */
 }
 
-export function filterByChallenge( relations, challengeId ){
-  return relations.filter( r => (r.challenge === challengeId ))
-}
-
-export function filterByOwned( objects, uid ){
+export function filterByOwned( ids, objects, uid ){
   if( !uid ){
     return [];
   }
-  const owned = {}
-  Object.keys( objects ).forEach( id => {
+
+  const owned = {};
+  ids.forEach( id => {
     if( objects[id].userUid === uid ){
       owned[id] = objects[id]
     }
@@ -39,13 +29,25 @@ export function filterByOwned( objects, uid ){
   return owned;
 }
 
+export function filterByOrigin( lessons, originId ){
+  const filteredIds = [];
+  Object.keys(lessons).forEach( id => {
+    if( lessons[id].origin === originId ){
+      filteredIds.push(id)
+    }
+  })
+  return filteredIds;
+}
+
 export function sortByOwned( o1, o2, uid ){
   if( o1.userUid === uid ){
     return -1
   }
+
   if( o2.userUid === uid ){
       return 1
   }
+
   sortByLatest( o1, o2 );
 }
 
@@ -53,18 +55,21 @@ export function sortByLatest( o1, o2 ){
   if( o1.creationDate > o2.creationDate ){
     return -1
   }
+
   if( o1.creationDate < o2.creationDate ){
     return 1
   }
+
   return 0
 }
 
 
 
 export function shuffle(array) {
-  //https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
+  // https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
 
-  let currentIndex = array.length,  randomIndex;
+  let currentIndex = array.length;
+  let  randomIndex;
 
   // While there remain elements to shuffle.
   while (currentIndex !== 0) {
@@ -77,5 +82,6 @@ export function shuffle(array) {
     [array[currentIndex], array[randomIndex]] = [
       array[randomIndex], array[currentIndex]];
   }
+
   return array;
 }

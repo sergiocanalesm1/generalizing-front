@@ -8,12 +8,13 @@ export async function getAllDomains(db){
     try{
         const querySnapshot = await getDocs(collection(db, domainsCollection));
         querySnapshot.forEach((doc) => {
-            //domains.push({[doc.id]:doc.data()})
+            // Domains.push({[doc.id]:doc.data()})
             domains[doc.id] = doc.data();
         });
     }
     catch(error){
         reportError(error);
     }
+
     return domains;
 }

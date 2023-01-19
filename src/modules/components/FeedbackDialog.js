@@ -1,3 +1,4 @@
+import React from 'react';
 import { CheckCircleOutline, ErrorOutline } from "@mui/icons-material";
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack, Typography } from "@mui/material";
 
@@ -5,8 +6,8 @@ function FeedbackDialog( {success, open, onClose } ){
     return(
         <Dialog
             open={open}
-            onClose={onClose}
             scroll="paper"
+            onClose={onClose}
         >
             <DialogTitle sx={{minWidth:300}}>
                 <div>

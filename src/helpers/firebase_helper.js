@@ -1,6 +1,6 @@
 import { initializeApp } from "firebase/app";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-//import { getAnalytics } from "firebase/analytics";
+// Import { getAnalytics } from "firebase/analytics";
 import { getFirestore } from "firebase/firestore";
 import { dbState, userState } from "../globalState/globalState";
 
@@ -17,7 +17,7 @@ export function initFirebase(){
       };
       
     const app = initializeApp(firebaseConfig);
-    // const analytics = getAnalytics(app); TODO setup analytics
+    // Const analytics = getAnalytics(app); TODO setup analytics
     const firestoreDB = getFirestore(app);
     dbState.set(firestoreDB);
 

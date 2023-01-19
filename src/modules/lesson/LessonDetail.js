@@ -1,10 +1,10 @@
-import { useCallback, useState } from "react";
+import React, { useCallback, useState } from "react";
 import Linkify from "react-linkify";
 
 import { Box, Button, Card, CardActions, CardContent, CardMedia, Chip, Dialog, Grid, Stack, Toolbar, Typography } from "@mui/material";
 
 import { capitalizeFirstLetter, stringToColor } from "../../utils/strings";
-import MyEditor from "../home/components/MyEditor";
+import MyEditor from "../components/MyEditor";
 import RelationListDialog from "../relation/RelationList";
 import { useHookstate } from "@hookstate/core";
 import { domainsState, originsState, tagsState, relationsToListState } from "../../globalState/globalState";
@@ -32,6 +32,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
         setOpenRelationListDialog(true)
     },[relationsToList, lesson])
     if( !lesson ){
+        // eslint-disable-next-line react/jsx-no-useless-fragment
         return <></>;
     }
 
@@ -40,8 +41,8 @@ function LessonDetailDialog({ lesson, open, onClose }) {
             <Dialog
                 fullWidth
                 open={open}
-                onClose={onClose}
                 scroll="paper"
+                onClose={onClose}
             >
                 <Card sx={{overflow: 'auto'}}>
                     {lesson.fileName &&
@@ -69,7 +70,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                           : <Typography variant="body">
                                 <Linkify
                                     componentDecorator={(decoratedHref, decoratedText, key) => (
-                                        <a target="blank" href={decoratedHref} key={key}>
+                                        <a key={key} target="blank" href={decoratedHref}>
                                             {decoratedText}
                                         </a>
                                     )}
@@ -89,7 +90,7 @@ function LessonDetailDialog({ lesson, open, onClose }) {
                                 }}>
                             { lesson.tags && 
                                 lesson.tags.map( tagId => {
-                                    const tag = tags.get()[ tagId ].tag
+                                    const {tag} = tags.get()[ tagId ]
                                     return (
                                         <Chip 
                                             key={tag}
@@ -146,10 +147,10 @@ function LessonDetailDialog({ lesson, open, onClose }) {
             <RelationListDialog
                 open={openRelationListDialog}
                 setOpen={setOpenRelationListDialog}
-                onClose={()=>setOpenRelationListDialog(false)}
                 relations={lesson.relations}
-                filterType={"Lesson"}
+                filterType="Lesson"
                 filters={lesson.title}
+                onClose={()=>setOpenRelationListDialog(false)}
             />
         </div>
     );

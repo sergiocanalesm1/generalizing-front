@@ -1,65 +1,87 @@
-import { Fragment, useCallback, useEffect, useState } from "react";
+ 
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { Box, Button, CircularProgress, Grid, Stack, Toolbar } from "@mui/material";
-import { AddCircleOutline } from '@mui/icons-material';
+import { AddCircleOutline, ArrowBackIos, ArrowForwardIos } from '@mui/icons-material';
 import { useHookstate } from '@hookstate/core';
 
 import { lessonPath, relationPath } from "../../utils/paths";
 import { getFirstTimer } from "../../utils/user";
-import { dbState, lessonsState, relationsState, domainsState, tagsState, originsState, userState, relationsToListState, updatingOrCreatingObjectState } from "../../globalState/globalState";
+import { lessonsState, relationsState, userState, updatingOrCreatingObjectState, filterTypeState } from "../../globalState/globalState";
 import AuthModal from "../components/AuthModal";
 import HelpDialog from "../components/HelpDialog";
-import RelationGraph from "./components/RelationGraph";
 import FeedbackDialog from "../components/FeedbackDialog";
 import WelcomingDialog from "../components/Welcoming";
 import LessonListDialog from "../lesson/LessonList";
 import RelationListDialog from "../relation/RelationList";
-import { getAllRelations } from "../../services/relations_services";
-import { getAllLessons } from "../../services/lessons_services";
-import { getAllDomains } from "../../services/domains_services";
-import { getAllTags } from "../../services/tags_services";
-import { getAllOrigins } from "../../services/origins_services";
-import { combineLessonsWithRelations } from "../../helpers/lessons_helper";
-//import ChallengeDetailDialog from "../challenge/ChallengeDetail";
-// import { getLastChallenge } from "../../services/challenges_services";
-//import { tempLasChallenge, tempRelations } from "../../utils/enums";
-//const t_relations =  tempRelations()
+import useWindowDimensions from "../../utils/hooks";
+import RelationsDomainsGraph from "./components/graphs/RelationsDomainsGraph";
+import RelationsOriginsGraph from "./components/graphs/RelationsOriginsGraph";
 
-  
+
+const homeStyles = {
+    container: {
+        '@media only screen and (max-width: 600px)': {
+            p:1,
+            mt:0,
+        },
+        mt:2
+    },
+    graphContainer:{
+        width: '100vw',
+        height: '70vh',
+        position: 'relative'
+    },
+    graph:{
+        width: '100%',
+        height: '100%',
+        position:"absolute",
+        margin: 'auto'
+    },
+    arrow:{
+        width: 80,
+        height: 80,
+        zIndex: 'tooltip',
+        position:"absolute",
+        "&:hover":{
+            opacity: 0.3
+        }
+    }
+}
+
 function Home() {
     
     const navigate = useNavigate();
 
-    //const state = useHookstate(globalState);
-    const lessons = useHookstate(lessonsState);
     const relations = useHookstate(relationsState);
-    const domains = useHookstate(domainsState);
-    const tags = useHookstate(tagsState);
-    const origins = useHookstate(originsState);
     const user = useHookstate(userState);
-    const fbDB = useHookstate(dbState);
-    const relationsToList = useHookstate(relationsToListState);
     const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
-
+    const filterType = useHookstate(filterTypeState);
 
     const [success, setSuccess] = useState( false );
-    const [fetching, setFetching] = useState( true );
     const [openAuthModal, setOpenAuthModal] = useState( false );
     const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
     const [openLessonListDialog, setOpenLessonListDialog] = useState( false );
     const [openRelationListDialog, setOpenRelationListDialog] = useState( false );
-    //const [openChallengeDetailDialog, setOpenChallengeDetailDialog] = useState( false );
     const [openHelpDialog, setOpenHelpDialog] = useState( false );
     const[openWelcomingDialog,setOpenWelcomingDialog] = useState(false);
+    const [selectedGraph, setSelectedGraph] = useState(1); // Better with strings?
 
 
-    //const [lastChallenge, setLastChallenge] = useState({});
     const [relationsFilters, setRelationsFilters] = useState("");
     const [path,setPath] = useState("");
 
+    const {height, width} = useWindowDimensions();
 
-
+    useEffect( () => {
+        if( selectedGraph === 1 ){
+            filterType.set("domains")
+        }
+        else if( selectedGraph === 2 ){
+            filterType.set("origins")
+        }
+    },[selectedGraph])
 
     const handleCreateLesson = useCallback(()=>{
         if( user.get().uid ) {
@@ -87,61 +109,14 @@ function Home() {
         }
     },[navigate, user, updatingOrCreatingObject]);
 
-
-    //const fetchRelationResource = () => getAllRelations(fbDB.get()).then( fetchedResource => relations.set( fetchedResource ) )
-
-    /*
-    const handleViewChallenge = useCallback(()=>{
-        setOpenChallengeDetailDialog(true);
-    },[])
-    */
-    useEffect(()=>{
-        let isMounted = true; 
-
-        setFetching(true);
-
-        if( !getFirstTimer() ){
-            setOpenWelcomingDialog(true);
-        }
-        
-        const db = fbDB.get();
-        //TODO fix state
-        getAllRelations(db).then( fetchedRelations => {         
-            getAllLessons(db).then( fetchedLessons => {
-                getAllDomains(db).then( fetchedDomains => {
-                    getAllTags(db).then( fetchedTags => {
-                        getAllOrigins(db).then( fetchedOrigins => {
-                            fetchedLessons = combineLessonsWithRelations(fetchedRelations, fetchedLessons);
-                            if( isMounted ){
-                                relations.set(fetchedRelations)
-                                domains.set(fetchedDomains)
-                                tags.set(fetchedTags)
-                                origins.set(fetchedOrigins) 
-                                lessons.set(fetchedLessons)
-                                relationsToList.set(Object.keys(relations));
-                                setFetching(false);
-
-                            }
-                        })
-                    })
-                })
-            })
-        })
-        
-            /*
-            getLastChallenge().then( c => {
-                const updatedLessons = combineLessonsWithRelations(r, [c.lesson_1, c.lesson_2]);
-                c.lesson_1 = updatedLessons[0];
-                c.lesson_2 = updatedLessons[1];
-                setLastChallenge(c);
-                
-            });
-            */
-        return () => { isMounted = false }
-    },[]);
+ useEffect(()=>{
+     if( !getFirstTimer() ){
+         setOpenWelcomingDialog(true);
+     }
+ },[]);
 
     return (
-        <Fragment>
+        <>
             <Box>
                 <Box>
                     <Toolbar />
@@ -149,13 +124,7 @@ function Home() {
                         container
                         justifyContent="center"
                         alignItems="center"
-                        sx={{
-                            '@media only screen and (max-width: 600px)': {
-                                p:1,
-                                mt:0,
-                            },
-                            mt:2
-                        }}
+                        sx={homeStyles.container}
                         spacing={1}
                     >
                         <Grid item xs={12} md={2}>
@@ -187,36 +156,53 @@ function Home() {
                                 Create Relation
                             </Button>
                         </Grid>
-                        {/*
-                            <Grid item xs={12} md={3}>
-                                {
-                                    lastChallenge &&
-                                    <Button
-                                    fullWidth
-                                        variant="contained"
-                                        startIcon={<Attractions />}
-                                        onClick={handleViewChallenge}
-                                    >
-                                        Challenge of the Week
-                                    </Button>
-                                }
-                            </Grid>
-                        */}
                     </Grid>
-                    {   !fetching
-                        ? <Box>
-                            <RelationGraph 
-                                setOpenList={setOpenRelationListDialog}
-                                setFilters={setRelationsFilters}
-                            />
-                            <Toolbar />
-                        </Box>
-                        : <>{
+                    {   lessonsState.get()
+                        ? 
+                            <div>
+                                { selectedGraph === 1 
+                                ?
+                                    <div style={homeStyles.graphContainer}>
+                                        <RelationsDomainsGraph 
+                                            setOpenList={setOpenRelationListDialog}
+                                            sx={homeStyles.graph}
+                                        />  
+                                        <ArrowForwardIos
+                                            color="primary" 
+                                            sx={{
+                                                ...homeStyles.arrow,
+                                                right: '3%',
+                                                top: height / 2 - 80,
+                                            }}
+                                            onClick={()=> setSelectedGraph(2) }
+                                        />
+                                    </div>
+                                :
+                                    <div style={homeStyles.graphContainer}>
+                                        <Toolbar />
+                                        <RelationsOriginsGraph
+                                            setOpenRelationsList={setOpenRelationListDialog}
+                                            setOpenLessonsList={setOpenLessonListDialog}
+                                            sx={homeStyles.graph}
+                                        /> 
+                                        <ArrowBackIos 
+                                            color="primary" 
+                                            sx={{
+                                                ...homeStyles.arrow,
+                                                left: '3%',
+                                                top: height / 2 - 80,
+                                            }}
+                                            onClick={()=> setSelectedGraph(1) }
+                                        />
+                                    </div>
+                                }
+                            </div>
+                        :
                             <div>
                                 <Toolbar />
                                 <Stack direction="row" justifyContent="center">  <CircularProgress /> </Stack>
-                            </div>
-                            }</>
+                            </div> 
+
                     }
                 </Box>
                 <Toolbar />
@@ -255,8 +241,8 @@ function Home() {
                 onClose={()=>setOpenHelpDialog(false)}
             />
             {
-                !fetching &&
-                <Fragment>
+                relations.get() &&
+                <>
                     <LessonListDialog
                         open={openLessonListDialog}
                         setOpen={setOpenLessonListDialog}
@@ -265,26 +251,14 @@ function Home() {
                     <RelationListDialog
                         open={openRelationListDialog}
                         setOpen={setOpenRelationListDialog}
-                        onClose={()=>setOpenRelationListDialog(false)}
                         filters={relationsFilters}
-                        filterType={'Domains'}
+                        filterType={filterType}
+                        onClose={()=>setOpenRelationListDialog(false)}
                     />
-                </Fragment>
+                </>
 
             }
-            {/*   lastChallenge &&
-                <ChallengeDetailDialog
-                    open={openChallengeDetailDialog}
-                    setOpen={setOpenChallengeDetailDialog}
-                    onClose={()=>setOpenChallengeDetailDialog(false)}
-                    challenge={lastChallenge}
-                    relations={relations} 
-                    setOpenList={setOpenRelationListDialog}
-                    setRelationsToShow={setRelationsToShow}
-                    setFilters={setRelationsFilters}
-                />
-            */}
-        </Fragment>       
+        </>       
     );
 }
   

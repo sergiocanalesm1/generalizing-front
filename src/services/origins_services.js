@@ -8,12 +8,13 @@ export async function getAllOrigins(db){
     try{
         const querySnapshot = await getDocs(collection(db, originsCollection));
         querySnapshot.forEach((doc) => {
-            //origins.push({[doc.id]:doc.data()})
+            // Origins.push({[doc.id]:doc.data()})
             origins[doc.id] = doc.data();
         });
     }
     catch(error){
         reportError( error );
     }
+
     return origins;
 }

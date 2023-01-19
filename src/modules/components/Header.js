@@ -11,9 +11,9 @@ import LessonListDialog from '../lesson/LessonList';
 import RelationListDialog from '../relation/RelationList';
 import FeedbackDialog from './FeedbackDialog';
 import HelpDialog from './HelpDialog';
-import { relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from '../../globalState/globalState';
+import { filtersState, lessonsState, lessonsToListState, relationsState, relationsToListState, updatingOrCreatingObjectState, userState } from '../../globalState/globalState';
 import { logout } from '../../services/user_services';
-//import { tempRelations } from '../../utils/enums';
+// Import { tempRelations } from '../../utils/enums';
 
 
 function Header() {
@@ -38,20 +38,22 @@ function Header() {
 
   const user = useHookstate(userState);
   const relations = useHookstate(relationsState);
+  const lessons = useHookstate(lessonsState)
   const relationsToList = useHookstate(relationsToListState);
+  const lessonsToList = useHookstate(lessonsToListState);
   const updatingOrCreatingObject = useHookstate(updatingOrCreatingObjectState);
 
   const [path,setPath] = useState("");
 
 
   const handleLogout = useCallback(()=> {
-    logout(); // state is cleared in the observer
+    logout(); // State is cleared in the observer
     navigate( 0 );
   },[navigate])
 
   const handleCreateLesson = useCallback(()=>{
     setAnchorElLessons();
-    if( user.get().uid ) {
+    if( user.get()?.uid ) {
       updatingOrCreatingObject.set({
         object:{}
     })
@@ -65,13 +67,15 @@ function Header() {
   },[navigate, user, updatingOrCreatingObject])
 
   const handleViewLessons = useCallback(()=>{
+    filtersState.set("");
+    lessonsToList.set(Object.keys(lessons));
     setAnchorElLessons();
     setOpenLessonListDialog(true);
-  },[]);
+  },[lessonsToList, lessons]);
 
   const handleCreateRelation = useCallback(()=>{
     setAnchorElRelations();
-    if( user.get().uid ) {
+    if( user.get()?.uid ) {
       updatingOrCreatingObject.set({
         object:{}
     })
@@ -84,6 +88,7 @@ function Header() {
   },[navigate, user, updatingOrCreatingObject]);
 
   const handleViewRelations = useCallback(()=>{
+    filtersState.set("");
     relationsToList.set(Object.keys(relations));
     setAnchorElRelations();
     setOpenRelationListDialog(true);
@@ -99,15 +104,15 @@ function Header() {
         <Container maxWidth={false}>
           <Toolbar>
             <Button 
-              onClick={()=>navigate(homePath)}
               sx={{
                 pr:5,
                 maxWidth:450
                 
-              }}>
+              }}
+              onClick={()=>navigate(homePath)}>
               <CardMedia
                 component="img"
-                image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/Logo-blue.png"
+                image={`${process.env.REACT_APP_BUCKET}/Logo-blue.png`}
                 alt="generalizing-logo"
               />
             </Button>
@@ -162,7 +167,7 @@ function Header() {
               <MenuItem onClick={handleViewRelations}>View Relations</MenuItem>
             </Menu>
           </Stack>
-          {user.get().uid
+          {user.get()?.uid
             ? 
               <Grid container justifyContent="flex-end" alignItems="center">
                 <Grid item container xs={8} md={1} justifyContent="flex-end">
@@ -172,19 +177,19 @@ function Header() {
                     aria-label="account of current user"
                     aria-controls="menu-appbar"
                     aria-haspopup="true"
-                    onClick={()=>setAnchorElUser(refUserSettings.current)}
                     color="secondary"
+                    onClick={()=>setAnchorElUser(refUserSettings.current)}
                   >
                     <AccountCircle />
                   </IconButton>
                   <Menu
+                    keepMounted
                     id="menu-appbar"
                     anchorEl={anchorElUser}
                     anchorOrigin={{
                       vertical: 'top',
                       horizontal: 'right',
                     }}
-                    keepMounted
                     transformOrigin={{
                       vertical: 'top',
                       horizontal: 'right',
@@ -201,8 +206,8 @@ function Header() {
                     aria-label="account of current user"
                     aria-controls="menu-appbar"
                     aria-haspopup="true"
-                    onClick={()=>setOpenHelpDialog(true)}
                     color="secondary"
+                    onClick={()=>setOpenHelpDialog(true)}
                   >
                     <HelpOutline />
                   </IconButton>

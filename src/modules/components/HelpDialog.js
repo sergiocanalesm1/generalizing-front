@@ -1,6 +1,7 @@
+import React, { useCallback, useState } from 'react';
 import { useHookstate } from "@hookstate/core";
 import { Button, Card, CardActions, CardContent, CardMedia, Dialog, Link, Stack, Toolbar, Typography } from "@mui/material";
-import { Fragment, useCallback, useState } from "react";
+
 import { dbState, lessonsState, relationsState } from "../../globalState/globalState";
 import { getExamples } from "../../services/examples_services";
 import LessonDetailDialog from "../lesson/LessonDetail";
@@ -36,26 +37,26 @@ function HelpDialog( {open, onClose} ){
     const examples = useHookstate(fetchResource);
 
     const showLesson = useCallback( type => {
-        const id = examples.get()[ type ].id;
+        const {id} = examples.get()[ type ];
         setLesson( lessons.get()[ id ]);
         setOpenLessonDetailDialog( true );
     },[examples, lessons])
 
     const showRelation = useCallback( () => {
-        const id = examples.get()[ "relation_1" ].id;
+        const {id} = examples.get().relation_1;
         setRelation( relations.get()[ id ]);
         setOpenRelationDetailDialog( true );
     },[examples, relations])
 
 
     return(
-        <Fragment>
+        <>
             <Dialog
+                fullWidth
                 scroll="paper"
                 open={open}
-                onClose={onClose}
-                fullWidth
                 maxWidth="md"
+                onClose={onClose}
             >
                 <Card sx={{
                     overflow: 'auto',
@@ -66,7 +67,7 @@ function HelpDialog( {open, onClose} ){
                     <CardMedia
                         component="img"
                         height="50%"
-                        image="https://generalizing-test-bucket.s3.us-east-2.amazonaws.com/Logo-white.png"
+                        image={`${process.env.REACT_APP_BUCKET}/Logo-white.png`}
                         alt="generalizing-logo"
                         sx={{p:2}}
                     />
@@ -129,7 +130,7 @@ function HelpDialog( {open, onClose} ){
                     </CardContent>
                     <Stack direction="row" justifyContent="flex-end">
                         <CardActions>
-                            <Button onClick={onClose} color="primary">
+                            <Button color="primary" onClick={onClose}>
                                 Much More Clear! thanks
                             </Button>
                         </CardActions>
@@ -139,34 +140,34 @@ function HelpDialog( {open, onClose} ){
             { lesson && 
                 <LessonDetailDialog
                     open={openLessonDetailDialog}
-                    onClose={() => setOpenLessonDetailDialog(false) }
                     lesson={lesson}
+                    onClose={() => setOpenLessonDetailDialog(false) }
                 />
             }
             { relation &&
                 <RelationDetailDialog
                     open={openRelationDetailDialog}
-                    onClose={() => setOpenRelationDetailDialog(false) }
                     relation={relation}
+                    onClose={() => setOpenRelationDetailDialog(false) }
                 />
             }
             { lessons && 
                 <LessonListDialog
                     open={openLessonList}
                     setOpen={setOpenLessonList}
-                    onClose={()=>setOpenLessonList(false)}
                     lessons={lessons}
+                    onClose={()=>setOpenLessonList(false)}
                 />
             }
             { relations && 
                 <RelationListDialog
                     open={openRelationList}
                     setOpen={setOpenRelationList}
-                    onClose={()=>setOpenRelationList(false)}
                     relations={relations}
+                    onClose={()=>setOpenRelationList(false)}
                     />
             }
-        </Fragment>
+        </>
     )
 }
 
