@@ -18,7 +18,7 @@ import { mapOriginsToRelations } from "../../../../helpers/relations_helper";
 import { invertResource } from "../../../../helpers/data_helper";
 import Line from "../Line";
 import { filterByOrigin } from "../../../../utils/filters";
-const hdrUrl = "/unfinished_office_1k.hdr";
+const hdrUrl = "imgs/unfinished_office_1k.hdr";
 
 const rad = 10;
 const lineAmp = rad / 3;
