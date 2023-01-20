@@ -6,9 +6,10 @@ https://gltf.pmnd.rs/
 import React, { useRef, useState } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import lectureModelUrl from "./models/chalkboard2.glb";
 
 export default function Chalkboard(props) {
-  const { nodes, materials } = useGLTF(`models/chalkboard2.glb`);
+  const { nodes, materials } = useGLTF(lectureModelUrl);
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
 
@@ -39,4 +40,4 @@ export default function Chalkboard(props) {
   );
 }
 
-useGLTF.preload(`models/chalkboard2.glb`);
+useGLTF.preload(lectureModelUrl);
