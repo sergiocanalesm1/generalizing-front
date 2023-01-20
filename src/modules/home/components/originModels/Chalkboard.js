@@ -8,9 +8,7 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
 export default function Chalkboard(props) {
-  const { nodes, materials } = useGLTF(
-    `${process.env.PUBLIC_URL}models/chalkboard2.glb`
-  );
+  const { nodes, materials } = useGLTF(`models/chalkboard2.glb`);
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
 
@@ -41,4 +39,4 @@ export default function Chalkboard(props) {
   );
 }
 
-useGLTF.preload(`${process.env.PUBLIC_URL}models/chalkboard2.glb`);
+useGLTF.preload(`models/chalkboard2.glb`);
