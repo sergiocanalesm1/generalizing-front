@@ -8,7 +8,7 @@ import { useFrame } from "@react-three/fiber";
 
 export default function Newspaper(props) {
   const { nodes, materials } = useGLTF(
-    `${process.env.PUBLIC_URL}/models/newspaper2.glb`
+    `${process.env.PUBLIC_URL}models/newspaper2.glb`
   );
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
@@ -38,4 +38,4 @@ export default function Newspaper(props) {
   );
 }
 
-useGLTF.preload(`${process.env.PUBLIC_URL}/models/newspaper2.glb`);
+useGLTF.preload(`${process.env.PUBLIC_URL}models/newspaper2.glb`);

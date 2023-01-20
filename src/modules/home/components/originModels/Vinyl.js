@@ -8,7 +8,7 @@ import { useFrame } from "@react-three/fiber";
 
 export default function Vinyl(props) {
   const { nodes, materials } = useGLTF(
-    `${process.env.PUBLIC_URL}/models/vinyl2.glb`
+    `${process.env.PUBLIC_URL}models/vinyl2.glb`
   );
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
@@ -38,4 +38,4 @@ export default function Vinyl(props) {
   );
 }
 
-useGLTF.preload(`${process.env.PUBLIC_URL}/models/vinyl2.glb`);
+useGLTF.preload(`${process.env.PUBLIC_URL}models/vinyl2.glb`);

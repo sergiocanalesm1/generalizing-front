@@ -8,7 +8,7 @@ import { useFrame } from "@react-three/fiber";
 
 export default function Video(props) {
   const { nodes, materials } = useGLTF(
-    `${process.env.PUBLIC_URL}/models/video.glb`
+    `${process.env.PUBLIC_URL}models/video.glb`
   );
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
@@ -50,4 +50,4 @@ export default function Video(props) {
   );
 }
 
-useGLTF.preload(`${process.env.PUBLIC_URL}/models/video.glb`);
+useGLTF.preload(`${process.env.PUBLIC_URL}models/video.glb`);

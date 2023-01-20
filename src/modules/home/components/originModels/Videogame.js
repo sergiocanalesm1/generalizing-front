@@ -8,7 +8,7 @@ import { useFrame } from "@react-three/fiber";
 
 export default function Videogame(props) {
   const { nodes, materials } = useGLTF(
-    `${process.env.PUBLIC_URL}/models/videogame.glb`
+    `${process.env.PUBLIC_URL}models/videogame.glb`
   );
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
@@ -53,4 +53,4 @@ export default function Videogame(props) {
   );
 }
 
-useGLTF.preload(`${process.env.PUBLIC_URL}/models/videogame.glb`);
+useGLTF.preload(`${process.env.PUBLIC_URL}models/videogame.glb`);
