@@ -6,7 +6,7 @@ https://gltf.pmnd.rs/
 import React, { useRef, useState } from "react";
 import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import lectureModelUrl from "./models/chalkboard2.glb";
+const lectureModelUrl = `${process.env.REACT_APP_MODELS_BUCKET}/glbs/chalkboard2.glb`;
 
 export default function Chalkboard(props) {
   const { nodes, materials } = useGLTF(lectureModelUrl);
