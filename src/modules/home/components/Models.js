@@ -29,12 +29,3 @@ export const originsComponentOrder = [
   "Video Game",
   "Song",
 ];
-
-// export const bookModelUrl = "./models/book.glb";
-// export const lectureModelUrl = "./models/chalkboard2.glb";
-// export const articleModelUrl = "./models/newspaper2.glb";
-// export const personalXPModelUrl = "./models/personal xp.glb";
-// export const theaterPlayModelUrl = "./models/theater.glb";
-// export const videoModelUrl = "./models/theater.glb";
-// export const videoGameModelUrl = "./models/videogame.glb";
-// export const songModelUrl = "./models/vinyl2.glb";
