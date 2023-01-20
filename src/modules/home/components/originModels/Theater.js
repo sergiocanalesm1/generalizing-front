@@ -7,9 +7,7 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
 export default function Theater(props) {
-  const { nodes, materials } = useGLTF(
-    `${process.env.PUBLIC_URL}models/theater.glb`
-  );
+  const { nodes, materials } = useGLTF(`models/theater.glb`);
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
 
@@ -39,4 +37,4 @@ export default function Theater(props) {
   );
 }
 
-useGLTF.preload(`${process.env.PUBLIC_URL}models/theater.glb`);
+useGLTF.preload(`models/theater.glb`);
