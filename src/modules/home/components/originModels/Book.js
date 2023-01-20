@@ -7,7 +7,9 @@ import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 
 export default function Book(props) {
-  const { nodes, materials } = useGLTF("/models/book.glb");
+  const { nodes, materials } = useGLTF(
+    `${process.env.PUBLIC_URL}models/book.glb`
+  );
   const mesh = useRef();
   const [hovered, setHovered] = useState(false);
 
@@ -45,4 +47,4 @@ export default function Book(props) {
   );
 }
 
-useGLTF.preload("/models/book.glb");
+useGLTF.preload(`${process.env.PUBLIC_URL}models/book.glb`);
