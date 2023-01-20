@@ -18,7 +18,7 @@ import { mapOriginsToRelations } from "../../../../helpers/relations_helper";
 import { invertResource } from "../../../../helpers/data_helper";
 import Line from "../Line";
 import { filterByOrigin } from "../../../../utils/filters";
-const hdrUrl = "imgs/unfinished_office_1k.hdr";
+import hdrUrl from "../originModels/imgs/unfinished_office_1k.hdr";
 
 const rad = 10;
 const lineAmp = rad / 3;
@@ -85,7 +85,12 @@ export default function RelationsOriginsGraph({
         fov: 15,
       }}
     >
-      <Environment background files={hdrUrl} blur={1} />
+      <Environment
+        background
+        files={hdrUrl}
+        // preset="city"
+        blur={1}
+      />
       <ambientLight intensity={0.5} />
       <Suspense fallback={null}>
         {components.map((Component, i) => {
