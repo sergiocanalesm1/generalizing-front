@@ -18,6 +18,7 @@ import { mapOriginsToRelations } from "../../../../helpers/relations_helper";
 import { invertResource } from "../../../../helpers/data_helper";
 import Line from "../Line";
 import { filterByOrigin } from "../../../../utils/filters";
+import hdrUrl from "../originModels/imgs/unfinished_office_1k.hdr";
 
 const rad = 10;
 const lineAmp = rad / 3;
@@ -29,7 +30,6 @@ const y0 = 0.1;
 export default function RelationsOriginsGraph({
   setOpenRelationsList,
   setOpenLessonsList,
-  setFilters,
 }) {
   const lessons = useHookstate(lessonsState);
   const origins = useHookstate(originsState);
@@ -85,11 +85,7 @@ export default function RelationsOriginsGraph({
         fov: 15,
       }}
     >
-      <Environment
-        background
-        files="./imgs/unfinished_office_1k.hdr"
-        blur={1}
-      />
+      <Environment background files={hdrUrl} blur={1} />
       <ambientLight intensity={0.5} />
       <Suspense fallback={null}>
         {components.map((Component, i) => {
