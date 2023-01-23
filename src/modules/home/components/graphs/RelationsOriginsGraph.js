@@ -16,12 +16,9 @@ import {
 import { mapOriginsToRelations } from "../../../../helpers/relations_helper";
 import { invertResource } from "../../../../helpers/data_helper";
 import { filterByOrigin } from "../../../../utils/filters";
-<<<<<<< HEAD
 import Models, { originsComponentOrder } from "./components/Models";
 import Line from "./components/Line";
 import RelationsMovement from "./components/RelationsMovement";
-=======
->>>>>>> b33753c7aa9da0435309dd25cd97d87855b390b8
 
 const hdrUrl = `${process.env.REACT_APP_MODELS_BUCKET}/imgs/unfinished_office_1k.hdr`;
 const rad = 10;
