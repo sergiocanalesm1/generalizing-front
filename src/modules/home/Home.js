@@ -207,8 +207,7 @@ function Home() {
             <div>
               <Toolbar />
               <Stack direction="row" justifyContent="center">
-                {" "}
-                <CircularProgress />{" "}
+                <CircularProgress />
               </Stack>
             </div>
           )}

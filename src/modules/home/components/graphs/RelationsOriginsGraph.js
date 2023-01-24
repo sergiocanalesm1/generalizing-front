@@ -22,7 +22,7 @@ import RelationsMovement from "./components/RelationsMovement";
 
 const hdrUrl = `${process.env.REACT_APP_MODELS_BUCKET}/imgs/unfinished_office_1k.hdr`;
 const rad = 10;
-const lineAmp = rad / 3;
+const lineAmp = rad / 2;
 export const steps = 40;
 export const totalTime = 3;
 export const y0 = 0.1;
@@ -73,7 +73,7 @@ function Graph({ setOpenRelationsList, setOpenLessonsList }) {
       const x = X[0] + dx * t;
       const z = Z[0] + dz * t;
       const y = y0 + lineAmp * Math.sin((Math.PI * t) / steps);
-      points.push(new THREE.Vector3(x, y, z));
+      points.push(new THREE.Vector3(x, -y, z));
     }
 
     return points;
@@ -162,7 +162,7 @@ export default function RelationsOriginsGraph({
   return (
     <Canvas
       camera={{
-        position: [4 * rad * (Math.PI / 4), 20, 4 * rad * (Math.PI / 4)],
+        position: [0, 4 * rad, 8 * rad],
         fov: 15,
       }}
     >
