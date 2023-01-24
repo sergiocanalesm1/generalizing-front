@@ -19,12 +19,10 @@ import { filterByOrigin } from "../../../../utils/filters";
 import Models, { originsComponentOrder } from "./components/Models";
 import Line from "./components/Line";
 import RelationsMovement from "./components/RelationsMovement";
-import { CircularProgress, Toolbar } from "@mui/material";
-import { Stack } from "@mui/system";
 
 const hdrUrl = `${process.env.REACT_APP_MODELS_BUCKET}/imgs/unfinished_office_1k.hdr`;
 const rad = 10;
-const lineAmp = rad / 3;
+const lineAmp = rad / 2;
 export const steps = 40;
 export const totalTime = 3;
 export const y0 = 0.1;
@@ -75,7 +73,7 @@ function Graph({ setOpenRelationsList, setOpenLessonsList }) {
       const x = X[0] + dx * t;
       const z = Z[0] + dz * t;
       const y = y0 + lineAmp * Math.sin((Math.PI * t) / steps);
-      points.push(new THREE.Vector3(x, y, z));
+      points.push(new THREE.Vector3(x, -y, z));
     }
 
     return points;
@@ -164,7 +162,7 @@ export default function RelationsOriginsGraph({
   return (
     <Canvas
       camera={{
-        position: [4 * rad * (Math.PI / 4), 20, 4 * rad * (Math.PI / 4)],
+        position: [0, 4 * rad, 8 * rad],
         fov: 15,
       }}
     >
@@ -175,16 +173,7 @@ export default function RelationsOriginsGraph({
         blur={1}
       />
       <ambientLight intensity={0.5} />
-      <Suspense
-        fallback={
-          <div>
-            <Toolbar />
-            <Stack direction="row" justifyContent="center">
-              <CircularProgress />
-            </Stack>
-          </div>
-        }
-      >
+      <Suspense fallback={null}>
         <Graph
           setOpenRelationsList={setOpenRelationsList}
           setOpenLessonsList={setOpenLessonsList}

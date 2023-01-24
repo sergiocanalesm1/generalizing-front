@@ -5,8 +5,7 @@ import { steps, totalTime, y0 } from "../RelationsOriginsGraph";
 export default function RelationsMovement({ points, relationIds, refs }) {
   const asignMovement = useCallback(
     (refPos, t) => {
-      let i;
-      let delta;
+      let i, delta;
       const factor = steps / totalTime;
       // indexPosition maps the time to a position array index
       const indexPosition = Math.floor((t % totalTime) * factor);
@@ -31,12 +30,12 @@ export default function RelationsMovement({ points, relationIds, refs }) {
 
     relationIds.forEach(id => {
       const ref = refs.current.get(id);
-      if (ref.position.y !== y0) {
+      if (ref.position.y !== -y0) {
         asignMovement(ref.position, t - ref.userData.waitTime);
       } else if (Math.random() > 0.995) {
         // initial position
         ref.userData.waitTime = t;
-        asignMovement(ref.position, 0);
+        asignMovement(ref.position, 0.01);
       } else {
         // wait for next frame
       }
@@ -55,7 +54,7 @@ export default function RelationsMovement({ points, relationIds, refs }) {
             }
           }}
           position={points[0]}
-          scale={0.08}
+          scale={0.15}
           userData={{ waitTime: 0 }}
         >
           <sphereGeometry />
