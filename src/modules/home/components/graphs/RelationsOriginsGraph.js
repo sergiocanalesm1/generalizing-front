@@ -19,6 +19,8 @@ import { filterByOrigin } from "../../../../utils/filters";
 import Models, { originsComponentOrder } from "./components/Models";
 import Line from "./components/Line";
 import RelationsMovement from "./components/RelationsMovement";
+import { CircularProgress, Toolbar } from "@mui/material";
+import { Stack } from "@mui/system";
 
 const hdrUrl = `${process.env.REACT_APP_MODELS_BUCKET}/imgs/unfinished_office_1k.hdr`;
 const rad = 10;
@@ -173,7 +175,16 @@ export default function RelationsOriginsGraph({
         blur={1}
       />
       <ambientLight intensity={0.5} />
-      <Suspense fallback={null}>
+      <Suspense
+        fallback={
+          <div>
+            <Toolbar />
+            <Stack direction="row" justifyContent="center">
+              <CircularProgress />
+            </Stack>
+          </div>
+        }
+      >
         <Graph
           setOpenRelationsList={setOpenRelationsList}
           setOpenLessonsList={setOpenLessonsList}
