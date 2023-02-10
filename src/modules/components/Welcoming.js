@@ -36,7 +36,7 @@ function WelcomingDialog({ open, lessons, relations, onClose }) {
         >
           <Stack direction="row" justifyContent="center" alignItems="center">
             <Typography variant="h3" align="center">
-              Welcome to Generalizing!
+              Generalizing
             </Typography>
           </Stack>
           <CardMedia
