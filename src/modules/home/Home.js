@@ -17,7 +17,7 @@ import {
 import { useHookstate } from "@hookstate/core";
 
 import { lessonPath, relationPath } from "../../utils/paths";
-import { getFirstTimer } from "../../utils/user";
+import { getFirstTimer, setFirstTimer } from "../../utils/user";
 import {
   lessonsState,
   relationsState,
@@ -119,7 +119,7 @@ function Home() {
 
   useEffect(() => {
     if (!getFirstTimer()) {
-      setOpenWelcomingDialog(true);
+      setOpenHelpDialog(true);
     }
   }, []);
 
@@ -245,7 +245,13 @@ function Home() {
       />
       <HelpDialog
         open={openHelpDialog}
-        onClose={() => setOpenHelpDialog(false)}
+        onClose={() => {
+          if (!getFirstTimer()) {
+            setFirstTimer();
+          }
+
+          setOpenHelpDialog(false);
+        }}
       />
       {relations.get() && (
         <>
