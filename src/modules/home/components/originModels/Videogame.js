@@ -14,7 +14,7 @@ export default function Videogame(props) {
 
   useFrame((state, delta) => {
     if (hovered) {
-      mesh.current.rotation.y += delta;
+      mesh.current.rotation.y += delta*0.5;
     } else if (mesh.current.rotation.y > 0.01) {
       mesh.current.rotation.y -= delta;
     }
@@ -25,7 +25,10 @@ export default function Videogame(props) {
       {...props}
       ref={mesh}
       dispose={null}
-      onPointerOver={() => setHovered(true)}
+      onPointerOver={ e => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
       onPointerOut={() => setHovered(false)}
     >
       <group rotation={[Math.PI, 1.57, 0]} scale={[0.66, 0.06, 0.66]}>

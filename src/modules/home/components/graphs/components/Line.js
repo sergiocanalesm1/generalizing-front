@@ -6,9 +6,15 @@ export default function Line({ points, handleClick, color }) {
   return (
     <line
       geometry={points}
-      onClick={handleClick}
-      onPointerOver={() => setHovered(true)}
-      onPointerOut={() => setHovered(false)}
+      onClick={ e => {
+        e.stopPropagation();
+        handleClick();
+      }}
+      onPointerOver={ e => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
+      onPointerOut={ () => setHovered(false)}
     >
       <lineBasicMaterial color={hovered ? color : 0x00b7eb} linewidth={7} />
     </line>

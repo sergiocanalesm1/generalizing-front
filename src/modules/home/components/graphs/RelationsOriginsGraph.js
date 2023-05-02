@@ -19,7 +19,6 @@ import { filterByOrigin } from "../../../../utils/filters";
 import Models, { originsComponentOrder } from "./components/Models";
 import Line from "./components/Line";
 import RelationsMovement from "./components/RelationsMovement";
-import { CircularProgress } from "@mui/material";
 
 const hdrUrl = `${process.env.REACT_APP_MODELS_BUCKET}/imgs/unfinished_office_1k.hdr`;
 const rad = 10;
@@ -44,6 +43,9 @@ function Graph({ setOpenRelationsList, setOpenLessonsList }) {
   const relations = useHookstate(relationsState);
   const lessonsToList = useHookstate(lessonsToListState);
   const filters = useHookstate(filtersState);
+
+  // const [hoveredMesh, setHoveredMesh] = useState();
+
 
   const dTheta = useMemo(
     () => (2 * Math.PI) / Object.keys(origins.get()).length,
@@ -95,19 +97,36 @@ function Graph({ setOpenRelationsList, setOpenLessonsList }) {
 
         return (
           <group key={originToId[originsComponentOrder[i]]}>
-            <Component
-              position={[X[0], 0, Z[0]]}
-              onClick={() => {
-                filters.set(originsComponentOrder[i]);
-                lessonsToList.set(
-                  filterByOrigin(
-                    lessons.get(),
-                    originToId[originsComponentOrder[i]]
-                  )
-                );
-                setOpenLessonsList(true);
-              }}
+{/*           { hoveredMesh === originsComponentOrder[i] &&
+             <Texts 
+              text={originsComponentOrder[i]}
+              position={[X[0] -(originsComponentOrder[i].length/3), 3, Z[0]]}
             />
+          } */}
+          <mesh
+            position={[X[0], 0, Z[0]]}
+/*             onPointerOver={(e) => {
+              e.stopPropagation();
+              setHoveredMesh(originsComponentOrder[i]);
+              console.log(e)
+            }}
+            onPointerOut={(e) => {
+              setHoveredMesh();
+            }} */
+            onClick={ e => {
+              e?.stopPropagation();
+              filters.set(originsComponentOrder[i]);
+              lessonsToList.set(
+                filterByOrigin(
+                  lessons.get(),
+                  originToId[originsComponentOrder[i]]
+                )
+              );
+              setOpenLessonsList(true);
+            }}
+          >
+            <Component />
+          </mesh>
             {originsRelatedWithOrigin1?.map(origin2Id => {
               // primero deme el segundo origin
               const origin2name = origins.get()[origin2Id].origin;
@@ -131,7 +150,7 @@ function Graph({ setOpenRelationsList, setOpenLessonsList }) {
                   <Line
                     color={Math.random() * 0xffffff}
                     points={new THREE.BufferGeometry().setFromPoints(points)}
-                    handleClick={() => {
+                    handleClick={ () => {
                       filters.set(
                         `${origins.get()[originId1].origin}, ${origin2name}`
                       );
@@ -174,7 +193,7 @@ export default function RelationsOriginsGraph({
         blur={1}
       />
       <ambientLight intensity={0.5} />
-      <Suspense fallback={<CircularProgress />}>
+      <Suspense fallback={null}>
         <Graph
           setOpenRelationsList={setOpenRelationsList}
           setOpenLessonsList={setOpenLessonsList}

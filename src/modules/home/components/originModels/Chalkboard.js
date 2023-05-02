@@ -15,7 +15,7 @@ export default function Chalkboard(props) {
 
   useFrame((state, delta) => {
     if (hovered) {
-      mesh.current.rotation.y += delta;
+      mesh.current.rotation.y += delta*0.5;
     } else if (mesh.current.rotation.y > 0.01) {
       mesh.current.rotation.y -= delta;
     }
@@ -26,7 +26,10 @@ export default function Chalkboard(props) {
       {...props}
       ref={mesh}
       dispose={null}
-      onPointerOver={() => setHovered(true)}
+      onPointerOver={ e => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
       onPointerOut={() => setHovered(false)}
     >
       <group scale={[2.2, 1, 1]} rotation={[0, Math.PI / 4, 0]}>

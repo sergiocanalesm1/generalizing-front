@@ -14,7 +14,7 @@ export default function Video(props) {
 
   useFrame((state, delta) => {
     if (hovered) {
-      mesh.current.rotation.y += delta;
+      mesh.current.rotation.y += delta*0.5;
     } else if (mesh.current.rotation.y > 0.01) {
       mesh.current.rotation.y -= delta;
     }
@@ -26,7 +26,10 @@ export default function Video(props) {
       ref={mesh}
       dispose={null}
       scale={0.7}
-      onPointerOver={() => setHovered(true)}
+      onPointerOver={ e => {
+        e.stopPropagation();
+        setHovered(true);
+      }}
       onPointerOut={() => setHovered(false)}
     >
       <group
